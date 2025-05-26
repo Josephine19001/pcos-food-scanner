@@ -1,59 +1,161 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Tabs } from 'expo-router';
+import {
+  View,
+  Pressable,
+  Text,
+  Platform,
+  Animated,
+  type GestureResponderEvent,
+} from 'react-native';
+import { Settings, TextSearch, ListTodo, ScanBarcode } from 'lucide-react-native';
+import { usePathname, useRouter } from 'expo-router';
+import clsx from 'clsx';
+import { useEffect, useRef } from 'react';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+const HIDDEN_ROUTES = ['/scan'];
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const pathname = usePathname();
+  const router = useRouter();
+  const shouldHideTabBar = HIDDEN_ROUTES.includes(pathname);
+  const tabBarAnimation = useRef(new Animated.Value(1)).current;
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    Animated.timing(tabBarAnimation, {
+      toValue: shouldHideTabBar ? 0 : 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [shouldHideTabBar]);
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+    <View className="flex-1 bg-white">
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarShowLabel: false,
+          tabBarStyle: {
+            transform: [
+              {
+                translateY: tabBarAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [100, 0],
+                }),
+              },
+            ],
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 84,
+            paddingBottom: 14,
+            paddingTop: 8,
+            backgroundColor: 'rgba(255, 255, 255, 0.94)',
+            borderTopWidth: 0,
+            elevation: Platform.OS === 'android' ? 10 : 0,
+            shadowColor: '#000',
+            shadowOpacity: 0.06,
+            shadowOffset: { width: 0, height: -2 },
+            shadowRadius: 12,
+          },
         }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="routines/index"
+          options={{
+            tabBarButton: (props) => (
+              <TabButton
+                {...props}
+                label="Routines"
+                Icon={ListTodo}
+                isActive={pathname === '/routines'}
+                onPress={(e) => router.replace('/routines')}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="products/index"
+          options={{
+            tabBarButton: (props) => (
+              <TabButton
+                {...props}
+                label="Products"
+                Icon={TextSearch}
+                isActive={pathname === '/products'}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="settings/index"
+          options={{
+            tabBarButton: (props) => (
+              <TabButton
+                {...props}
+                label="Settings"
+                Icon={Settings}
+                isActive={pathname === '/settings'}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="scan/index"
+          options={{
+            headerShown: false,
+            tabBarButton: () => null,
+          }}
+        />
+
+        <Tabs.Screen
+          name="settings/personal-details"
+          options={{ href: null, headerShown: false }}
+        />
+
+        <Tabs.Screen
+          name="settings/adjust-hair-goals"
+          options={{ href: null, headerShown: false }}
+        />
+      </Tabs>
+
+      {/* Floating Scan Button */}
+      {!shouldHideTabBar && (
+        <Pressable
+          onPress={() => router.push('/scan')}
+          className="absolute right-6 bottom-14 w-16 h-16 rounded-full bg-black items-center justify-center z-50"
+          style={{
+            elevation: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
+          }}
+        >
+          <ScanBarcode size={28} color="white" />
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
+type TabButtonProps = {
+  Icon: React.ElementType;
+  label: string;
+  isActive: boolean;
+  onPress?: (e: GestureResponderEvent) => void;
+};
+
+function TabButton({ Icon, label, isActive, onPress, ...rest }: TabButtonProps) {
+  return (
+    <Pressable onPress={onPress} className="flex-1 items-center justify-start pt-1" {...rest}>
+      <Icon size={24} color={isActive ? 'black' : '#C1C1C1'} />
+      <Text
+        className={clsx('text-sm mt-1', isActive ? 'text-black font-medium' : 'text-[#C1C1C1]')}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
