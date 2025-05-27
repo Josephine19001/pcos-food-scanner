@@ -38,8 +38,8 @@ export default function AddProductScreen() {
 
   return (
     <SubPageLayout title="Add Product">
-      <ScrollView className="flex-1 px-6">
-        <View className="flex gap-4">
+      <ScrollView className="flex-1 ">
+        <View className="flex gap-4 px-6">
           <View>
             <Text className="text-gray-600 text-lg mb-2">Product Type</Text>
             <SelectButton

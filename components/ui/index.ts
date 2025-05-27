@@ -7,3 +7,5 @@ export * from './text-input';
 export * from './select-button';
 export * from './chip';
 export * from './badge';
+export * from './accordion';
+export * from './image-picker';

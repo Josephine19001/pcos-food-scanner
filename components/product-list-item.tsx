@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import { Plus } from 'lucide-react-native';
+import { Eye } from 'lucide-react-native';
 import { cn } from '@/lib/utils';
 
 type ProductListItemProps = {
@@ -34,7 +34,7 @@ export default function ProductListItem({ name, type, brand, onPress }: ProductL
       </View>
 
       <View className="bg-black/90 rounded-full p-2">
-        <Plus size={18} color="white" />
+        <Eye size={18} color="white" />
       </View>
     </Pressable>
   );

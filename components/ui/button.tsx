@@ -22,7 +22,7 @@ export function Button({
         'items-center justify-center',
         variant === 'primary' && 'bg-black p-4 rounded-full mb-4',
         variant === 'link' && 'flex-row',
-        variant === 'secondary' && 'bg-gray-100 p-4 rounded-full mb-4',
+        variant === 'secondary' && 'border border-black p-4 rounded-full mb-4',
         className,
         disabled && 'opacity-50'
       )}
@@ -48,7 +48,6 @@ interface ButtonWithIconProps extends ButtonProps {
 }
 
 export function ButtonWithIcon({
-  variant = 'primary',
   label,
   onPress,
   className = '',
@@ -63,8 +62,8 @@ export function ButtonWithIcon({
             'flex-row items-center justify-center px-2 py-1 rounded-xl border border-black'
           )}
         >
-          <Text className={cn('text-base font-medium text-black')}>{label}</Text>
           {Icon && <Icon size={20} className="ml-2" />}
+          <Text className={cn('text-base font-medium text-black')}>{label}</Text>
         </View>
       )}
     </Pressable>
