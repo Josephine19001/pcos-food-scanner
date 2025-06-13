@@ -7,21 +7,13 @@ import {
   Animated,
   type GestureResponderEvent,
 } from 'react-native';
-import { Settings, TextSearch, ListTodo, ScanBarcode } from 'lucide-react-native';
+import { Settings, Compass, Bookmark, ScanBarcode } from 'lucide-react-native';
 import { usePathname, useRouter } from 'expo-router';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
 
-const HIDDEN_ROUTES = [
-  '/scan',
-  '/settings/personal-details',
-  '/settings/adjust-hair-goals',
-  '/products/add',
-  '/products/[id]',
-  '/products/custom/[id]',
-  '/routines/log',
-];
+const HIDDEN_ROUTES = ['/scan', '/settings/personal-details'];
 
 export default function TabLayout() {
   const pathname = usePathname();
@@ -73,28 +65,27 @@ export default function TabLayout() {
           }}
         >
           <Tabs.Screen
-            name="routines/index"
+            name="explore/index"
             options={{
               tabBarButton: (props) => (
                 <TabButton
                   {...props}
-                  label="Routines"
-                  Icon={ListTodo}
-                  isActive={pathname === '/routines'}
-                  onPress={(e) => router.replace('/routines')}
+                  label="Explore"
+                  Icon={Compass}
+                  isActive={pathname === '/explore'}
                 />
               ),
             }}
           />
           <Tabs.Screen
-            name="products/index"
+            name="saves/index"
             options={{
               tabBarButton: (props) => (
                 <TabButton
                   {...props}
-                  label="Products"
-                  Icon={TextSearch}
-                  isActive={pathname === '/products'}
+                  label="Saves"
+                  Icon={Bookmark}
+                  isActive={pathname === '/saves'}
                 />
               ),
             }}
@@ -125,16 +116,6 @@ export default function TabLayout() {
             name="settings/personal-details"
             options={{ href: null, headerShown: false }}
           />
-
-          <Tabs.Screen
-            name="settings/adjust-hair-goals"
-            options={{ href: null, headerShown: false }}
-          />
-
-          <Tabs.Screen name="products/[id]" options={{ href: null, headerShown: false }} />
-          <Tabs.Screen name="products/custom/[id]" options={{ href: null, headerShown: false }} />
-          <Tabs.Screen name="products/add" options={{ href: null, headerShown: false }} />
-          <Tabs.Screen name="routines/log" options={{ href: null, headerShown: false }} />
         </Tabs>
 
         {!shouldHideTabBar && (

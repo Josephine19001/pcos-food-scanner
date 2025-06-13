@@ -5488,6 +5488,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-av@npm:~15.1.6":
+  version: 15.1.6
+  resolution: "expo-av@npm:15.1.6"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+    react-native-web: "*"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: 10c0/8387e59dcc25eed9928b6c28821e3682666cbe563a45f22f71d988042854c68ec61b26cc6724b6016cc1c6bdd85372cc9a793c214f828f628484200bcfd2fb94
+  languageName: node
+  linkType: hard
+
 "expo-blur@npm:~14.1.5":
   version: 14.1.5
   resolution: "expo-blur@npm:14.1.5"
@@ -5781,6 +5796,17 @@ __metadata:
     react-native-web:
       optional: true
   checksum: 10c0/ee88daa49f98e34e2cde2020b0dd6296c5aa26f8eb4fb60bd779bdd274fc34051e7c853a4785f4bd3e5e776377d821c28d7dd8dd7d9625d4f062bfe58e0fff73
+  languageName: node
+  linkType: hard
+
+"expo-video@npm:~2.2.1":
+  version: 2.2.1
+  resolution: "expo-video@npm:2.2.1"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/a0996dab3661581e0f9f25ee6d4ffe46c68a499350833e1c2261e83aeaf1762a45720a132c8cf2e97aaaec1e617f9526a2295eb641cf9be427c118e6974ecfaa
   languageName: node
   linkType: hard
 
@@ -6371,6 +6397,7 @@ __metadata:
     eslint-plugin-react-native: "npm:^5.0.0"
     expo: "npm:53.0.11"
     expo-auth-session: "npm:~6.2.0"
+    expo-av: "npm:~15.1.6"
     expo-blur: "npm:~14.1.5"
     expo-camera: "npm:~16.1.8"
     expo-crypto: "npm:~14.1.5"
@@ -6387,6 +6414,7 @@ __metadata:
     expo-status-bar: "npm:~2.2.3"
     expo-store-review: "npm:^8.1.5"
     expo-system-ui: "npm:~5.0.8"
+    expo-video: "npm:~2.2.1"
     expo-web-browser: "npm:~14.1.6"
     globals: "npm:^16.1.0"
     jest: "npm:^29.2.1"

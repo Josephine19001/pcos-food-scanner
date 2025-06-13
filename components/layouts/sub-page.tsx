@@ -19,8 +19,8 @@ const SubPageLayout = ({ children, title = 'Page', rightElement, onBack }: SubPa
       if (router.canGoBack()) {
         router.back();
       } else {
-        // Fallback to replace with products tab if can't go back
-        router.replace('/(tabs)/products');
+        // Fallback to replace with explore tab if can't go back
+        router.replace('/(tabs)/explore');
       }
     }
   };

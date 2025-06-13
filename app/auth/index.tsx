@@ -15,6 +15,7 @@ export default function AuthScreen() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canSignUp = mode === 'signup';
 
@@ -34,6 +35,7 @@ export default function AuthScreen() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       if (isSignUp) {
         await signUpWithEmail(email, password, firstName.trim(), lastName.trim());
@@ -42,6 +44,8 @@ export default function AuthScreen() {
       }
     } catch (error: any) {
       toast.error(error.message || `Failed to ${isSignUp ? 'sign up' : 'sign in'}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -72,15 +76,6 @@ export default function AuthScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#000" />
-        <Text className="mt-4 text-slate-600">Loading...</Text>
-      </View>
-    );
-  }
-
   return (
     <View className="flex-1 bg-white px-6">
       <View className="flex-1 justify-center">
@@ -106,6 +101,7 @@ export default function AuthScreen() {
                 placeholder="First name"
                 autoCapitalize="words"
                 className="mb-4"
+                editable={!isSubmitting}
               />
               <TextInput
                 value={lastName}
@@ -113,6 +109,7 @@ export default function AuthScreen() {
                 placeholder="Last name"
                 autoCapitalize="words"
                 className="mb-4"
+                editable={!isSubmitting}
               />
             </>
           )}
@@ -123,6 +120,7 @@ export default function AuthScreen() {
             autoCapitalize="none"
             keyboardType="email-address"
             className="mb-4"
+            editable={!isSubmitting}
           />
           <TextInput
             value={password}
@@ -130,20 +128,30 @@ export default function AuthScreen() {
             placeholder="Password"
             secureTextEntry
             className="mb-6"
+            editable={!isSubmitting}
           />
 
           <Pressable
             onPress={handleEmailAuth}
-            disabled={loading}
+            disabled={isSubmitting}
             className="bg-black rounded-xl py-4 mb-4 disabled:opacity-50"
           >
-            <Text className="text-center text-white text-lg font-semibold">
-              {isSignUp ? 'Create Account' : 'Sign In'}
-            </Text>
+            {isSubmitting ? (
+              <View className="flex-row justify-center items-center space-x-2">
+                <ActivityIndicator color="white" size="small" />
+                <Text className="text-center text-white text-lg font-semibold">
+                  {isSignUp ? 'Creating Account...' : 'Signing In...'}
+                </Text>
+              </View>
+            ) : (
+              <Text className="text-center text-white text-lg font-semibold">
+                {isSignUp ? 'Create Account' : 'Sign In'}
+              </Text>
+            )}
           </Pressable>
 
           {(isSignUp || canSignUp) && (
-            <Pressable onPress={toggleAuthMode} disabled={loading}>
+            <Pressable onPress={toggleAuthMode} disabled={isSubmitting}>
               <Text className="text-center text-slate-600 text-lg">
                 {isSignUp ? 'Already have an account? ' : 'Need an account? '}
                 <Text className="text-black font-semibold">
@@ -154,7 +162,7 @@ export default function AuthScreen() {
           )}
 
           {!isSignUp && !canSignUp && (
-            <Pressable onPress={toggleAuthMode} disabled={loading}>
+            <Pressable onPress={toggleAuthMode} disabled={isSubmitting}>
               <Text className="text-center text-slate-600 text-lg">
                 Need an account? <Text className="text-black font-semibold">Get Started</Text>
               </Text>

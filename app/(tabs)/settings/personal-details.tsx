@@ -1,49 +1,32 @@
-import { useState, useEffect } from 'react';
-import { View, Pressable, Modal, Alert } from 'react-native';
+import { useState } from 'react';
+import { View, Pressable, Modal } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Calendar } from 'react-native-calendars';
 import SettingsDetailItem from '@/components/settings-detail-item';
 import { PersonalDetailsSkeleton } from '@/components/ui';
 import SubPageLayout from '@/components/layouts/sub-page';
-import { api } from '@/lib/api';
+import { useAccount, useUpdateAccount } from '@/lib/hooks/use-accounts';
 import { toast } from 'sonner-native';
 import { useRouter } from 'expo-router';
 
 export default function PersonalDetailsScreen() {
   const router = useRouter();
-  const [details, setDetails] = useState({
-    name: '',
-    dateOfBirth: new Date('1999-05-22'),
-  });
-  const [loading, setLoading] = useState(true);
+  const { data: account, isLoading } = useAccount();
+  const { mutate: updateAccount } = useUpdateAccount();
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
   const [showCalendar, setShowCalendar] = useState(false);
 
-  useEffect(() => {
-    loadAccountData();
-  }, []);
-
-  const loadAccountData = async () => {
-    try {
-      setLoading(true);
-      const account = await api.accounts.getAccount();
-
-      setDetails({
-        name: account.name || '',
-        dateOfBirth: account.dateOfBirth ? new Date(account.dateOfBirth) : new Date('1999-05-22'),
-      });
-    } catch (error) {
-      console.error('Failed to load account data:', error);
-      Alert.alert('Error', 'Failed to load your account information');
-    } finally {
-      setLoading(false);
-    }
+  const details = {
+    name: account?.name || '',
+    date_of_birth: account?.date_of_birth
+      ? new Date(account.date_of_birth)
+      : new Date('1999-05-22'),
   };
 
   const handleEdit = (field: string, value: string | Date) => {
-    if (field === 'dateOfBirth') {
+    if (field === 'date_of_birth') {
       setShowCalendar(true);
     } else {
       setEditingField(field);
@@ -52,36 +35,24 @@ export default function PersonalDetailsScreen() {
   };
 
   const handleSave = async (field: string) => {
-    if (field === 'dateOfBirth') return;
+    if (field === 'date_of_birth') return;
 
     try {
-      setDetails((prev) => ({ ...prev, [field]: tempValue }));
-
       if (field === 'name') {
-        await api.accounts.updateAccount({ name: tempValue });
+        updateAccount({ name: tempValue });
       }
-
       setEditingField(null);
     } catch (error) {
-      console.error('Failed to update account:', error);
       toast.error('Failed to update your information. Please try again.');
-      await loadAccountData();
     }
   };
 
   const handleDateSelect = async (day: { dateString: string }) => {
-    const selectedDate = new Date(day.dateString);
-
     try {
-      setDetails((prev) => ({ ...prev, dateOfBirth: selectedDate }));
-
-      await api.accounts.updateAccount({ dateOfBirth: day.dateString });
-
+      updateAccount({ date_of_birth: day.dateString });
       setShowCalendar(false);
     } catch (error) {
-      console.error('Failed to update date of birth:', error);
       toast.error('Failed to update date of birth. Please try again.');
-      await loadAccountData();
     }
   };
 
@@ -89,7 +60,7 @@ export default function PersonalDetailsScreen() {
     router.back();
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <SubPageLayout title="Personal Details" onBack={handleGoBack}>
         <PersonalDetailsSkeleton />
@@ -103,7 +74,13 @@ export default function PersonalDetailsScreen() {
         {Object.entries(details).map(([field, value], index) => (
           <SettingsDetailItem
             key={field}
-            label={field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')}
+            label={
+              field.charAt(0).toUpperCase() +
+              field
+                .slice(1)
+                .replace(/([A-Z])/g, ' $1')
+                .replace('_', ' ')
+            }
             value={value instanceof Date ? value.toLocaleDateString() : value}
             isEditing={editingField === field}
             tempValue={tempValue}
@@ -127,7 +104,7 @@ export default function PersonalDetailsScreen() {
             </View>
 
             <Calendar
-              current={details.dateOfBirth.toISOString().split('T')[0]}
+              current={details.date_of_birth.toISOString().split('T')[0]}
               onDayPress={handleDateSelect}
               maxDate={new Date().toISOString().split('T')[0]} // Can't select future dates
               minDate="1900-01-01"

@@ -1,110 +1,150 @@
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import { toast } from 'sonner-native';
-import {
-  api,
-  type Account,
-  type CreateAccountData,
-  type UpdateAccountData,
-  type Subscription,
-  type VerifyReceiptData,
-} from '../api';
+import { supabase } from '@/lib/supabase/client';
 import { queryKeys } from './query-keys';
 import { handleError } from './utils';
+import { AVATAR_BUCKET } from '@/constants/images';
 
-export function useAccount(options?: UseQueryOptions<Account>) {
+export interface Account {
+  id: string;
+  name: string;
+  avatar: string | null;
+  onboarding_completed: boolean;
+  subscription_status: string;
+  subscription_plan: string;
+  subscription_platform: string;
+  subscription_expires: string | null;
+  subscription_billing_frequency: string | null;
+  subscription_receipt_id: string | null;
+  subscription_original_purchase: string | null;
+  subscription_product: string | null;
+  subscription_last_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
+  date_of_birth: string | null;
+}
+
+export function useAccount(
+  options?: Omit<UseQueryOptions<Account, Error, Account>, 'queryKey' | 'queryFn'>
+) {
   return useQuery({
     queryKey: queryKeys.accounts.detail(),
     queryFn: async () => {
-      return await api.accounts.getAccount();
-    },
-    retry: (failureCount, error) => {
-      if (error instanceof Error && error.message.includes('401')) {
-        return false;
-      }
-      return failureCount < 3;
+      const { data, error } = (await supabase.rpc('get_account_for_user')) as {
+        data: Account | null;
+        error: Error | null;
+      };
+      if (error) throw error;
+      return data!;
     },
     ...options,
-  });
-}
-
-export function useCreateAccount() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: CreateAccountData) => {
-      return await api.accounts.createAccount(data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
-    },
-    onError: (error) => handleError(error, 'Failed to create account'),
   });
 }
 
 export function useUpdateAccount() {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: UpdateAccountData) => {
-      return await api.accounts.updateAccount(data);
+    mutationFn: async (payload: {
+      name?: string;
+      onboarding_completed?: boolean;
+      date_of_birth?: string;
+    }) => {
+      const { error } = await supabase.rpc('update_account_profile', {
+        p_name: payload.name ?? undefined,
+        p_avatar: undefined,
+        p_onboarding_done: payload.onboarding_completed ?? undefined,
+        p_date_of_birth: payload.date_of_birth ?? undefined,
+      });
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
-      toast.success('Account updated successfully');
+      qc.invalidateQueries({ queryKey: queryKeys.accounts.detail() });
+      toast.success('Account updated');
     },
-    onError: (error) => handleError(error, 'Failed to update account'),
+    onError: (err: any) => handleError(err, 'Failed to update account'),
   });
 }
 
 export function useUpdateAccountAvatar() {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ imageUri, base64 }: { imageUri: string; base64: string }) => {
-      return await api.accounts.uploadAvatar(imageUri, base64);
+    mutationFn: async ({ fileUri, fileBase64 }: { fileUri: string; fileBase64: string }) => {
+      const fileName = fileUri.split('/').pop()!;
+      const { data: upload, error: upErr } = await supabase.storage
+        .from(AVATAR_BUCKET)
+        .upload(`${fileName}`, fileBase64, {
+          contentType: 'image/jpeg',
+          upsert: true,
+        });
+      if (upErr) throw upErr;
+
+      const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(upload.path);
+      const publicUrl = data.publicUrl;
+
+      const { error: rpcErr } = await supabase.rpc('update_account_profile', {
+        p_name: undefined,
+        p_avatar: publicUrl,
+        p_onboarding_done: undefined,
+      });
+      if (rpcErr) throw rpcErr;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.all });
-      toast.success('Avatar updated successfully');
+      qc.invalidateQueries({ queryKey: queryKeys.accounts.detail() });
     },
-    onError: (error) => handleError(error, 'Failed to update avatar'),
+    onError: (err: any) => handleError(err, 'Failed to update avatar'),
   });
 }
 
 export function useDeleteAccount() {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => api.accounts.deleteAccount(),
-    onSuccess: () => {
-      queryClient.clear();
-      toast.success('Account deleted successfully');
+    mutationFn: async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     },
-    onError: (error) => handleError(error, 'Failed to delete account'),
+    onSuccess: () => {
+      qc.clear();
+      toast.success('Signed out');
+    },
+    onError: (err: any) => handleError(err, 'Failed to sign out'),
   });
 }
 
-export function useSubscription(options?: UseQueryOptions<Subscription>) {
+export interface Subscription {
+  status: string;
+  plan: string;
+  platform: string;
+  expires: string | null;
+  billing_frequency: string | null;
+  receipt_id: string | null;
+  original_purchase: string | null;
+  product: string | null;
+  last_verified_at: string | null;
+}
+
+export function useSubscription(
+  options?: Omit<UseQueryOptions<Subscription, Error, Subscription>, 'queryKey' | 'queryFn'>
+) {
   return useQuery({
     queryKey: queryKeys.accounts.subscription(),
     queryFn: async () => {
-      return await api.accounts.getSubscription();
+      const { data, error } = (await supabase.rpc('get_account_for_user')) as {
+        data: Account | null;
+        error: Error | null;
+      };
+      if (error) throw error;
+      return {
+        status: data!.subscription_status,
+        plan: data!.subscription_plan,
+        platform: data!.subscription_platform,
+        expires: data!.subscription_expires,
+        billing_frequency: data!.subscription_billing_frequency,
+        receipt_id: data!.subscription_receipt_id,
+        original_purchase: data!.subscription_original_purchase,
+        product: data!.subscription_product,
+        last_verified_at: data!.subscription_last_verified_at,
+      };
     },
     ...options,
-  });
-}
-
-export function useVerifyReceipt() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: VerifyReceiptData) => {
-      return await api.accounts.verifyReceipt(data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.accounts.subscription() });
-      toast.success('Subscription verified successfully');
-    },
-    onError: (error) => handleError(error, 'Failed to verify receipt'),
   });
 }

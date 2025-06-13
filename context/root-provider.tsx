@@ -6,7 +6,6 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Toaster } from 'sonner-native';
 import { AuthProvider } from './auth-provider';
-import { OnboardingProvider } from './onboarding-provider';
 import { SubscriptionProvider } from './subscription-provider';
 
 const queryClient = new QueryClient({
@@ -26,14 +25,12 @@ export const RootProvider = ({ children }: PropsWithChildren) => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SubscriptionProvider>
-          <OnboardingProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <BottomSheetModalProvider>
-                {children}
-                <Toaster />
-              </BottomSheetModalProvider>
-            </GestureHandlerRootView>
-          </OnboardingProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <BottomSheetModalProvider>
+              {children}
+              <Toaster />
+            </BottomSheetModalProvider>
+          </GestureHandlerRootView>
         </SubscriptionProvider>
       </AuthProvider>
     </QueryClientProvider>

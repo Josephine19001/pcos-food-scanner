@@ -1,6 +1,7 @@
 import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
@@ -11,31 +12,39 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Custom storage implementation using Expo SecureStore for better persistence
-const ExpoSecureStoreAdapter = {
+// Custom storage implementation for web
+const webStorage = {
   getItem: (key: string) => {
-    return SecureStore.getItemAsync(key);
+    try {
+      return Promise.resolve(localStorage.getItem(key));
+    } catch {
+      return Promise.resolve(null);
+    }
   },
   setItem: (key: string, value: string) => {
-    SecureStore.setItemAsync(key, value);
+    try {
+      localStorage.setItem(key, value);
+      return Promise.resolve();
+    } catch {
+      return Promise.resolve();
+    }
   },
   removeItem: (key: string) => {
-    SecureStore.deleteItemAsync(key);
+    try {
+      localStorage.removeItem(key);
+      return Promise.resolve();
+    } catch {
+      return Promise.resolve();
+    }
   },
 };
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // Enable auto refresh with longer intervals
+    storage: Platform.OS === 'web' ? webStorage : AsyncStorage,
     autoRefreshToken: true,
-    // Persist session in secure storage
     persistSession: true,
-    // Use SecureStore for better persistence
-    storage: ExpoSecureStoreAdapter,
-    // Enable Apple and Google OAuth
-    detectSessionInUrl: false,
-    // Set longer session duration (7 days)
-    flowType: 'pkce',
+    detectSessionInUrl: Platform.OS === 'web',
   },
 });
 

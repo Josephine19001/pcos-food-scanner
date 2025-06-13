@@ -13,7 +13,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   useEffect(() => {
     if (!loading && !user) {
       // User is not authenticated, redirect to auth
-      router.replace('/auth');
+      router.replace('/auth?mode=signin');
     }
   }, [user, loading]);
 

@@ -1,23 +1,48 @@
-import { View, Pressable, Linking, Image, Alert } from 'react-native';
+import { View, Pressable, Linking, Image } from 'react-native';
 import { Text } from '@/components/ui/text';
-import {
-  UserRound,
-  Settings2,
-  FileText,
-  Shield,
-  UserMinus,
-  LogOut,
-  Camera,
-} from 'lucide-react-native';
+import { UserRound, FileText, Shield, UserMinus, LogOut, Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ConfirmationModal, Skeleton } from '@/components/ui';
 import PageLayout from '@/components/layouts/page-layout';
 import { useAuth } from '@/context/auth-provider';
-import { api } from '@/lib/api';
 import { toast } from 'sonner-native';
-import { useAccount, useUpdateAccountAvatar } from '@/lib/hooks/use-accounts';
+import { useAccount, useUpdateAccountAvatar, useDeleteAccount } from '@/lib/hooks/use-accounts';
 import * as ImagePickerExpo from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
+import Animated, {
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+  useSharedValue,
+  cancelAnimation,
+} from 'react-native-reanimated';
+
+function AnimatedDots() {
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(withTiming(1, { duration: 500 }), withTiming(0.3, { duration: 500 })),
+      -1, // Infinite repeat
+      true // Reverse
+    );
+
+    return () => {
+      cancelAnimation(opacity);
+    };
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.Text style={[{ color: '#3B82F6', marginLeft: 2 }, animatedStyle]}>...</Animated.Text>
+  );
+}
 
 function ProfileHeaderSkeleton() {
   return (
@@ -72,6 +97,38 @@ function SettingsPageSkeleton() {
   );
 }
 
+function CircularLoader() {
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, {
+        duration: 1000,
+      }),
+      -1
+    );
+
+    return () => {
+      cancelAnimation(rotation);
+    };
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+    position: 'absolute',
+    top: -8,
+    left: -8,
+    right: -8,
+    bottom: -8,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+    borderTopColor: 'transparent',
+  }));
+
+  return <Animated.View style={animatedStyle} />;
+}
+
 export default function SettingsScreen() {
   const router = useRouter();
   const { signOut, user } = useAuth();
@@ -79,6 +136,7 @@ export default function SettingsScreen() {
 
   const { data: account, isLoading, error, refetch } = useAccount();
   const { mutate: updateAvatar, isPending: isUpdatingAvatar } = useUpdateAccountAvatar();
+  const { mutate: deleteAccount, isPending: isDeleting } = useDeleteAccount();
 
   const handleLogout = async () => {
     try {
@@ -91,14 +149,10 @@ export default function SettingsScreen() {
 
   const handleDeleteAccount = async () => {
     try {
-      await api.accounts.deleteAccount();
-      await signOut();
-      toast.success('Account deleted successfully');
-      router.replace('/auth');
+      await deleteAccount();
+      setShowDeleteModal(false);
     } catch (error) {
-      console.error('Failed to delete account:', error);
       toast.error('Failed to delete your account. Please try again or contact support.');
-    } finally {
       setShowDeleteModal(false);
     }
   };
@@ -110,12 +164,57 @@ export default function SettingsScreen() {
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
-        base64: true,
+        base64: false, // We'll handle base64 conversion after processing
       });
 
       if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
-        const { uri, base64 } = asset;
+        let processedUri = asset.uri;
+
+        // Check if the image is HEIC and convert it
+        const isHeic =
+          asset.uri.toLowerCase().includes('.heic') ||
+          asset.uri.toLowerCase().includes('.heif') ||
+          asset.mimeType?.toLowerCase().includes('heic') ||
+          asset.mimeType?.toLowerCase().includes('heif');
+
+        if (isHeic) {
+          console.log('📷 HEIC image detected, converting to JPEG...');
+          toast.loading('Converting HEIC image...');
+
+          // Convert HEIC to JPEG using ImageManipulator
+          const convertedImage = await ImageManipulator.manipulateAsync(
+            asset.uri,
+            [
+              { resize: { width: 800 } }, // Resize for consistency
+            ],
+            {
+              compress: 0.8,
+              format: ImageManipulator.SaveFormat.JPEG,
+            }
+          );
+
+          processedUri = convertedImage.uri;
+        } else {
+          // For non-HEIC images, still process them for consistency
+          const processedImage = await ImageManipulator.manipulateAsync(
+            asset.uri,
+            [
+              { resize: { width: 800 } }, // Resize for consistency
+            ],
+            {
+              compress: 0.8,
+              format: ImageManipulator.SaveFormat.JPEG,
+            }
+          );
+
+          processedUri = processedImage.uri;
+        }
+
+        // Convert the processed image to base64
+        const base64 = await FileSystem.readAsStringAsync(processedUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
 
         if (!base64) {
           toast.error('Failed to process image');
@@ -123,17 +222,22 @@ export default function SettingsScreen() {
         }
 
         updateAvatar(
-          { imageUri: uri, base64 },
+          { fileUri: processedUri, fileBase64: base64 },
           {
             onSuccess: () => {
+              toast.success('Avatar updated successfully!');
               refetch();
+            },
+            onError: (error) => {
+              console.error('Avatar update failed:', error);
+              toast.error('Failed to update avatar');
             },
           }
         );
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      toast.error('Failed to pick image');
+      console.error('Error processing image:', error);
+      toast.error('Failed to process image. Please try again.');
     }
   };
 
@@ -147,27 +251,33 @@ export default function SettingsScreen() {
   };
 
   const renderAvatar = () => {
-    if (account?.avatar) {
-      return (
-        <Image
-          source={{ uri: account.avatar }}
-          className="w-16 h-16 rounded-full"
-          resizeMode="cover"
-        />
-      );
-    } else if (account?.name) {
-      return (
-        <View className="w-16 h-16 rounded-full bg-gray-200 items-center justify-center">
-          <Text className="text-xl font-bold text-gray-600">{getUserInitials(account.name)}</Text>
-        </View>
-      );
-    } else {
-      return (
-        <View className="w-16 h-16 rounded-full bg-gray-200 items-center justify-center">
-          <UserRound size={32} color="#666" />
-        </View>
-      );
-    }
+    return (
+      <View className="relative">
+        {account?.avatar ? (
+          <Image
+            source={{ uri: account.avatar }}
+            className="w-16 h-16 rounded-full"
+            resizeMode="cover"
+          />
+        ) : account?.name ? (
+          <View className="w-16 h-16 rounded-full bg-gray-200 items-center justify-center">
+            <Text className="text-xl font-bold text-gray-600">{getUserInitials(account.name)}</Text>
+          </View>
+        ) : (
+          <View className="w-16 h-16 rounded-full bg-gray-200 items-center justify-center">
+            <UserRound size={32} color="#666" />
+          </View>
+        )}
+        {isUpdatingAvatar && <CircularLoader />}
+        <Pressable
+          onPress={handleEditAvatar}
+          className="absolute -bottom-1 -right-1 bg-black rounded-full p-1"
+          disabled={isUpdatingAvatar}
+        >
+          <Camera size={12} color="white" />
+        </Pressable>
+      </View>
+    );
   };
 
   const renderFallbackProfile = () => (
@@ -216,23 +326,17 @@ export default function SettingsScreen() {
             {account && !error ? (
               <View className="bg-white mx-4 rounded-2xl shadow mb-4 overflow-hidden">
                 <View className="p-6 flex-row items-center">
-                  <View className="relative">
-                    {renderAvatar()}
-                    <Pressable
-                      onPress={handleEditAvatar}
-                      className="absolute -bottom-1 -right-1 bg-black rounded-full p-1"
-                      disabled={isUpdatingAvatar}
-                    >
-                      <Camera size={12} color="white" />
-                    </Pressable>
-                  </View>
+                  <View className="relative">{renderAvatar()}</View>
                   <View className="ml-4 flex-1">
                     <Text className="text-xl font-bold text-gray-900">
                       {account?.name || 'Loading...'}
                     </Text>
                     <Text className="text-gray-500 mt-1">{user?.email || ''}</Text>
                     {isUpdatingAvatar && (
-                      <Text className="text-sm text-blue-500 mt-1">Updating avatar...</Text>
+                      <View className="flex-row items-center mt-1">
+                        <Text className="text-sm text-blue-500">Updating avatar</Text>
+                        <AnimatedDots />
+                      </View>
                     )}
                   </View>
                 </View>
@@ -247,11 +351,7 @@ export default function SettingsScreen() {
                 icon={UserRound}
                 label="Personal details"
                 onPress={() => router.push('/settings/personal-details')}
-              />
-              <SettingsItem
-                icon={Settings2}
-                label="Adjust hair goals"
-                onPress={() => router.push('/settings/adjust-hair-goals')}
+                isLast
               />
             </View>
 
