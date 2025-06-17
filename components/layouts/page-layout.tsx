@@ -12,7 +12,7 @@ const PageLayout = ({ children, title, image, btn }: Props) => {
   return (
     <View className="flex-1 bg-slate-100 pt-5">
       <View className="flex-row items-center justify-between pb-4 pt-12 px-4">
-        <Text className="text-4xl font-bold">{title}</Text>
+        <Text className="text-3xl font-bold text-black mb-2">{title}</Text>
         {image && (
           <Image
             source={require('@/assets/images/avatar.png')}

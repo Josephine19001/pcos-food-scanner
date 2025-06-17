@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Pressable, ActivityIndicator, Linking } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/auth-provider';
 import { toast } from 'sonner-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -86,8 +87,8 @@ export default function AuthScreen() {
           </Text>
           <Text className="text-lg text-slate-600 text-center">
             {isSignUp
-              ? 'Join the community that understands your hair'
-              : 'Sign in to continue your hair journey'}
+              ? 'Join the community that understands your beauty'
+              : 'Sign in to continue your beauty journey'}
           </Text>
         </View>
 
@@ -131,30 +132,20 @@ export default function AuthScreen() {
             editable={!isSubmitting}
           />
 
-          <Pressable
+          <Button
+            title={isSignUp ? 'Create Account' : 'Sign In'}
             onPress={handleEmailAuth}
             disabled={isSubmitting}
-            className="bg-black rounded-xl py-4 mb-4 disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <View className="flex-row justify-center items-center space-x-2">
-                <ActivityIndicator color="white" size="small" />
-                <Text className="text-center text-white text-lg font-semibold">
-                  {isSignUp ? 'Creating Account...' : 'Signing In...'}
-                </Text>
-              </View>
-            ) : (
-              <Text className="text-center text-white text-lg font-semibold">
-                {isSignUp ? 'Create Account' : 'Sign In'}
-              </Text>
-            )}
-          </Pressable>
+            variant="primary"
+            loading={isSubmitting}
+            className="mb-4"
+          />
 
           {(isSignUp || canSignUp) && (
             <Pressable onPress={toggleAuthMode} disabled={isSubmitting}>
               <Text className="text-center text-slate-600 text-lg">
                 {isSignUp ? 'Already have an account? ' : 'Need an account? '}
-                <Text className="text-black font-semibold">
+                <Text className="text-pink-500 font-semibold">
                   {isSignUp ? 'Sign In' : 'Get Started'}
                 </Text>
               </Text>
@@ -164,7 +155,7 @@ export default function AuthScreen() {
           {!isSignUp && !canSignUp && (
             <Pressable onPress={toggleAuthMode} disabled={isSubmitting}>
               <Text className="text-center text-slate-600 text-lg">
-                Need an account? <Text className="text-black font-semibold">Get Started</Text>
+                Need an account? <Text className="text-pink-500 font-semibold">Get Started</Text>
               </Text>
             </Pressable>
           )}
@@ -175,14 +166,14 @@ export default function AuthScreen() {
           <Text className="text-sm text-slate-500 text-center leading-relaxed">
             By continuing, you agree to our{' '}
             <Text
-              className="text-black underline"
+              className="text-pink-500 underline"
               onPress={() => openLink('https://your-website.com/terms')}
             >
               Terms
             </Text>{' '}
             and{' '}
             <Text
-              className="text-black underline"
+              className="text-pink-500 underline"
               onPress={() => openLink('https://your-website.com/privacy')}
             >
               Privacy Policy

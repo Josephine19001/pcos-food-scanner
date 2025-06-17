@@ -3,7 +3,6 @@ import { toast } from 'sonner-native';
 import { supabase } from '@/lib/supabase/client';
 import { queryKeys } from './query-keys';
 import { handleError } from './utils';
-import { AVATAR_BUCKET } from '@/constants/images';
 
 export interface Account {
   id: string;
@@ -62,36 +61,6 @@ export function useUpdateAccount() {
       toast.success('Account updated');
     },
     onError: (err: any) => handleError(err, 'Failed to update account'),
-  });
-}
-
-export function useUpdateAccountAvatar() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ fileUri, fileBase64 }: { fileUri: string; fileBase64: string }) => {
-      const fileName = fileUri.split('/').pop()!;
-      const { data: upload, error: upErr } = await supabase.storage
-        .from(AVATAR_BUCKET)
-        .upload(`${fileName}`, fileBase64, {
-          contentType: 'image/jpeg',
-          upsert: true,
-        });
-      if (upErr) throw upErr;
-
-      const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(upload.path);
-      const publicUrl = data.publicUrl;
-
-      const { error: rpcErr } = await supabase.rpc('update_account_profile', {
-        p_name: undefined,
-        p_avatar: publicUrl,
-        p_onboarding_done: undefined,
-      });
-      if (rpcErr) throw rpcErr;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.accounts.detail() });
-    },
-    onError: (err: any) => handleError(err, 'Failed to update avatar'),
   });
 }
 

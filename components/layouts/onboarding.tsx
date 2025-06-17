@@ -70,7 +70,7 @@ export function OnboardingLayout({
           <View className="py-6">
             <Button
               variant="primary"
-              label={nextButtonLabel}
+              title={nextButtonLabel}
               onPress={onNext}
               disabled={!allowContinue}
             />

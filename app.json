@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "hair-deet-ai",
-    "slug": "hair-deet-ai",
+    "name": "beauty-scan",
+    "slug": "beauty-scan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "hair-deet-ai",
+    "scheme": "beauty-scan",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {

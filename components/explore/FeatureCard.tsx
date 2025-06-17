@@ -28,7 +28,7 @@ export function FeatureCard({ feature }: FeatureCardProps) {
           <Text className="text-2xl font-bold text-black mb-2">{feature.title}</Text>
           <Text className="text-gray-600 text-lg mb-4 leading-6">{feature.subtitle}</Text>
           <TouchableOpacity
-            className="self-start rounded-2xl px-6 py-3"
+            className="self-start rounded-full px-6 py-3"
             style={{ backgroundColor: feature.color }}
             onPress={() => router.push('/scan')}
           >

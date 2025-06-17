@@ -6,11 +6,11 @@ declare const __DEV__: boolean;
 
 // Product IDs - these need to match your App Store Connect and Google Play Console
 export const PRODUCT_IDS = {
-  MONTHLY: Platform.OS === 'ios' ? 'hair_deet_monthly' : 'hair_deet_monthly',
-  YEARLY: Platform.OS === 'ios' ? 'hair_deet_yearly' : 'hair_deet_yearly',
+  WEEKLY: Platform.OS === 'ios' ? 'beautyscan_weekly' : 'beautyscan_weekly',
+  YEARLY: Platform.OS === 'ios' ? 'beautyscan_yearly' : 'beautyscan_yearly',
 };
 
-export const SUBSCRIPTION_SKUS = [PRODUCT_IDS.MONTHLY, PRODUCT_IDS.YEARLY];
+export const SUBSCRIPTION_SKUS = [PRODUCT_IDS.WEEKLY, PRODUCT_IDS.YEARLY];
 
 export interface Product {
   productId: string;
@@ -63,19 +63,19 @@ class IAPService {
     if (this.isDevelopment && this.products.length === 0) {
       this.products = [
         {
-          productId: 'hair_deet_monthly',
+          productId: 'beautyscan_weekly',
           price: '4.99',
           currency: 'USD',
-          title: 'Monthly Subscription',
-          description: 'Monthly subscription to HairDeets AI',
+          title: 'Weekly Subscription',
+          description: 'Weekly subscription to BeautyScan',
           localizedPrice: '$4.99',
         },
         {
-          productId: 'hair_deet_yearly',
+          productId: 'beautyscan_yearly',
           price: '39.99',
           currency: 'USD',
           title: 'Yearly Subscription',
-          description: 'Yearly subscription to HairDeets AI',
+          description: 'Yearly subscription to BeautyScan',
           localizedPrice: '$39.99',
         },
       ];
@@ -105,19 +105,19 @@ class IAPService {
           ? this.products
           : [
               {
-                productId: 'hair_deet_monthly',
+                productId: 'beautyscan_weekly',
                 price: '4.99',
                 currency: 'USD',
-                title: 'Monthly Subscription',
-                description: 'Monthly subscription to HairDeets AI',
+                title: 'Weekly Subscription',
+                description: 'Weekly subscription to BeautyScan',
                 localizedPrice: '$4.99',
               },
               {
-                productId: 'hair_deet_yearly',
+                productId: 'beautyscan_yearly',
                 price: '39.99',
                 currency: 'USD',
                 title: 'Yearly Subscription',
-                description: 'Yearly subscription to HairDeets AI',
+                description: 'Yearly subscription to BeautyScan',
                 localizedPrice: '$39.99',
               },
             ];
@@ -140,7 +140,7 @@ class IAPService {
         transactionId: `mock_${Date.now()}`,
         transactionReceipt: `mock_receipt_${Date.now()}`,
         purchaseToken: `mock_token_${Date.now()}`,
-        packageName: 'com.yourapp.hairdeets',
+        packageName: 'com.beautyscan.app',
       };
     }
 
@@ -184,11 +184,11 @@ class IAPService {
       // Return a mock purchase to test the restore flow
       return [
         {
-          productId: 'hair_deet_yearly',
+          productId: 'beautyscan_yearly',
           transactionId: `mock_restore_${Date.now()}`,
           transactionReceipt: `mock_restore_receipt_${Date.now()}`,
           purchaseToken: `mock_restore_token_${Date.now()}`,
-          packageName: 'com.yourapp.hairdeets',
+          packageName: 'com.beautyscan.app',
         },
       ];
     }
@@ -205,7 +205,6 @@ class IAPService {
         .filter((purchase) => {
           // Only include our app's subscription products
           const isOurProduct = SUBSCRIPTION_SKUS.includes(purchase.productId);
-
           return isOurProduct;
         })
         .map((purchase) => {

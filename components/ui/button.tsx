@@ -1,79 +1,84 @@
-import { Pressable, View, ActivityIndicator, type PressableProps } from 'react-native';
-import { Text } from './text';
-import { cn } from '@/lib/utils/cn';
+import React from 'react';
+import { TouchableOpacity, Text, TouchableOpacityProps } from 'react-native';
 
-interface ButtonProps extends PressableProps {
-  variant?: 'primary' | 'link' | 'secondary';
-  label: string;
-  disabled?: boolean;
+interface ButtonProps extends TouchableOpacityProps {
+  title: string;
+  variant?: 'primary' | 'secondary';
   loading?: boolean;
+  size?: 'small' | 'medium' | 'large';
 }
 
 export function Button({
+  title,
   variant = 'primary',
-  label,
-  className,
-  style,
-  disabled,
   loading = false,
+  size = 'medium',
+  disabled,
+  className = '',
   ...props
 }: ButtonProps) {
-  const isDisabled = disabled || loading;
+  const getButtonClasses = () => {
+    let baseClasses = 'rounded-full items-center justify-center';
+
+    // Size classes
+    switch (size) {
+      case 'small':
+        baseClasses += ' py-2 px-6';
+        break;
+      case 'large':
+        baseClasses += ' py-5 px-8';
+        break;
+      default: // medium
+        baseClasses += ' py-4 px-6';
+        break;
+    }
+
+    // Variant classes
+    if (variant === 'primary') {
+      baseClasses += ' bg-pink-500';
+    } else {
+      baseClasses += ' bg-white border border-pink-500';
+    }
+
+    // Disabled/loading state
+    if (disabled || loading) {
+      baseClasses += ' opacity-70';
+    }
+
+    return `${baseClasses} ${className}`;
+  };
+
+  const getTextClasses = () => {
+    let textClasses = 'font-bold';
+
+    // Size-based text classes
+    switch (size) {
+      case 'small':
+        textClasses += ' text-sm';
+        break;
+      case 'large':
+        textClasses += ' text-xl';
+        break;
+      default: // medium
+        textClasses += ' text-lg';
+        break;
+    }
+
+    // Variant-based text color
+    if (variant === 'primary') {
+      textClasses += ' text-white';
+    } else {
+      textClasses += ' text-pink-500';
+    }
+
+    return textClasses;
+  };
 
   return (
-    <Pressable
-      className={cn(
-        'items-center justify-center',
-        variant === 'primary' && 'bg-black p-4 rounded-xl mb-4',
-        variant === 'link' && 'flex-row',
-        variant === 'secondary' && 'border border-slate-300 p-4 rounded-xl mb-4',
-        className,
-        isDisabled && 'opacity-60'
-      )}
-      style={({ pressed }) => [
-        typeof style === 'function' ? style({ pressed, hovered: false }) : style,
-        pressed && !isDisabled && { opacity: 0.8 },
-      ]}
-      {...props}
-      disabled={isDisabled}
-    >
-      {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? 'white' : 'black'} size="small" />
-      ) : (
-        <Text
-          variant="button"
-          className={cn(variant === 'primary' ? 'text-white' : 'text-black', 'font-bold')}
-        >
-          {label}
-        </Text>
-      )}
-    </Pressable>
+    <TouchableOpacity className={getButtonClasses()} disabled={disabled || loading} {...props}>
+      <Text className={getTextClasses()}>{loading ? 'Loading...' : title}</Text>
+    </TouchableOpacity>
   );
 }
 
-interface ButtonWithIconProps extends ButtonProps {
-  icon: React.ElementType;
-}
-
-export function ButtonWithIcon({
-  label,
-  onPress,
-  className = '',
-  icon: Icon,
-  children,
-}: ButtonWithIconProps) {
-  return (
-    <Pressable onPress={onPress} className={`${className}`}>
-      {children || (
-        <View
-          className={cn(
-            'flex-row items-center justify-center px-2 py-1 rounded-xl border border-black'
-          )}
-        >
-          {Icon && <Icon size={20} className="ml-2" />}
-          <Text className={cn('text-base font-medium text-black')}>{label}</Text>
-        </View>
-      )}
-    </Pressable>
-  );
-}
+export default Button;

@@ -1,20 +1,10 @@
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  Linking,
-  Image,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useSubscription } from '../context/subscription-provider';
 import { toast } from 'sonner-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Video } from 'expo-av';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Button } from '@/components/ui/button';
 
 export default function PaywallScreen() {
   const {
@@ -27,13 +17,17 @@ export default function PaywallScreen() {
   const [selectedPlan, setSelectedPlan] = useState<string>('weekly');
   const [loading, setLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+  const [freeTrialEnabled, setFreeTrialEnabled] = useState(true);
 
   const handleRestore = async () => {
     try {
       setRestoreLoading(true);
       await restorePurchases();
+      toast.success('Purchases restored successfully');
+      router.replace('/'); // Redirect to welcome page after successful restore
     } catch (error) {
       console.error('Restore error:', error);
+      toast.error('No purchases found to restore');
     } finally {
       setRestoreLoading(false);
     }
@@ -42,25 +36,24 @@ export default function PaywallScreen() {
   const handlePurchase = async () => {
     try {
       setLoading(true);
-      await AsyncStorage.setItem('selected_subscription_plan', selectedPlan);
-      router.replace('/auth?mode=signup');
-    } catch {
-      toast.error('Failed to continue.');
+      let productId = 'beautyscan_weekly';
+      if (selectedPlan === 'yearly') productId = 'beautyscan_yearly';
+
+      await purchaseSubscription(productId);
+
+      // If we reach here, the purchase was successful
+      toast.success('Subscription activated!');
+      router.replace('/(tabs)/explore');
+    } catch (error) {
+      console.error('Purchase error:', error);
+      toast.error('Purchase failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleContinueFree = async () => {
-    try {
-      setLoading(true);
-      await AsyncStorage.setItem('selected_subscription_plan', 'free');
-      router.replace('/auth?mode=signup');
-    } catch {
-      toast.error('Failed to continue.');
-    } finally {
-      setLoading(false);
-    }
+    router.replace('/auth?mode=signup');
   };
 
   const openLink = async (url: string) => {
@@ -73,127 +66,150 @@ export default function PaywallScreen() {
     }
   };
 
-  const weeklyProduct = products.find((p) => p.productId.includes('week'));
-  const yearlyProduct = products.find((p) => p.productId.includes('year'));
-
   return (
     <View className="flex-1 bg-black">
-      <Video
-        source={require('@/assets/onboarding/example.mp4')}
-        style={{ ...StyleSheet.absoluteFillObject }}
-        isLooping
-        shouldPlay
-        isMuted
-      />
-      <LinearGradient
-        colors={['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.8)']}
-        className="absolute inset-0"
-      />
+      <SafeAreaView className="flex-1 px-5 pt-10">
+        {/* Close Button */}
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="absolute top-12 left-5 z-10 bg-white/20 rounded-[20px] w-10 h-10 items-center justify-center"
+        >
+          <Ionicons name="close" size={24} color="#fff" />
+        </TouchableOpacity>
 
-      <SafeAreaView className="flex-1 justify-end">
-        <View className="px-6">
-          <View className="items-center mb-6">
-            <Text className="text-3xl font-bold text-white text-center mb-2">
-              Scan. Analyze. Own It.
-            </Text>
-            <View className="w-full mb-4">
-              {/* Features */}
-              {[
-                { icon: 'camera', label: 'Unlimited Scans' },
-                { icon: 'analytics', label: 'AI Analysis' },
-                { icon: 'heart', label: 'Favourites' },
-                { icon: 'time', label: 'History' },
-              ].map((f, i) => (
-                <View key={i} className="flex-row items-center py-2">
-                  <View className="bg-white rounded-lg p-2 mr-3">
-                    <Ionicons name={f.icon} size={18} color="#000" />
-                  </View>
-                  <Text className="text-white text-base font-semibold">{f.label}</Text>
-                </View>
-              ))}
+        {/* Header */}
+        <View className="items-center mt-16 mb-10">
+          <Text className="text-4xl font-bold text-white text-center mb-2">Know Your Beauty.</Text>
+          <Text className="text-4xl font-bold text-white text-center mb-5">Choose Better ✨</Text>
+
+          {/* Features */}
+          <View className="items-start mb-10">
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="scan" size={20} color="#FF69B4" className="mr-3" />
+              <Text className="text-white text-lg">
+                <Text className="font-bold">Scan</Text> any beauty product instantly
+              </Text>
+            </View>
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="flask" size={20} color="#FF69B4" className="mr-3" />
+              <Text className="text-white text-lg">
+                Decode <Text className="font-bold">ingredients & safety</Text>
+              </Text>
+            </View>
+            <View className="flex-row items-center mb-3">
+              <Ionicons name="heart" size={20} color="#FF69B4" className="mr-3" />
+              <Text className="text-white text-lg">
+                Build your <Text className="font-bold">perfect beauty routine</Text>
+              </Text>
             </View>
           </View>
+        </View>
 
-          {/* Pricing */}
-          <View className="bg-white bg-opacity-10 rounded-xl p-4 mb-6">
-            {[
-              {
-                key: 'yearly',
-                title: 'YEARLY ACCESS',
-                subtitle: '$49.99 / year',
-                badge: 'BEST VALUE',
-              },
-              {
-                key: 'weekly',
-                title: '3-DAY FREE TRIAL',
-                subtitle: 'then $7.99 / week',
-              },
-            ].map((plan) => {
-              const selected = selectedPlan === plan.key;
-              return (
-                <TouchableOpacity
-                  key={plan.key}
-                  onPress={() => setSelectedPlan(plan.key)}
-                  className={`flex-row items-center rounded-lg p-3 mb-3 ${
-                    selected ? 'bg-white bg-opacity-20' : ''
+        {/* Free Trial Toggle */}
+        <View className="bg-pink-500/15 rounded-2xl p-4 mb-5 flex-row items-center justify-between border border-pink-500/30 mx-8">
+          <Text className="text-white text-lg font-semibold">Free Trial Enabled</Text>
+          <TouchableOpacity
+            onPress={() => setFreeTrialEnabled(!freeTrialEnabled)}
+            className={`w-15 h-8 rounded-full justify-center px-0.5 ${
+              freeTrialEnabled ? 'bg-pink-500 items-end' : 'bg-white/30 items-start'
+            }`}
+          >
+            <View className="w-7 h-7 rounded-full bg-white" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Pricing Options */}
+        <View className="mb-8 px-8">
+          {/* Yearly Plan */}
+          <TouchableOpacity
+            onPress={() => setSelectedPlan('yearly')}
+            className={`bg-pink-500/10 rounded-2xl p-4 mb-3 relative ${
+              selectedPlan === 'yearly' ? 'border-2 border-pink-500' : 'border border-pink-500/30'
+            }`}
+          >
+            {selectedPlan === 'yearly' && (
+              <View className="absolute -top-2 right-4 bg-pink-600 rounded-xl px-3 py-1">
+                <Text className="text-white text-xs font-bold">💖 BEST VALUE</Text>
+              </View>
+            )}
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <View
+                  className={`w-5 h-5 rounded-full border-2 border-pink-500 mr-3 items-center justify-center ${
+                    selectedPlan === 'yearly' ? 'bg-pink-500' : 'bg-transparent'
                   }`}
                 >
-                  <View className="mr-3">
-                    <View
-                      className={`w-5 h-5 rounded-full border-2 ${
-                        selected ? 'border-white bg-white' : 'border-gray-400'
-                      }`}
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-white font-bold text-base">
-                      {plan.title}{' '}
-                      {plan.badge && <Text className="text-white opacity-80">{plan.badge}</Text>}
-                    </Text>
-                    <Text className="text-white text-sm">{plan.subtitle}</Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {/* CTA */}
-          <TouchableOpacity
-            onPress={handlePurchase}
-            disabled={loading}
-            className="mb-4 rounded-full overflow-hidden shadow-lg"
-          >
-            <LinearGradient
-              colors={['#000', '#fff']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              className="py-4 items-center"
-            >
-              <Text className="text-lg font-bold">{loading ? 'Loading...' : 'Try for Free'}</Text>
-            </LinearGradient>
+                  {selectedPlan === 'yearly' && <View className="w-2 h-2 rounded-full bg-white" />}
+                </View>
+                <Text className="text-white text-lg font-bold">YEARLY ACCESS</Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-pink-500 text-lg font-bold">$0.77</Text>
+                <Text className="text-white/70 text-sm">per week</Text>
+              </View>
+            </View>
+            <Text className="text-white/70 text-sm ml-8">$39.99 per year</Text>
           </TouchableOpacity>
 
-          <View className="flex-row items-center justify-center mb-4">
-            <Ionicons name="shield-checkmark" size={18} color="#fff" className="mr-2" />
-            <Text className="text-white font-medium">No payment now</Text>
-          </View>
+          {/* Weekly Plan */}
+          <TouchableOpacity
+            onPress={() => setSelectedPlan('weekly')}
+            className={`bg-pink-500/10 rounded-2xl p-4 ${
+              selectedPlan === 'weekly' ? 'border-2 border-pink-500' : 'border border-pink-500/30'
+            }`}
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <View
+                  className={`w-5 h-5 rounded-full border-2 border-pink-500 mr-3 items-center justify-center ${
+                    selectedPlan === 'weekly' ? 'bg-pink-500' : 'bg-transparent'
+                  }`}
+                >
+                  {selectedPlan === 'weekly' && <View className="w-2 h-2 rounded-full bg-white" />}
+                </View>
+                <Text className="text-white text-lg font-bold">3-DAY FREE TRIAL</Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-white/70 text-sm">then $4.99</Text>
+                <Text className="text-white/70 text-sm">per week</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
 
-          {/* Links */}
-          <View className="flex-row justify-center mb-6">
-            {[
-              { label: 'Restore', url: 'https://yourapp.com/restore' },
-              { label: 'Terms', url: 'https://yourapp.com/terms' },
-              { label: 'Privacy', url: 'https://yourapp.com/privacy' },
-            ].map((link) => (
-              <TouchableOpacity
-                key={link.label}
-                onPress={() => openLink(link.url)}
-                className="mx-4"
-              >
-                <Text className="text-gray-400 text-sm">{link.label}</Text>
-              </TouchableOpacity>
-            ))}
+        {/* Try for Free Button */}
+        <Button
+          title={loading ? 'Processing...' : 'Start Your Glow Up ✨'}
+          onPress={handlePurchase}
+          disabled={loading || subscriptionLoading}
+          variant="primary"
+          loading={loading}
+          className="mx-8 mb-3"
+        />
+
+        {/* No payment now */}
+        <View className="items-center mb-5">
+          <View className="flex-row items-center">
+            <Ionicons name="checkmark-circle" size={16} color="#FF69B4" className="mr-2" />
+            <Text className="text-white/70 text-sm">No payment now</Text>
           </View>
+        </View>
+
+        {/* Footer Links */}
+        <View className="flex-row justify-center items-center gap-10 mt-8">
+          <TouchableOpacity onPress={handleRestore} disabled={restoreLoading}>
+            <Text className="text-white/60 text-sm">
+              {restoreLoading ? 'Restoring...' : 'Restore'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => openLink('https://beautyscan.app/terms')}>
+            <Text className="text-white/60 text-sm">Terms</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => openLink('https://beautyscan.app/privacy')}>
+            <Text className="text-white/60 text-sm">Privacy</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </View>

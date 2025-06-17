@@ -16,6 +16,7 @@ interface AuthContextType {
     lastName: string
   ) => Promise<void>;
   signOut: () => Promise<void>;
+  // Temporarily disabled subscription features
   isSubscribed: boolean;
   subscriptionPlan: 'free' | 'pro' | null;
 }
@@ -26,57 +27,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscriptionPlan, setSubscriptionPlan] = useState<'free' | 'pro' | null>(null);
+  // Temporarily set subscription to defaults
+  const [isSubscribed] = useState(false);
+  const [subscriptionPlan] = useState<'free' | 'pro' | null>('free');
 
   useEffect(() => {
     (async () => {
-      const {
-        data: { session: restored },
-      } = await supabase.auth.getSession();
-      setSession(restored);
-      setUser(restored?.user ?? null);
-      setLoading(false);
-      if (restored) await loadSubscriptionStatus();
-      else router.replace('/');
+      try {
+        const {
+          data: { session: restored },
+        } = await supabase.auth.getSession();
+        setSession(restored);
+        setUser(restored?.user ?? null);
+        if (!restored) {
+          router.replace('/');
+        }
+      } catch (err) {
+        setSession(null);
+        setUser(null);
+        router.replace('/');
+      } finally {
+        setLoading(false);
+      }
     })();
 
     const { data: sub } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        if (session?.access_token) {
-          if (event === 'SIGNED_IN') {
-            router.replace('/(tabs)/explore');
-          }
-          await loadSubscriptionStatus();
-        } else {
-          setIsSubscribed(false);
-          setSubscriptionPlan('free');
-          if (event === 'SIGNED_OUT') {
-            router.replace('/');
-          }
-        }
+
+        // Remove automatic navigation - let Index component handle it
+        // if (session?.access_token) {
+        //   if (event === 'SIGNED_IN') {
+        //     router.replace('/(tabs)/explore');
+        //   }
+        // } else {
+        //   if (event === 'SIGNED_OUT') {
+        //     router.replace('/');
+        //   }
+        // }
+
         setLoading(false);
       }
     );
 
     return () => sub.subscription.unsubscribe();
   }, []);
-
-  const loadSubscriptionStatus = async () => {
-    const { data, error } = (await supabase.rpc('get_account_for_user')) as {
-      data: { subscription_status: string; subscription_plan: string } | null;
-      error: Error | null;
-    };
-    if (!error && data) {
-      setIsSubscribed(data.subscription_status === 'active');
-      setSubscriptionPlan(data.subscription_plan as 'free' | 'pro');
-    } else {
-      setIsSubscribed(false);
-      setSubscriptionPlan('free');
-    }
-  };
 
   const signInWithEmail = async (email: string, password: string) => {
     setLoading(true);
@@ -86,7 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     setLoading(false);
     if (error) throw error;
-    // onAuthStateChange will handle the rest
   };
 
   const signUpWithEmail = async (
@@ -109,7 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!data.session) {
       toast.success('Check your email to verify your account');
     }
-    // after email-verify and SIGNED_IN, onAuthStateChange and loadSubscriptionStatus will fire
   };
 
   const signOut = async () => {

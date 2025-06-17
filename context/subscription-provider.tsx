@@ -50,7 +50,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (user) {
       initializeIAP();
-      loadSubscriptionStatus();
+      // loadSubscriptionStatus(); // Temporarily disabled - causes RPC timeout
       loadFreeUsage();
     }
   }, [user]);
@@ -154,7 +154,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       const purchases = await iapService.restorePurchases();
       if (purchases.length) {
         const active =
-          purchases.find((p) => ['hair_deet_yearly', 'hair_deet_monthly'].includes(p.productId)) ||
+          purchases.find((p) => ['beautyscan_yearly', 'beautyscan_weekly'].includes(p.productId)) ||
           purchases[0];
         if (!(__DEV__ && active.transactionId.startsWith('mock_'))) await verifyWithBackend(active);
         setState((s) => ({
@@ -163,7 +163,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
           subscriptionType: active.productId.includes('yearly') ? 'yearly' : 'monthly',
           loading: false,
         }));
-        loadSubscriptionStatus();
+        // loadSubscriptionStatus(); // Temporarily disabled - causes RPC timeout
         Alert.alert('Restored', 'Your subscription has been restored');
       } else {
         setState((s) => ({ ...s, loading: false }));

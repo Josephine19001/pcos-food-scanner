@@ -1,302 +1,341 @@
-import type { SavedProduct } from '@/components/saves/ProductCard';
+import { ScannedProductUI } from '@/lib/types/product';
 
-export const mockSavedProducts: SavedProduct[] = [
+export const mockSavedProducts: ScannedProductUI[] = [
   {
     id: '1',
-    name: "Fenty Beauty Pro Filt'r Foundation",
-    brand: 'Fenty Beauty',
-    category: 'Face',
+    name: 'Hydrating Serum',
+    brand: 'GlowCo',
+    category: 'Skincare',
     safetyScore: 8,
-    scannedAt: '2024-01-15',
+    scannedAt: '2024-01-15T10:30:00Z',
+    savedAt: '2024-01-15T10:30:00Z',
     isFavorite: true,
-    image: require('@/assets/onboarding/example-icon.png'),
+    image: require('@/assets/images/product.png'),
     ingredients: [
       'Water',
-      'Dimethicone',
+      'Hyaluronic Acid',
       'Glycerin',
-      'Butylene Glycol',
-      'Phenoxyethanol',
-      'Sodium Hyaluronate',
-      'Tocopheryl Acetate',
+      'Niacinamide',
       'Panthenol',
       'Allantoin',
-      'Carbomer',
-      'Triethanolamine',
-      'Disodium EDTA',
-      'Fragrance',
-    ],
-    keyIngredients: [
-      {
-        name: 'Sodium Hyaluronate',
-        type: 'beneficial',
-        description:
-          'A powerful humectant that can hold up to 1000 times its weight in water, providing excellent hydration and plumping effects for the skin.',
-      },
-      {
-        name: 'Tocopheryl Acetate (Vitamin E)',
-        type: 'beneficial',
-        description:
-          'An antioxidant that helps protect skin from environmental damage and provides moisturizing benefits.',
-      },
-      {
-        name: 'Phenoxyethanol',
-        type: 'neutral',
-        description:
-          'A widely used preservative that prevents bacterial growth. Generally well-tolerated but may cause irritation in very sensitive individuals.',
-      },
-      {
-        name: 'Fragrance',
-        type: 'harmful',
-        description:
-          'Can be a potential allergen and irritant, especially for sensitive skin types. Consider patch testing if you have fragrance sensitivities.',
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Olaplex No. 3 Hair Perfector',
-    brand: 'Olaplex',
-    category: 'Hair',
-    safetyScore: 9,
-    scannedAt: '2024-01-14',
-    isFavorite: false,
-    image: require('@/assets/onboarding/example-icon.png'),
-    ingredients: [
-      'Water',
-      'Bis-Aminopropyl Diglycol Dimaleate',
-      'Phenoxyethanol',
-      'Sodium Benzoate',
-      'Citric Acid',
-      'Disodium EDTA',
-    ],
-    keyIngredients: [
-      {
-        name: 'Bis-Aminopropyl Diglycol Dimaleate',
-        type: 'beneficial',
-        description:
-          "Olaplex's patented bond-building ingredient that helps repair and strengthen damaged hair by reconnecting broken disulfide bonds.",
-      },
-      {
-        name: 'Citric Acid',
-        type: 'beneficial',
-        description:
-          'Helps balance pH levels and can smooth the hair cuticle, resulting in shinier and more manageable hair.',
-      },
-      {
-        name: 'Phenoxyethanol',
-        type: 'neutral',
-        description:
-          'A preservative that keeps the product safe from harmful bacteria. Generally well-tolerated on the scalp.',
-      },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Drunk Elephant C-Firma Day Serum',
-    brand: 'Drunk Elephant',
-    category: 'Skin',
-    safetyScore: 7,
-    scannedAt: '2024-01-13',
-    isFavorite: true,
-    image: require('@/assets/onboarding/example-icon.png'),
-    ingredients: [
-      'Water',
-      'L-Ascorbic Acid',
-      'Glycerin',
-      'Propanediol',
-      'Alpha Arbutin',
-      'Sodium Hyaluronate Crosspolymer',
-      'Tocopherol',
-      'Ferulic Acid',
-      'Sodium Hydroxide',
+      'Sodium Hyaluronate',
       'Phenoxyethanol',
       'Ethylhexylglycerin',
     ],
     keyIngredients: [
       {
-        name: 'L-Ascorbic Acid (Vitamin C)',
+        name: 'Hyaluronic Acid',
         type: 'beneficial',
         description:
-          'A potent antioxidant that brightens skin, stimulates collagen production, and helps fade dark spots and hyperpigmentation.',
+          'Powerful humectant that can hold up to 1000 times its weight in water, providing intense hydration.',
+      },
+      {
+        name: 'Niacinamide',
+        type: 'beneficial',
+        description:
+          'Vitamin B3 that helps regulate oil production, minimize pores, and improve skin texture.',
+      },
+      {
+        name: 'Phenoxyethanol',
+        type: 'neutral',
+        description: 'Preservative that prevents bacterial growth in cosmetic products.',
+      },
+    ],
+    productLinks: [
+      {
+        title: 'GlowCo Hydrating Serum - Sephora',
+        url: 'https://www.sephora.com/product/hydrating-serum',
+        source: 'Sephora',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=100&h=100&fit=crop&crop=center',
+      },
+      {
+        title: 'Hydrating Serum 30ml - Ulta Beauty',
+        url: 'https://www.ulta.com/p/hydrating-serum',
+        source: 'Ulta Beauty',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=100&h=100&fit=crop&crop=center',
+      },
+      {
+        title: 'GlowCo Hydrating Serum - Amazon',
+        url: 'https://www.amazon.com/glowco-hydrating-serum',
+        source: 'Amazon',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=100&h=100&fit=crop&crop=center',
+      },
+    ],
+  },
+  {
+    id: '2',
+    name: 'Vitamin C Brightening Cream',
+    brand: 'RadiantSkin',
+    category: 'Skincare',
+    safetyScore: 9,
+    scannedAt: '2024-01-14T14:20:00Z',
+    savedAt: '2024-01-14T14:20:00Z',
+    isFavorite: false,
+    image: require('@/assets/images/product.png'),
+    ingredients: [
+      'Water',
+      'Ascorbic Acid',
+      'Magnesium Ascorbyl Phosphate',
+      'Glycerin',
+      'Squalane',
+      'Tocopheryl Acetate',
+      'Ferulic Acid',
+      'Hyaluronic Acid',
+      'Phenoxyethanol',
+    ],
+    keyIngredients: [
+      {
+        name: 'Ascorbic Acid',
+        type: 'beneficial',
+        description:
+          'Pure Vitamin C that brightens skin, reduces dark spots, and provides antioxidant protection.',
       },
       {
         name: 'Ferulic Acid',
         type: 'beneficial',
         description:
-          'An antioxidant that stabilizes vitamin C and provides additional protection against environmental damage.',
+          'Antioxidant that stabilizes Vitamin C and provides additional protection against environmental damage.',
       },
       {
-        name: 'Alpha Arbutin',
+        name: 'Tocopheryl Acetate',
         type: 'beneficial',
         description:
-          'A gentle skin-brightening ingredient that helps reduce the appearance of dark spots and hyperpigmentation.',
+          'Vitamin E derivative that provides antioxidant benefits and helps maintain skin barrier.',
+      },
+    ],
+    productLinks: [
+      {
+        title: 'RadiantSkin Vitamin C Brightening Cream - Dermstore',
+        url: 'https://www.dermstore.com/radiantskin-vitamin-c-cream',
+        source: 'Dermstore',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?w=100&h=100&fit=crop&crop=center',
       },
       {
-        name: 'Sodium Hydroxide',
-        type: 'harmful',
+        title: 'Vitamin C Brightening Cream 50ml - Target',
+        url: 'https://www.target.com/p/radiantskin-vitamin-c-cream',
+        source: 'Target',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=100&h=100&fit=crop&crop=center',
+      },
+    ],
+  },
+  {
+    id: '3',
+    name: 'Gentle Cleansing Foam',
+    brand: 'PureSkin',
+    category: 'Cleanser',
+    safetyScore: 7,
+    scannedAt: '2024-01-13T09:15:00Z',
+    savedAt: '2024-01-13T09:15:00Z',
+    isFavorite: true,
+    image: require('@/assets/images/product.png'),
+    ingredients: [
+      'Water',
+      'Sodium Cocoyl Isethionate',
+      'Cocamidopropyl Betaine',
+      'Glycerin',
+      'Sodium Chloride',
+      'Panthenol',
+      'Allantoin',
+      'Citric Acid',
+      'Phenoxyethanol',
+      'Fragrance',
+    ],
+    keyIngredients: [
+      {
+        name: 'Sodium Cocoyl Isethionate',
+        type: 'beneficial',
         description:
-          "Used to adjust pH but can be irritating in high concentrations. In this formulation, it's likely used in small amounts but may cause sensitivity.",
+          'Gentle surfactant derived from coconut that cleanses without stripping the skin.',
+      },
+      {
+        name: 'Panthenol',
+        type: 'beneficial',
+        description:
+          'Pro-Vitamin B5 that soothes and moisturizes the skin while reducing irritation.',
+      },
+      {
+        name: 'Fragrance',
+        type: 'harmful',
+        description: 'Can cause allergic reactions and skin sensitivity in some individuals.',
+      },
+    ],
+    productLinks: [
+      {
+        title: 'PureSkin Gentle Cleansing Foam - CVS Pharmacy',
+        url: 'https://www.cvs.com/shop/pureskin-cleansing-foam',
+        source: 'CVS Pharmacy',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=100&h=100&fit=crop&crop=center',
+      },
+      {
+        title: 'Gentle Cleansing Foam 150ml - Walgreens',
+        url: 'https://www.walgreens.com/store/c/pureskin-foam',
+        source: 'Walgreens',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=100&h=100&fit=crop&crop=center',
+      },
+      {
+        title: 'PureSkin Cleansing Foam - Official Website',
+        url: 'https://www.pureskin.com/products/cleansing-foam',
+        source: 'PureSkin',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=100&fit=crop&crop=center',
       },
     ],
   },
   {
     id: '4',
-    name: 'Rare Beauty Soft Matte Lipstick',
-    brand: 'Rare Beauty',
-    category: 'Face',
+    name: 'Anti-Aging Night Cream',
+    brand: 'TimelessBeauty',
+    category: 'Skincare',
     safetyScore: 6,
-    savedAt: '2024-01-12',
-    isFavorite: true,
-    image: require('@/assets/onboarding/example-icon.png'),
+    scannedAt: '2024-01-12T20:45:00Z',
+    savedAt: '2024-01-12T20:45:00Z',
+    isFavorite: false,
+    image: require('@/assets/images/product.png'),
     ingredients: [
-      'Dimethicone',
-      'Isododecane',
-      'Cyclopentasiloxane',
-      'Trimethylsiloxysilicate',
-      'Ceresin',
-      'Polyethylene',
-      'Kaolin',
-      'Silica',
-      'Tocopheryl Acetate',
+      'Water',
+      'Retinol',
+      'Glycerin',
+      'Squalane',
+      'Peptides',
+      'Hyaluronic Acid',
+      'Ceramides',
+      'Niacinamide',
       'Phenoxyethanol',
-      'May Contain: CI 77491, CI 77492, CI 77499, CI 15850',
+      'BHT',
     ],
     keyIngredients: [
       {
-        name: 'Tocopheryl Acetate (Vitamin E)',
+        name: 'Retinol',
         type: 'beneficial',
-        description: 'Provides antioxidant protection and helps maintain lip moisture and comfort.',
+        description: 'Vitamin A derivative that promotes cell turnover and reduces signs of aging.',
       },
       {
-        name: 'Kaolin',
+        name: 'Peptides',
         type: 'beneficial',
         description:
-          'A gentle clay that helps absorb excess oils and provides a smooth, matte finish without being overly drying.',
+          'Amino acid chains that help stimulate collagen production and improve skin firmness.',
       },
       {
-        name: 'Silica',
-        type: 'neutral',
-        description:
-          'Helps create a smooth texture and provides oil absorption for the matte finish. Generally well-tolerated.',
-      },
-      {
-        name: 'CI Colorants',
+        name: 'BHT',
         type: 'harmful',
         description:
-          'Synthetic colorants that may cause allergic reactions in sensitive individuals. Patch test if you have known color sensitivities.',
+          'Synthetic antioxidant that may cause skin irritation and has potential health concerns.',
       },
     ],
   },
   {
     id: '5',
-    name: 'The Ordinary Hyaluronic Acid 2% + B5',
-    brand: 'The Ordinary',
-    category: 'Skin',
-    safetyScore: 9,
-    savedAt: '2024-01-11',
-    isFavorite: false,
-    image: require('@/assets/onboarding/example-icon.png'),
+    name: 'Moisturizing Sunscreen SPF 50',
+    brand: 'SunGuard',
+    category: 'Sunscreen',
+    safetyScore: 8,
+    scannedAt: '2024-01-11T11:30:00Z',
+    savedAt: '2024-01-11T11:30:00Z',
+    isFavorite: true,
+    image: require('@/assets/images/product.png'),
     ingredients: [
-      'Aqua',
-      'Sodium Hyaluronate',
-      'Panthenol',
-      'Ahnfeltia Concinna Extract',
+      'Water',
+      'Zinc Oxide',
+      'Titanium Dioxide',
       'Glycerin',
-      'Pentylene Glycol',
-      'Propanediol',
-      'Polyacrylate Crosspolymer-6',
-      'Dimethyl Isosorbide',
-      'Hydroxyethylcellulose',
-      'Arginine',
+      'Squalane',
+      'Hyaluronic Acid',
+      'Vitamin E',
+      'Aloe Vera Extract',
       'Phenoxyethanol',
-      'Hydroxypropyl Cyclodextrin',
-      'Chlorphenesin',
     ],
     keyIngredients: [
       {
-        name: 'Sodium Hyaluronate',
+        name: 'Zinc Oxide',
         type: 'beneficial',
         description:
-          'Multiple molecular weights of hyaluronic acid provide deep and surface-level hydration for plump, smooth skin.',
+          'Mineral sunscreen ingredient that provides broad-spectrum UV protection without irritation.',
       },
       {
-        name: 'Panthenol (Pro-Vitamin B5)',
+        name: 'Titanium Dioxide',
         type: 'beneficial',
         description:
-          'A soothing ingredient that helps calm irritation, improve skin barrier function, and provide long-lasting hydration.',
+          'Mineral UV filter that reflects and scatters UV rays, suitable for sensitive skin.',
       },
       {
-        name: 'Ahnfeltia Concinna Extract',
+        name: 'Aloe Vera Extract',
         type: 'beneficial',
         description:
-          'A marine extract that helps improve skin elasticity and provides additional hydrating benefits.',
+          'Natural ingredient that soothes and hydrates the skin while providing anti-inflammatory benefits.',
+      },
+    ],
+    productLinks: [
+      {
+        title: 'SunGuard SPF 50 Sunscreen - Beach & Pool Supply',
+        url: 'https://www.beachsupply.com/sunguard-spf50',
+        source: 'Beach Supply',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1544966503-7e2dcbbc6b5e?w=100&h=100&fit=crop&crop=center',
       },
       {
-        name: 'Phenoxyethanol',
-        type: 'neutral',
-        description:
-          'A preservative that maintains product safety. Well-tolerated by most skin types in the low concentrations used.',
+        title: 'Moisturizing Sunscreen SPF 50 - Amazon',
+        url: 'https://www.amazon.com/sunguard-sunscreen-spf50',
+        source: 'Amazon',
+        thumbnailUrl:
+          'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=100&h=100&fit=crop&crop=center',
       },
     ],
   },
   {
     id: '6',
-    name: 'Chanel Coco Mademoiselle',
-    brand: 'Chanel',
-    category: 'Perfume',
-    safetyScore: 5,
-    scannedAt: '2024-01-10',
+    name: 'Exfoliating Toner',
+    brand: 'ClearSkin',
+    category: 'Toner',
+    safetyScore: 7,
+    scannedAt: '2024-01-10T16:20:00Z',
+    savedAt: '2024-01-10T16:20:00Z',
     isFavorite: false,
-    image: require('@/assets/onboarding/example-icon.png'),
+    image: require('@/assets/images/product.png'),
     ingredients: [
-      'Alcohol Denat.',
-      'Parfum',
-      'Aqua',
-      'Benzyl Salicylate',
-      'Coumarin',
-      'Linalool',
-      'Alpha-Isomethyl Ionone',
-      'Citronellol',
-      'Hexyl Cinnamal',
-      'Hydroxycitronellal',
-      'Geraniol',
-      'Citral',
-      'Farnesol',
-      'Benzyl Benzoate',
+      'Water',
+      'Salicylic Acid',
+      'Glycolic Acid',
+      'Witch Hazel',
+      'Niacinamide',
+      'Panthenol',
+      'Sodium Hyaluronate',
+      'Phenoxyethanol',
+      'Alcohol Denat',
     ],
     keyIngredients: [
       {
-        name: 'Linalool',
-        type: 'harmful',
+        name: 'Salicylic Acid',
+        type: 'beneficial',
         description:
-          'A common fragrance allergen that can cause skin sensitization and irritation in susceptible individuals. EU requires labeling when present above 0.001%.',
+          'Beta hydroxy acid that penetrates pores to remove dead skin cells and reduce acne.',
       },
       {
-        name: 'Coumarin',
-        type: 'harmful',
+        name: 'Glycolic Acid',
+        type: 'beneficial',
         description:
-          'A fragrance component with a sweet, hay-like scent. Can be allergenic and is required to be listed when present in concentrations above regulatory limits.',
+          'Alpha hydroxy acid that exfoliates the skin surface to improve texture and brightness.',
       },
       {
-        name: 'Alcohol Denat.',
-        type: 'neutral',
-        description:
-          'Used as a solvent and to help the fragrance project. Can be drying but is standard in perfume formulations.',
-      },
-      {
-        name: 'Citronellol',
+        name: 'Alcohol Denat',
         type: 'harmful',
         description:
-          'A fragrance ingredient that can cause allergic reactions. Commonly found in rose and citrus scents but must be declared due to allergen potential.',
+          'Drying alcohol that can strip the skin barrier and cause irritation with frequent use.',
       },
     ],
   },
 ];
 
-export const getFavoriteProducts = (products: SavedProduct[]): SavedProduct[] => {
+export const getFavoriteProducts = (products: ScannedProductUI[]): ScannedProductUI[] => {
   return products.filter((product) => product.isFavorite);
 };
 
-export const getScannedProducts = (products: SavedProduct[]): SavedProduct[] => {
-  return products.filter((product) => product.scannedAt);
+export const getScannedProducts = (products: ScannedProductUI[]): ScannedProductUI[] => {
+  return products.filter((product) => !product.isFavorite);
 };

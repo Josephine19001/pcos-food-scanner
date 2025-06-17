@@ -1,354 +1,205 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, Dimensions, Animated } from 'react-native';
 import { ResizeMode, Video } from 'expo-av';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { Button } from '@/components/ui/button';
 
-const steps = ['Welcome', 'WhatYouCanScan', 'HowItWorks', 'Personalize', 'GetStarted'];
+const { width, height } = Dimensions.get('window');
+
+const steps = ['Welcome', 'Discover', 'Analyze'];
 
 function StepIndicator({ step }: { step: number }) {
   return (
-    <View
-      style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 24, marginBottom: 16 }}
-    >
+    <View className="flex-row justify-center absolute top-16 left-0 right-0 z-10">
       {steps.map((_, i) => (
-        <View
+        <Animated.View
           key={i}
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            marginHorizontal: 5,
-            backgroundColor: i === step ? '#111' : '#E5E7EB',
-            opacity: i === step ? 1 : 0.5,
-          }}
+          className={`h-2 mx-1 rounded-full ${i === step ? 'w-6 bg-pink-500' : 'w-2 bg-white/40'}`}
         />
       ))}
     </View>
   );
 }
 
-function BlackButton({
-  onPress,
-  children,
-  disabled,
+function NavigationButtons({
+  onNext,
+  onBack,
+  isFirstStep,
+  isLastStep,
+  nextLabel = 'Next',
 }: {
-  onPress: () => void;
-  children: React.ReactNode;
-  disabled?: boolean;
+  onNext: () => void;
+  onBack?: () => void;
+  isFirstStep: boolean;
+  isLastStep: boolean;
+  nextLabel?: string;
 }) {
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      style={{
-        width: '100%',
-        borderRadius: 999,
-        backgroundColor: '#111',
-        alignItems: 'center',
-        paddingVertical: 18,
-        marginTop: 24,
-        opacity: disabled ? 0.5 : 1,
-      }}
-    >
-      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>{children}</Text>
-    </TouchableOpacity>
-  );
-}
+    <View className="flex-row justify-between items-center px-8 py-6 pb-8">
+      {!isFirstStep ? (
+        <Button
+          title="Back"
+          onPress={onBack}
+          variant="secondary"
+          size="medium"
+          className="flex-row items-center"
+        />
+      ) : (
+        <View className="w-20" />
+      )}
 
-function OnboardingBg({ children }: { children: React.ReactNode }) {
-  return (
-    <View
-      style={{ flex: 1, backgroundColor: '#fff', justifyContent: 'flex-end', alignItems: 'center' }}
-    >
-      {children}
+      <Button
+        title={nextLabel}
+        onPress={onNext}
+        variant="primary"
+        size="medium"
+        className="flex-row items-center"
+      />
     </View>
   );
 }
 
-function Welcome({ onNext }: { onNext: () => void }) {
+function VideoBackground({
+  videoSource,
+  children,
+}: {
+  videoSource: any;
+  children: React.ReactNode;
+}) {
   return (
-    <OnboardingBg>
-      <View style={{ flex: 1, width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <View
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: 24,
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowRadius: 16,
-              elevation: 2,
-              padding: 32,
-              marginTop: 48,
-              marginBottom: 16,
-            }}
-          >
-            <Image
-              source={require('@/assets/onboarding/example-icon.png')}
-              style={{ width: 80, height: 80 }}
-            />
-          </View>
-        </View>
-        <View style={{ width: '90%', alignItems: 'center', marginBottom: 48 }}>
-          <Text
-            style={{
-              fontSize: 22,
-              fontWeight: 'bold',
-              color: '#111',
-              textAlign: 'center',
-              marginBottom: 12,
-            }}
-          >
-            Scan. Discover. Decide.
-          </Text>
-          <Text style={{ fontSize: 16, color: '#444', textAlign: 'center', marginBottom: 8 }}>
-            Instantly scan hair and skincare products. Get ingredient insights, safety info, and
-            more.
-          </Text>
-          <BlackButton onPress={onNext}>Next</BlackButton>
-        </View>
-      </View>
-    </OnboardingBg>
+    <View className="flex-1">
+      <Video
+        source={videoSource}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          width,
+          height,
+        }}
+        shouldPlay
+        isLooping
+        isMuted
+        resizeMode={ResizeMode.COVER}
+      />
+      <View className="flex-1 bg-black/40">{children}</View>
+    </View>
   );
 }
 
-function WhatYouCanScan({ onNext }: { onNext: () => void }) {
+function Welcome({ onNext, onBack }: { onNext: () => void; onBack?: () => void }) {
   return (
-    <OnboardingBg>
-      <View style={{ flex: 1, width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <View
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: 24,
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowRadius: 16,
-              elevation: 2,
-              padding: 32,
-              marginTop: 48,
-              marginBottom: 16,
-            }}
-          >
-            <Image
-              source={require('@/assets/onboarding/example-icon.png')}
-              style={{ width: 80, height: 80 }}
-            />
+    <VideoBackground videoSource={require('@/assets/onboarding/example.mp4')}>
+      <View className="flex-1 justify-end">
+        {/* Content with rounded background from bottom */}
+        <View className="bg-black/80 rounded-t-[32px] pt-8">
+          <View className="px-8">
+            <Text className="text-4xl font-bold text-white text-left mb-4 leading-tight">
+              Choose Better
+            </Text>
+            <Text className="text-lg text-white/90 text-left mb-6 leading-relaxed">
+              Know what's in your beauty products
+            </Text>
           </View>
-        </View>
-        <View style={{ width: '90%', alignItems: 'center', marginBottom: 48 }}>
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: '#111',
-              textAlign: 'center',
-              marginBottom: 12,
-            }}
-          >
-            What You Can Scan
-          </Text>
-          <Text style={{ fontSize: 16, color: '#444', textAlign: 'center', marginBottom: 8 }}>
-            Scan product labels, ingredients, and packaging to get instant details and AI-powered
-            analysis.
-          </Text>
-          <BlackButton onPress={onNext}>Next</BlackButton>
+
+          <NavigationButtons
+            onNext={onNext}
+            onBack={onBack}
+            isFirstStep={true}
+            isLastStep={false}
+            nextLabel="Get Started"
+          />
         </View>
       </View>
-    </OnboardingBg>
+    </VideoBackground>
   );
 }
 
-function HowItWorks({ onNext }: { onNext: () => void }) {
+function Discover({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   return (
-    <OnboardingBg>
-      <View style={{ flex: 1, width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <View
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: 24,
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowRadius: 16,
-              elevation: 2,
-              padding: 32,
-              marginTop: 48,
-              marginBottom: 16,
-            }}
-          >
-            <Image
-              source={require('@/assets/onboarding/example-icon.png')}
-              style={{ width: 80, height: 80 }}
-            />
+    <VideoBackground videoSource={require('@/assets/onboarding/example.mp4')}>
+      <View className="flex-1 justify-end">
+        {/* Content with rounded background from bottom */}
+        <View className="bg-black/80 rounded-t-[32px] pt-8">
+          <View className="px-8">
+            <Text className="text-3xl font-bold text-white text-left mb-4 leading-tight">
+              Know Your Ingredients
+            </Text>
+            <Text className="text-lg text-white/90 text-left mb-6 leading-relaxed">
+              Understand what each ingredient does to your skin
+            </Text>
           </View>
-        </View>
-        <View style={{ width: '90%', alignItems: 'center', marginBottom: 48 }}>
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: '#111',
-              textAlign: 'center',
-              marginBottom: 12,
-            }}
-          >
-            How It Works
-          </Text>
-          <Text style={{ fontSize: 16, color: '#444', textAlign: 'center', marginBottom: 8 }}>
-            Take a photo, get instant product details and ingredient analysis, and save your
-            favourites.
-          </Text>
-          <BlackButton onPress={onNext}>Next</BlackButton>
+
+          <NavigationButtons
+            onNext={onNext}
+            onBack={onBack}
+            isFirstStep={false}
+            isLastStep={false}
+          />
         </View>
       </View>
-    </OnboardingBg>
+    </VideoBackground>
   );
 }
 
-function Personalize({ onNext }: { onNext: () => void }) {
-  const [selected, setSelected] = useState<string[]>([]);
-  const toggle = (type: string) => {
-    setSelected((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]));
-  };
+function Analyze({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   return (
-    <OnboardingBg>
-      <View style={{ flex: 1, width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <View
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: 24,
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowRadius: 16,
-              elevation: 2,
-              padding: 32,
-              marginTop: 48,
-              marginBottom: 16,
-              flexDirection: 'row',
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => toggle('hair')}
-              style={{ marginHorizontal: 8, alignItems: 'center' }}
-            >
-              <View
-                style={{
-                  backgroundColor: selected.includes('hair') ? '#111' : '#F3F4F6',
-                  borderRadius: 16,
-                  padding: 16,
-                }}
-              >
-                <Text style={{ fontSize: 32, color: selected.includes('hair') ? '#fff' : '#111' }}>
-                  🧴
-                </Text>
-              </View>
-              <Text style={{ color: '#111', fontWeight: '600', marginTop: 8 }}>Hair</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => toggle('skin')}
-              style={{ marginHorizontal: 8, alignItems: 'center' }}
-            >
-              <View
-                style={{
-                  backgroundColor: selected.includes('skin') ? '#111' : '#F3F4F6',
-                  borderRadius: 16,
-                  padding: 16,
-                }}
-              >
-                <Text style={{ fontSize: 32, color: selected.includes('skin') ? '#fff' : '#111' }}>
-                  🧼
-                </Text>
-              </View>
-              <Text style={{ color: '#111', fontWeight: '600', marginTop: 8 }}>Skin</Text>
-            </TouchableOpacity>
+    <VideoBackground videoSource={require('@/assets/onboarding/example.mp4')}>
+      <View className="flex-1 justify-end">
+        {/* Content with rounded background from bottom */}
+        <View className="bg-black/80 rounded-t-[32px] pt-8">
+          <View className="px-8">
+            <Text className="text-3xl font-bold text-white text-left mb-4 leading-tight">
+              Save & Organize
+            </Text>
+            <Text className="text-lg text-white/90 text-left mb-6 leading-relaxed">
+              Save your scanned products and build your beauty collection
+            </Text>
           </View>
-        </View>
-        <View style={{ width: '90%', alignItems: 'center', marginBottom: 48 }}>
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: '#111',
-              textAlign: 'center',
-              marginBottom: 12,
-            }}
-          >
-            Personalize
-          </Text>
-          <Text style={{ fontSize: 16, color: '#444', textAlign: 'center', marginBottom: 8 }}>
-            What are you interested in?
-          </Text>
-          <BlackButton onPress={onNext} disabled={selected.length === 0}>
-            Next
-          </BlackButton>
-        </View>
-      </View>
-    </OnboardingBg>
-  );
-}
 
-function GetStarted({ onNext }: { onNext: () => void }) {
-  return (
-    <OnboardingBg>
-      <View style={{ flex: 1, width: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <View
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: 24,
-              shadowColor: '#000',
-              shadowOpacity: 0.06,
-              shadowRadius: 16,
-              elevation: 2,
-              padding: 32,
-              marginTop: 48,
-              marginBottom: 16,
-            }}
-          >
-            <Image
-              source={require('@/assets/onboarding/example-icon.png')}
-              style={{ width: 80, height: 80 }}
-            />
-          </View>
-        </View>
-        <View style={{ width: '90%', alignItems: 'center', marginBottom: 48 }}>
-          <Text
-            style={{
-              fontSize: 22,
-              fontWeight: 'bold',
-              color: '#111',
-              textAlign: 'center',
-              marginBottom: 12,
-            }}
-          >
-            You're all set!
-          </Text>
-          <Text style={{ fontSize: 16, color: '#444', textAlign: 'center', marginBottom: 8 }}>
-            Start scanning products and get instant insights.
-          </Text>
-          <BlackButton onPress={onNext}>Get Started</BlackButton>
+          <NavigationButtons
+            onNext={onNext}
+            onBack={onBack}
+            isFirstStep={false}
+            isLastStep={true}
+            nextLabel="Start Scanning"
+          />
         </View>
       </View>
-    </OnboardingBg>
+    </VideoBackground>
   );
 }
 
 export default function Onboarding() {
   const [step, setStep] = useState(0);
   const router = useRouter();
-  const goNext = () => setStep((s) => Math.min(s + 1, steps.length - 1));
+
+  const goNext = () => {
+    if (step < steps.length - 1) {
+      setStep((s) => s + 1);
+    } else {
+      // Navigate to paywall after the last onboarding step
+      router.replace('/paywall');
+    }
+  };
+
+  const goBack = () => {
+    if (step > 0) {
+      setStep((s) => s - 1);
+    }
+  };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      {step === 0 && <Welcome onNext={goNext} />}
-      {step === 1 && <WhatYouCanScan onNext={goNext} />}
-      {step === 2 && <HowItWorks onNext={goNext} />}
-      {step === 3 && <Personalize onNext={goNext} />}
-      {step === 4 && <GetStarted onNext={() => router.replace('/paywall')} />}
+    <View className="flex-1 bg-black">
       <StepIndicator step={step} />
+
+      {step === 0 && <Welcome onNext={goNext} />}
+      {step === 1 && <Discover onNext={goNext} onBack={goBack} />}
+      {step === 2 && <Analyze onNext={goNext} onBack={goBack} />}
     </View>
   );
 }
