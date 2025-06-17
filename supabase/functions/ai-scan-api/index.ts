@@ -76,7 +76,7 @@ async function searchWithSerper(imageUrl) {
   };
 }
 async function enrichWithGPT(productName, product_links) {
-  const prompt = `You are a beauty product expert. Based on the product name and provided links, return only valid JSON structured as follows:
+  const prompt = `You are a beauty product expert. Based on the product name and the provided links, return only valid JSON structured as follows:
 
 {
   "name": string,
@@ -102,8 +102,16 @@ async function enrichWithGPT(productName, product_links) {
   ]
 }
 
-Only return the JSON. Do not include any explanation. Guess missing info based on brand/product name if necessary.`;
-  const userContent = `Product Name: ${productName}\nProduct Links:\n${JSON.stringify(product_links, null, 2)}`;
+Instructions:
+- Extract the full list of ingredients from the product links or name.
+- Analyze all ingredients you find, but **return no more than 10** in the \`key_ingredients\` field.
+- If 10 or fewer ingredients are found, analyze all of them.
+- If more than 10 are found, analyze the most relevant ones (based on their effect).
+- Only return JSON. Do not include any explanation or commentary.`;
+
+  const userContent = `Product Name: ${productName}
+Product Links:\n${JSON.stringify(product_links, null, 2)}`;
+
   const chat = await openai.chat.completions.create({
     model: 'gpt-4o',
     temperature: 0.3,
@@ -118,6 +126,7 @@ Only return the JSON. Do not include any explanation. Guess missing info based o
       },
     ],
   });
+
   const message = chat.choices[0]?.message?.content ?? '';
   try {
     const match = message.match(/\{[\s\S]*\}/);
@@ -127,6 +136,7 @@ Only return the JSON. Do not include any explanation. Guess missing info based o
     throw new Error('Failed to parse JSON from OpenAI');
   }
 }
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return jsonError('Method Not Allowed', 405);
   try {
@@ -145,12 +155,27 @@ Deno.serve(async (req) => {
     } catch {
       gptResult = {};
     }
+
+    const keyIngredients = Array.isArray(gptResult.key_ingredients)
+      ? gptResult.key_ingredients.slice(0, 10)
+      : [];
+
+    const totalAnalyzed = keyIngredients.length;
+    const harmfulCount = keyIngredients.filter((k) => k.type === 'harmful').length;
+
+    let computedSafetyScore = 10;
+
+    if (totalAnalyzed > 0) {
+      const cautionRatio = harmfulCount / totalAnalyzed;
+      computedSafetyScore = Math.round((1 - cautionRatio) * 10);
+    }
+
     const result = {
       id: crypto.randomUUID(),
       name: gptResult.name || productName || 'Unknown Product',
       brand: gptResult.brand || 'Unknown Brand',
       category: gptResult.category || 'Other',
-      safety_score: typeof gptResult.safety_score === 'number' ? gptResult.safety_score : 5,
+      safety_score: computedSafetyScore,
       ingredients: Array.isArray(gptResult.ingredients) ? gptResult.ingredients : [],
       key_ingredients: Array.isArray(gptResult.key_ingredients)
         ? gptResult.key_ingredients.map((k) => ({
