@@ -68,14 +68,45 @@ export function useDeleteAccount() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Get current session for authorization
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        throw new Error('Not authenticated');
+      }
+
+      // Call the delete account edge function first (while still authenticated)
+      const { data, error } = await supabase.functions.invoke('delete-account', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to delete account');
+      }
+
+      // If the function returns an error response
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      // After successful server-side deletion, sign out locally to clear session
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.warn('Failed to sign out locally after account deletion:', signOutError);
+        // Don't throw here since the account was already deleted successfully
+      }
+
+      return data;
     },
     onSuccess: () => {
       qc.clear();
-      toast.success('Signed out');
+      toast.success('Account successfully deleted');
     },
-    onError: (err: any) => handleError(err, 'Failed to sign out'),
+    onError: (err: any) => handleError(err, 'Failed to delete account'),
   });
 }
 
