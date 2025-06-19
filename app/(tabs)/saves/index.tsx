@@ -146,7 +146,7 @@ export default function SavesScreen() {
       {/* Header */}
       <View className="px-6 py-4 border-b border-gray-100">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-2xl font-bold text-black">My Products</Text>
+          <Text className="text-3xl font-bold text-black">My Scans</Text>
           <View className="flex-row items-center gap-4">
             <TouchableOpacity
               className={`w-10 h-10 rounded-full items-center justify-center ${

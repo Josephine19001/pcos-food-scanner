@@ -2,11 +2,10 @@ import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
 import { FeatureCard } from '@/components/explore/FeatureCard';
-import { ScanningPersonCard } from '@/components/explore/ScanningPersonCard';
-import { PremiumBanner } from '@/components/explore/PremiumBanner';
 import { CompactProductCard } from '@/components/explore/CompactProductCard';
 import { ProductDetailModal } from '@/components/saves/ProductDetailModal';
-import { mainFeatures, scanningPeople } from '@/data/exploreData';
+import { BeautyFactCard } from '@/components/ui/beauty-fact-card';
+import { mainFeatures } from '@/data/exploreData';
 import { ScannedProductUI, convertScannedProductToUI } from '@/lib/types/product';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
@@ -69,7 +68,7 @@ export default function ExploreScreen() {
         <View className="px-4 pt-4 pb-6">
           <Text className="text-3xl font-bold text-black mb-6">Explore</Text>
 
-          <PremiumBanner />
+          <BeautyFactCard compact={true} className="mb-6" />
         </View>
 
         <View className="px-4">
@@ -142,14 +141,14 @@ export default function ExploreScreen() {
           </View>
         )}
 
-        <View className="px-4 mb-8">
+        {/* <View className="px-4 mb-8">
           <Text className="text-xl font-bold text-black mb-4">What People Are Scanning</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="space-x-4">
             {scanningPeople.map((person) => (
               <ScanningPersonCard key={person.id} person={person} />
             ))}
           </ScrollView>
-        </View>
+        </View> */}
 
         <View className="h-24" />
       </ScrollView>
