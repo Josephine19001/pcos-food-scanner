@@ -221,7 +221,7 @@ export default function NutritionGoalsScreen() {
   };
 
   return (
-    <SubPageLayout title="Nutrition Goals" onBack={() => router.back()}>
+    <SubPageLayout title="Nutrition Goals">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Goal Cards or Nutrition Results */}
         <View className="px-4">

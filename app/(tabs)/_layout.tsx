@@ -28,6 +28,7 @@ const HIDDEN_ROUTES = [
   '/log-supplements',
   '/period-tracker',
   '/scan-food',
+  '/scan-beauty',
 ];
 
 export default function TabLayout() {
@@ -50,7 +51,7 @@ export default function TabLayout() {
     <AuthGuard>
       <View className="flex-1 bg-white">
         <Tabs
-          backBehavior="history"
+          backBehavior="initialRoute"
           screenOptions={{
             headerShown: false,
             tabBarShowLabel: true,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { View, Pressable, Modal } from 'react-native';
+import { View, Pressable, Modal, Platform } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { Calendar } from 'react-native-calendars';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import SettingsDetailItem from '@/components/settings-detail-item';
 import { PersonalDetailsSkeleton } from '@/components/ui';
 import SubPageLayout from '@/components/layouts/sub-page';
@@ -49,13 +49,21 @@ export default function PersonalDetailsScreen() {
     }
   };
 
-  const handleDateSelect = async (day: { dateString: string }) => {
-    try {
-      // Update account
-      updateAccount({ date_of_birth: day.dateString });
+  const handleDateChange = async (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
       setShowCalendar(false);
-    } catch (error) {
-      toast.error('Failed to update date of birth. Please try again.');
+    }
+
+    if (selectedDate) {
+      try {
+        const dateString = selectedDate.toISOString().split('T')[0];
+        updateAccount({ date_of_birth: dateString });
+        if (Platform.OS === 'ios') {
+          setShowCalendar(false);
+        }
+      } catch (error) {
+        toast.error('Failed to update date of birth. Please try again.');
+      }
     }
   };
 
@@ -75,7 +83,6 @@ export default function PersonalDetailsScreen() {
     <SubPageLayout title="Personal Details" onBack={handleGoBack}>
       {/* Avatar Section */}
       <View className="bg-white mx-4 p-6 rounded-2xl shadow mb-4">
-        <Text className="text-lg font-semibold mb-4 text-center">Profile Photo</Text>
         <View className="items-center">
           <AvatarUpload size={100} showActions={true} />
         </View>
@@ -104,51 +111,46 @@ export default function PersonalDetailsScreen() {
         ))}
       </View>
 
-      {/* Calendar Modal */}
-      <Modal visible={showCalendar} transparent animationType="slide">
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-4">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-xl font-bold">Select Date of Birth</Text>
-              <Pressable onPress={() => setShowCalendar(false)} className="px-4 py-2">
-                <Text className="text-blue-500 font-medium">Cancel</Text>
-              </Pressable>
+      {/* Date Picker */}
+      {Platform.OS === 'ios' ? (
+        <Modal visible={showCalendar} transparent animationType="slide">
+          <View className="flex-1 justify-end bg-black/50">
+            <View className="bg-white rounded-t-3xl">
+              <View className="flex-row items-center justify-between p-4 border-b border-gray-100">
+                <Pressable onPress={() => setShowCalendar(false)}>
+                  <Text className="text-pink-600 font-medium">Cancel</Text>
+                </Pressable>
+                <Text className="text-lg font-semibold text-black">Date of Birth</Text>
+                <Pressable onPress={() => setShowCalendar(false)}>
+                  <Text className="text-pink-600 font-medium">Done</Text>
+                </Pressable>
+              </View>
+              <View className="pb-8">
+                <DateTimePicker
+                  value={details.date_of_birth}
+                  mode="date"
+                  display="spinner"
+                  onChange={handleDateChange}
+                  maximumDate={new Date()}
+                  minimumDate={new Date(1900, 0, 1)}
+                  style={{ height: 200 }}
+                />
+              </View>
             </View>
-
-            <Calendar
-              current={details.date_of_birth.toISOString().split('T')[0]}
-              onDayPress={handleDateSelect}
-              maxDate={new Date().toISOString().split('T')[0]} // Can't select future dates
-              minDate="1900-01-01"
-              theme={{
-                selectedDayBackgroundColor: '#000',
-                selectedDayTextColor: '#fff',
-                todayTextColor: '#000',
-                dayTextColor: '#000',
-                textDisabledColor: '#ccc',
-                dotColor: '#000',
-                selectedDotColor: '#fff',
-                arrowColor: '#000',
-                disabledArrowColor: '#ccc',
-                monthTextColor: '#000',
-                indicatorColor: '#000',
-                textDayFontFamily: 'System',
-                textMonthFontFamily: 'System',
-                textDayHeaderFontFamily: 'System',
-                textDayFontWeight: '400',
-                textMonthFontWeight: '600',
-                textDayHeaderFontWeight: '400',
-                textDayFontSize: 16,
-                textMonthFontSize: 18,
-                textDayHeaderFontSize: 14,
-              }}
-              style={{
-                borderRadius: 12,
-              }}
-            />
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      ) : (
+        showCalendar && (
+          <DateTimePicker
+            value={details.date_of_birth}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+            maximumDate={new Date()}
+            minimumDate={new Date(1900, 0, 1)}
+          />
+        )
+      )}
     </SubPageLayout>
   );
 }

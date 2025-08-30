@@ -408,7 +408,7 @@ function WeeklyPlanSection({
               <Text className="text-purple-600 text-xs font-semibold uppercase tracking-wide mb-1">
                 Workouts
               </Text>
-              <Text className="text-purple-900 text-2xl font-bold">
+              <Text className="text-purple-900 text-lg font-bold" numberOfLines={1}>
                 {currentWeeklyPlan.plan_data?.weekly_goals?.total_workouts || 0}
               </Text>
             </View>
@@ -422,7 +422,7 @@ function WeeklyPlanSection({
               <Text className="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">
                 Duration
               </Text>
-              <Text className="text-blue-900 text-2xl font-bold">
+              <Text className="text-blue-900 text-lg font-bold" numberOfLines={1}>
                 {currentWeeklyPlan.total_duration_minutes}min
               </Text>
             </View>
@@ -436,7 +436,7 @@ function WeeklyPlanSection({
               <Text className="text-orange-600 text-xs font-semibold uppercase tracking-wide mb-1">
                 Calories
               </Text>
-              <Text className="text-orange-900 text-2xl font-bold">
+              <Text className="text-orange-900 text-lg font-bold" numberOfLines={1}>
                 {currentWeeklyPlan.estimated_calories}
               </Text>
             </View>

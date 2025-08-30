@@ -166,7 +166,7 @@ export default function WeightTrackingScreen() {
   };
 
   return (
-    <SubPageLayout title="Weight Tracking" onBack={() => router.back()}>
+    <SubPageLayout title="Weight Tracking">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Weight Chart */}
         <View className="px-4 mb-4">

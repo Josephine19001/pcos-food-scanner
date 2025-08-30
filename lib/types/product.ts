@@ -55,6 +55,30 @@ export interface ScannedProduct {
     description?: string;
     effect?: string;
   }>;
+  cycle_insights?: {
+    menstrual_phase: {
+      recommended: boolean;
+      reason: string;
+    };
+    follicular_phase: {
+      recommended: boolean;
+      reason: string;
+    };
+    ovulatory_phase: {
+      recommended: boolean;
+      reason: string;
+    };
+    luteal_phase: {
+      recommended: boolean;
+      reason: string;
+    };
+  };
+  hormone_impact?: {
+    may_worsen_pms: boolean;
+    may_cause_breakouts: boolean;
+    good_for_sensitive_skin: boolean;
+    description: string;
+  };
   product_links?: Array<{
     title: string;
     url: string;
@@ -80,6 +104,30 @@ export interface ScannedProductUI {
     description?: string;
     effect?: string;
   }>;
+  cycleInsights?: {
+    menstrualPhase: {
+      recommended: boolean;
+      reason: string;
+    };
+    follicularPhase: {
+      recommended: boolean;
+      reason: string;
+    };
+    ovulatoryPhase: {
+      recommended: boolean;
+      reason: string;
+    };
+    lutealPhase: {
+      recommended: boolean;
+      reason: string;
+    };
+  };
+  hormoneImpact?: {
+    mayWorsenPms: boolean;
+    mayCauseBreakouts: boolean;
+    goodForSensitiveSkin: boolean;
+    description: string;
+  };
   productLinks?: Array<{
     title: string;
     url: string;

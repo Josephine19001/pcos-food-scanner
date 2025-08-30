@@ -199,19 +199,19 @@ export default function SettingsScreen() {
             </TouchableOpacity>
 
             {/* Personal Settings */}
-            <View className="bg-white mx-4 rounded-2xl shadow">
-              {/* <SettingsItem
+            {/* <View className="bg-white mx-4 rounded-2xl shadow"> */}
+            {/* <SettingsItem
                 icon={UserRound}
                 label="Personal details"
                 onPress={() => router.push('/settings/personal-details')}
               /> */}
-              <SettingsItem
+            {/* <SettingsItem
                 icon={Bell}
                 label="Reminder settings"
                 onPress={() => router.push('/settings/reminder-settings')}
                 isLast
-              />
-            </View>
+              /> */}
+            {/* </View> */}
 
             {/* Health & Fitness */}
             <View className="bg-white mx-4 rounded-2xl shadow mt-4">

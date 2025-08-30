@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, ScrollView, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -15,9 +15,8 @@ export default function OnboardingScreen() {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [showYearPicker, setShowYearPicker] = useState(false);
   const [calendarType, setCalendarType] = useState<'birthday'>('birthday');
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear() - 25);
+  const [selectedDate, setSelectedDate] = useState(new Date(new Date().getFullYear() - 25, 0, 1));
 
   const [data, setData] = useState<OnboardingData>({
     name: '',
@@ -58,40 +57,31 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleDateSelect = (day: { dateString: string }) => {
-    if (calendarType === 'birthday') {
-      updateData('dateOfBirth', day.dateString);
+  const handleDateChange = (event: any, date?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowCalendar(false);
     }
-    setShowCalendar(false);
+
+    if (date && calendarType === 'birthday') {
+      const dateString = date.toISOString().split('T')[0];
+      updateData('dateOfBirth', dateString);
+      setSelectedDate(date);
+
+      if (Platform.OS === 'ios') {
+        setShowCalendar(false);
+      }
+    }
   };
 
   const openCalendar = (type: 'birthday') => {
     setCalendarType(type);
-    setSelectedYear(new Date().getFullYear() - 25);
-    setShowCalendar(true);
-  };
-
-  const openYearPicker = () => {
-    setShowYearPicker(true);
-  };
-
-  const selectYear = (year: number) => {
-    setSelectedYear(year);
-    setShowYearPicker(false);
-  };
-
-  const closeCalendar = () => {
-    setShowCalendar(false);
-    setShowYearPicker(false);
-  };
-
-  const generateYears = () => {
-    const currentYear = new Date().getFullYear();
-    const years = [];
-    for (let year = currentYear - 12; year >= currentYear - 100; year--) {
-      years.push(year);
+    // Set initial date based on current dateOfBirth or default to 25 years ago
+    if (data.dateOfBirth) {
+      setSelectedDate(new Date(data.dateOfBirth));
+    } else {
+      setSelectedDate(new Date(new Date().getFullYear() - 25, 0, 1));
     }
-    return years;
+    setShowCalendar(true);
   };
 
   const currentStepData = onboardingSteps[currentStep];
@@ -221,12 +211,9 @@ export default function OnboardingScreen() {
         visible={showCalendar}
         calendarType={calendarType}
         currentStepData={currentStepData}
-        showYearPicker={showYearPicker}
-        selectedYear={selectedYear}
-        onDateSelect={handleDateSelect}
-        onYearSelect={selectYear}
-        onOpenYearPicker={openYearPicker}
-        onClose={closeCalendar}
+        selectedDate={selectedDate}
+        onDateChange={handleDateChange}
+        onClose={() => setShowCalendar(false)}
       />
     </SafeAreaView>
   );

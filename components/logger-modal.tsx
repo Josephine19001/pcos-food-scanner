@@ -169,7 +169,7 @@ export function LoggerModal({ visible, onClose }: LoggerModalProps) {
                   bgColor="#FDF2F8"
                   onPress={() =>
                     handleAction(() => {
-                      router.push('/period-tracker' as any);
+                      router.push('/(tabs)/cycle');
                     })
                   }
                 />

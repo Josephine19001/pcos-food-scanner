@@ -1,6 +1,7 @@
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
+import { useAppNavigation } from '@/lib/hooks/use-navigation';
 import { useState } from 'react';
 import { toast } from 'sonner-native';
 import SubPageLayout from '@/components/layouts/sub-page';
@@ -20,6 +21,7 @@ import { ExerciseLoggingModal } from '@/components/exercise/exercise-logging-mod
 import { ExerciseList } from '@/components/exercise/exercise-list';
 
 export default function LogExerciseScreen() {
+  const { goBack } = useAppNavigation();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -62,8 +64,7 @@ export default function LogExerciseScreen() {
         duration_minutes: data.duration_minutes || 0,
         intensity: (data.intensity as 'low' | 'moderate' | 'high') || 'moderate',
       });
-      toast.success(`${data.exercise_name} logged successfully! 💪`);
-      router.back();
+      goBack();
     } catch (error) {
       console.error('Error logging exercise:', error);
       toast.error('Failed to log exercise. Please try again.');

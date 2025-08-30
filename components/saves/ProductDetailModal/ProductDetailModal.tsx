@@ -7,6 +7,7 @@ import { ProductHero } from './ProductHero';
 import { ProductStats } from './ProductStats';
 import { IngredientsSection } from './IngredientsSection';
 import { ProductLinks } from './ProductLinks';
+import { CycleInsights } from '@/components/beauty/CycleInsights';
 
 interface ProductDetailModalProps {
   product: ScannedProductUI | null;
@@ -93,6 +94,7 @@ export function ProductDetailModal({
               <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
                 <ProductHero product={product} />
                 <ProductStats product={product} />
+                <CycleInsights product={product} />
                 <IngredientsSection product={product} />
                 <ProductLinks product={product} />
               </ScrollView>
@@ -155,6 +157,7 @@ export function ProductDetailModal({
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           <ProductHero product={product} />
           <ProductStats product={product} />
+          <CycleInsights product={product} />
           <IngredientsSection product={product} />
           <ProductLinks product={product} />
         </ScrollView>

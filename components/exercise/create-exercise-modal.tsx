@@ -129,9 +129,6 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
               toast.error(
                 'Failed to submit for community review, but exercise was created successfully'
               );
-            } else {
-              console.log(`✅ AI moderation completed in ${moderationTime}ms:`, moderationResponse);
-              toast.success('Exercise created and submitted for community review! 🌍');
             }
           }
         } catch (error) {
@@ -140,8 +137,6 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
             'Failed to submit for community review, but exercise was created successfully'
           );
         }
-      } else {
-        toast.success('Exercise created successfully!');
       }
 
       resetForm();

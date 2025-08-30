@@ -1,7 +1,7 @@
 import { View, Pressable } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { ChevronLeft } from 'lucide-react-native';
-import { router, useRouter } from 'expo-router';
+import { useAppNavigation } from '@/lib/hooks/use-navigation';
 
 type SubPageLayoutProps = {
   children: React.ReactNode;
@@ -11,12 +11,13 @@ type SubPageLayoutProps = {
 };
 
 const SubPageLayout = ({ children, title = 'Page', rightElement, onBack }: SubPageLayoutProps) => {
-  const router = useRouter();
+  const { goBack } = useAppNavigation();
+
   const handleGoBack = () => {
     if (onBack) {
       onBack();
     } else {
-      router.back();
+      goBack();
     }
   };
 

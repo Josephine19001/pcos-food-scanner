@@ -109,7 +109,7 @@ export default function FitnessGoalsScreen() {
   );
 
   return (
-    <SubPageLayout title="Fitness Goals" onBack={() => router.back()}>
+    <SubPageLayout title="Fitness Goals">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Goal Cards */}
         <View className="px-4">

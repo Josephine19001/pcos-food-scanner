@@ -77,7 +77,7 @@ async function searchWithSerper(imageUrl) {
   };
 }
 async function enrichWithGPT(productName, product_links) {
-  const prompt = `Analyze this beauty product and return ONLY valid JSON. Be honest about harmful ingredients.
+  const prompt = `Analyze this beauty product and return ONLY valid JSON. Be honest about harmful ingredients and include cycle-specific insights for women.
 
   Return this exact structure:
   {
@@ -94,6 +94,30 @@ async function enrichWithGPT(productName, product_links) {
         "effect": string
       }
     ],
+    "cycle_insights": {
+      "menstrual_phase": {
+        "recommended": boolean,
+        "reason": string
+      },
+      "follicular_phase": {
+        "recommended": boolean,
+        "reason": string
+      },
+      "ovulatory_phase": {
+        "recommended": boolean,
+        "reason": string
+      },
+      "luteal_phase": {
+        "recommended": boolean,
+        "reason": string
+      }
+    },
+    "hormone_impact": {
+      "may_worsen_pms": boolean,
+      "may_cause_breakouts": boolean,
+      "good_for_sensitive_skin": boolean,
+      "description": string
+    },
     "product_links": [
       {
         "title": string,
@@ -110,6 +134,8 @@ async function enrichWithGPT(productName, product_links) {
   - Common harmful ingredients: sulfates, parabens, formaldehyde, synthetic fragrances, alcohol denat
   - Safety score should reflect actual harm potential
   - Focus on the 5-10 most important ingredients
+  - For cycle insights: Consider how hormonal changes affect skin (oily during ovulation, sensitive during period, etc.)
+  - For hormone impact: Flag ingredients that may worsen PMS symptoms or hormonal acne
   `;
 
   const userContent = `Product Name: ${productName}
@@ -215,6 +241,18 @@ Deno.serve(async (req) => {
             effect: k.effect ?? '',
           }))
         : [],
+      cycle_insights: gptResult.cycle_insights || {
+        menstrual_phase: { recommended: true, reason: 'No specific cycle insights available' },
+        follicular_phase: { recommended: true, reason: 'No specific cycle insights available' },
+        ovulatory_phase: { recommended: true, reason: 'No specific cycle insights available' },
+        luteal_phase: { recommended: true, reason: 'No specific cycle insights available' },
+      },
+      hormone_impact: gptResult.hormone_impact || {
+        may_worsen_pms: false,
+        may_cause_breakouts: false,
+        good_for_sensitive_skin: true,
+        description: 'No specific hormone impact information available',
+      },
       product_links:
         Array.isArray(gptResult.product_links) && gptResult.product_links.length > 0
           ? gptResult.product_links
@@ -223,6 +261,9 @@ Deno.serve(async (req) => {
       isFavorite: false,
       scannedAt: new Date().toISOString(),
       savedAt: null,
+      // Add cycle-specific metadata for frontend
+      best_cycle_phase: gptResult.best_cycle_phase || 'all',
+      cycle_specific_benefits: gptResult.cycle_specific_benefits || [],
     };
     return new Response(JSON.stringify(result), {
       headers: {

@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS public.scanned_products (
   image_url TEXT,
   ingredients JSONB DEFAULT '[]'::jsonb,
   key_ingredients JSONB DEFAULT '[]'::jsonb,
+  cycle_insights JSONB DEFAULT '{}'::jsonb,
+  hormone_impact JSONB DEFAULT '{}'::jsonb,
   product_links JSONB DEFAULT '[]'::jsonb,
   scanned_at TIMESTAMPTZ DEFAULT NOW(),
   is_favorite BOOLEAN DEFAULT false,

@@ -4,15 +4,19 @@ import { Text } from '@/components/ui/text';
 interface Props {
   children: React.ReactNode;
   title: string;
+  extraSubtitle?: string;
   image?: string;
   btn?: React.ReactNode;
 }
 
-const PageLayout = ({ children, title, image, btn }: Props) => {
+const PageLayout = ({ children, title, extraSubtitle, image, btn }: Props) => {
   return (
     <View className="flex-1 bg-slate-100 pt-5">
       <View className="flex-row items-center justify-between pb-4 pt-12 px-4">
-        <Text className="text-3xl font-bold text-black mb-2">{title}</Text>
+        <View className="flex-1">
+          <Text className="text-3xl font-bold text-black">{title}</Text>
+          {extraSubtitle && <Text className="text-sm text-gray-600 mt-1">{extraSubtitle}</Text>}
+        </View>
         {image && (
           <Image
             source={require('@/assets/images/avatar.png')}

@@ -30,18 +30,18 @@ export default function LogMealScreen() {
   const router = useRouter();
   const createMealEntry = useCreateMealEntry();
   const scanFood = useScanFood();
-  
+
   // Form state
   const [selectedMealType, setSelectedMealType] = useState('breakfast');
   const [selectedFoods, setSelectedFoods] = useState<FoodItemWithQuantity[]>([]);
   const [shareWithCommunity, setShareWithCommunity] = useState(false);
-  
+
   // Modal states
   const [showScanner, setShowScanner] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showCustomFood, setShowCustomFood] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  
+
   // Editing state
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingValues, setEditingValues] = useState({
@@ -51,7 +51,7 @@ export default function LogMealScreen() {
     carbs: 0,
     fat: 0,
   });
-  
+
   // Custom food state
   const [customFood, setCustomFood] = useState({
     name: '',
@@ -315,7 +315,6 @@ export default function LogMealScreen() {
     setSelectedFoods([...selectedFoods, { food: newFood, quantity: 1 }]);
     resetCustomFood();
     setShowCustomFood(false);
-    toast.success('Custom food added! Will be reviewed for community database.');
   };
 
   const resetCustomFood = () => {
@@ -363,7 +362,7 @@ export default function LogMealScreen() {
   const totalNutrition = calculateTotalNutrition();
 
   return (
-    <SubPageLayout title="Log Meal" onBack={() => router.back()}>
+    <SubPageLayout title="Log Meal">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Meal Type Selection */}
         <MealTypeSelector

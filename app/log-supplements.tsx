@@ -4,59 +4,69 @@ import { Button } from '@/components/ui/button';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import SubPageLayout from '@/components/layouts/sub-page';
-import { Pill, Plus, Minus, Search, X } from 'lucide-react-native';
+import { Pill, Plus, X, CheckCircle } from 'lucide-react-native';
+
+// Import real data hooks
+import {
+  useUserSupplements,
+  useTodaysSupplements,
+  useLogSupplement,
+  useAddSupplement,
+} from '@/lib/hooks/use-supplements';
 
 export default function LogSupplementsScreen() {
-  const [selectedSupplements, setSelectedSupplements] = useState<{ [key: string]: number }>({});
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSupplements, setSelectedSupplements] = useState<{ [key: string]: boolean }>({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSupplementName, setNewSupplementName] = useState('');
   const [newSupplementDose, setNewSupplementDose] = useState('');
-  const [userSupplements, setUserSupplements] = useState([
-    { id: 'vitamin_d', name: 'Vitamin D', defaultDose: '1000 IU', color: '#EC4899' },
-    { id: 'omega_3', name: 'Omega-3', defaultDose: '1000 mg', color: '#EC4899' },
-    { id: 'multivitamin', name: 'Multivitamin', defaultDose: '1 tablet', color: '#EC4899' },
-  ]);
+
+  // Use real data
+  const { data: userSupplements = [] } = useUserSupplements();
+  const { data: todaysSupplements = [] } = useTodaysSupplements();
+  const logSupplement = useLogSupplement();
+  const addSupplement = useAddSupplement();
 
   const addCustomSupplement = () => {
     if (newSupplementName.trim() && newSupplementDose.trim()) {
-      const newId = newSupplementName.toLowerCase().replace(/\s+/g, '_');
-      const newSupplement = {
-        id: newId,
+      addSupplement.mutate({
         name: newSupplementName.trim(),
-        defaultDose: newSupplementDose.trim(),
-        color: '#EC4899',
-      };
-
-      setUserSupplements((prev) => [...prev, newSupplement]);
+        default_dosage: newSupplementDose.trim(),
+        frequency: 'Daily',
+        importance: 'medium',
+        days_of_week: ['Daily'],
+        is_active: true,
+      });
       setNewSupplementName('');
       setNewSupplementDose('');
       setShowAddModal(false);
     }
   };
 
-  const updateSupplementCount = (supplementId: string, change: number) => {
-    setSelectedSupplements((prev) => {
-      const current = prev[supplementId] || 0;
-      const newCount = Math.max(0, current + change);
-      if (newCount === 0) {
-        const { [supplementId]: removed, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [supplementId]: newCount };
-    });
+  const toggleSupplement = (supplementName: string) => {
+    setSelectedSupplements((prev) => ({
+      ...prev,
+      [supplementName]: !prev[supplementName],
+    }));
   };
 
   const handleSave = () => {
-    const supplements = Object.entries(selectedSupplements).map(([id, count]) => {
-      const supplement = userSupplements.find((s) => s.id === id);
-      return { id, name: supplement?.name, count, defaultDose: supplement?.defaultDose };
+    const today = new Date().toISOString().split('T')[0];
+
+    // Log each selected supplement
+    Object.entries(selectedSupplements).forEach(([supplementName, taken]) => {
+      if (taken) {
+        logSupplement.mutate({
+          date: today,
+          supplement_name: supplementName,
+          taken: true,
+        });
+      }
     });
 
-    if (supplements.length > 0) {
-      router.back();
-    }
+    router.back();
   };
+
+  const isFormValid = Object.values(selectedSupplements).some((taken) => taken);
 
   return (
     <SubPageLayout
@@ -67,7 +77,8 @@ export default function LogSupplementsScreen() {
           onPress={handleSave}
           variant="primary"
           size="small"
-          disabled={Object.keys(selectedSupplements).length === 0}
+          disabled={!isFormValid || logSupplement.isPending}
+          loading={logSupplement.isPending}
         />
       }
     >
@@ -77,41 +88,27 @@ export default function LogSupplementsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="flex-1 px-4 py-8">
-          {/* Search */}
-          <View className="mb-6">
-            <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex-row items-center">
-              <Search size={20} color="#6B7280" />
-              <TextInput
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Search supplements..."
-                className="flex-1 ml-3 text-base text-black"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-          </View>
-
           {/* Today's Summary */}
-          {Object.keys(selectedSupplements).length > 0 && (
+          {isFormValid && (
             <View className="bg-white rounded-2xl p-4 mb-6 shadow-sm border border-gray-100">
               <View className="flex-row items-center mb-3">
                 <Pill size={16} color="#EC4899" />
                 <Text className="text-lg font-semibold text-black ml-2">Today's Supplements</Text>
               </View>
-              {Object.entries(selectedSupplements).map(([id, count]) => {
-                const supplement = userSupplements.find((s) => s.id === id);
-                return (
-                  <View
-                    key={id}
-                    className="flex-row justify-between items-center py-2 border-b border-gray-50 last:border-b-0"
-                  >
-                    <Text className="text-gray-900 font-medium">
-                      {supplement?.name} × {count}
-                    </Text>
-                    <Text className="text-gray-500 text-sm">{supplement?.defaultDose}</Text>
-                  </View>
-                );
-              })}
+              {Object.entries(selectedSupplements)
+                .filter(([, taken]) => taken)
+                .map(([supplementName]) => {
+                  const supplement = userSupplements.find((s: any) => s.name === supplementName);
+                  return (
+                    <View
+                      key={supplementName}
+                      className="flex-row justify-between items-center py-2 border-b border-gray-50 last:border-b-0"
+                    >
+                      <Text className="text-gray-900 font-medium">{supplementName}</Text>
+                      <Text className="text-gray-500 text-sm">{supplement?.default_dosage}</Text>
+                    </View>
+                  );
+                })}
             </View>
           )}
 
@@ -139,49 +136,35 @@ export default function LogSupplementsScreen() {
                 </Text>
               </View>
             ) : (
-              userSupplements
-                .filter((supplement) =>
-                  supplement.name.toLowerCase().includes(searchQuery.toLowerCase())
-                )
-                .map((supplement) => {
-                  const count = selectedSupplements[supplement.id] || 0;
-                  return (
-                    <View
-                      key={supplement.id}
-                      className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100"
-                    >
-                      <View className="flex-row items-center justify-between">
-                        <View className="flex-1">
-                          <Text className="text-base font-semibold text-black">
-                            {supplement.name}
-                          </Text>
-                          <Text className="text-gray-500 text-sm">{supplement.defaultDose}</Text>
-                        </View>
+              userSupplements.map((supplement: any) => {
+                const isSelected = selectedSupplements[supplement.name] || false;
+                return (
+                  <TouchableOpacity
+                    key={supplement.id}
+                    onPress={() => toggleSupplement(supplement.name)}
+                    className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100"
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-1">
+                        <Text className="text-base font-semibold text-black">
+                          {supplement.name}
+                        </Text>
+                        <Text className="text-gray-500 text-sm">{supplement.default_dosage}</Text>
+                      </View>
 
-                        <View className="flex-row items-center">
-                          <TouchableOpacity
-                            onPress={() => updateSupplementCount(supplement.id, -1)}
-                            className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center"
-                            disabled={count === 0}
-                          >
-                            <Minus size={16} color={count === 0 ? '#9CA3AF' : '#374151'} />
-                          </TouchableOpacity>
-
-                          <Text className="mx-4 text-xl font-bold text-black min-w-[40px] text-center">
-                            {count}
-                          </Text>
-
-                          <TouchableOpacity
-                            onPress={() => updateSupplementCount(supplement.id, 1)}
-                            className="w-10 h-10 rounded-full bg-pink-50 items-center justify-center border border-pink-200"
-                          >
-                            <Plus size={16} color="#EC4899" />
-                          </TouchableOpacity>
-                        </View>
+                      <View className="ml-4">
+                        {isSelected ? (
+                          <View className="w-10 h-10 rounded-full bg-green-500 items-center justify-center">
+                            <CheckCircle size={20} color="white" />
+                          </View>
+                        ) : (
+                          <View className="w-10 h-10 rounded-full bg-gray-100 border-2 border-gray-300" />
+                        )}
                       </View>
                     </View>
-                  );
-                })
+                  </TouchableOpacity>
+                );
+              })
             )}
           </View>
         </View>
@@ -234,7 +217,10 @@ export default function LogSupplementsScreen() {
               onPress={addCustomSupplement}
               variant="primary"
               size="large"
-              disabled={!newSupplementName.trim() || !newSupplementDose.trim()}
+              disabled={
+                !newSupplementName.trim() || !newSupplementDose.trim() || addSupplement.isPending
+              }
+              loading={addSupplement.isPending}
             />
           </View>
         </View>

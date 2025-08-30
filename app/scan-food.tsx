@@ -229,7 +229,7 @@ export default function ScanFoodScreen() {
   };
 
   return (
-    <SubPageLayout title="Scan Food" onBack={() => router.back()}>
+    <SubPageLayout title="Scan Food">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Instructions */}
         <View className="px-4 mb-6">

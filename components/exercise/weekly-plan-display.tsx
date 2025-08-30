@@ -1,7 +1,16 @@
 import React from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { Clock, Flame, Heart, X, Calendar, Target, TrendingUp, Dumbbell } from 'lucide-react-native';
+import {
+  Clock,
+  Flame,
+  Heart,
+  X,
+  Calendar,
+  Target,
+  TrendingUp,
+  Dumbbell,
+} from 'lucide-react-native';
 
 interface WeeklyPlanProps {
   plan: {
@@ -72,20 +81,20 @@ export function WeeklyPlanDisplay({ plan, onClose }: WeeklyPlanProps) {
         <View className="my-6 p-4 bg-purple-50 rounded-2xl">
           <View className="flex-row justify-between">
             <View className="items-center">
-              <Text className="text-purple-600 text-xs uppercase">Workouts</Text>
-              <Text className="text-purple-900 text-xl font-bold">
+              <Text className="text-purple-600 text-xs uppercase font-medium">Workouts</Text>
+              <Text className="text-purple-900 text-base font-bold" numberOfLines={1}>
                 {plan.weekly_goals.total_workouts}
               </Text>
             </View>
             <View className="items-center">
-              <Text className="text-purple-600 text-xs uppercase">Minutes</Text>
-              <Text className="text-purple-900 text-xl font-bold">
-                {plan.weekly_goals.total_minutes}
+              <Text className="text-purple-600 text-xs uppercase font-medium">Duration</Text>
+              <Text className="text-purple-900 text-base font-bold" numberOfLines={1}>
+                {plan.weekly_goals.total_minutes}min
               </Text>
             </View>
             <View className="items-center">
-              <Text className="text-purple-600 text-xs uppercase">Calories</Text>
-              <Text className="text-purple-900 text-xl font-bold">
+              <Text className="text-purple-600 text-xs uppercase font-medium">Calories</Text>
+              <Text className="text-purple-900 text-base font-bold" numberOfLines={1}>
                 {plan.weekly_goals.estimated_calories}
               </Text>
             </View>
