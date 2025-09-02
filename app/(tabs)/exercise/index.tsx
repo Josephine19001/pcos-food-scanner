@@ -130,7 +130,7 @@ export default function ExerciseScreen() {
             </Text>
           </View>
           <TouchableOpacity
-            onPress={() => router.push('/log-exercise')}
+            onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
             className="bg-purple-500 w-10 h-10 rounded-full items-center justify-center"
           >
             <Plus size={20} color="white" />
@@ -167,7 +167,7 @@ export default function ExerciseScreen() {
           currentWeeklyPlan={currentWeeklyPlan}
           isLoading={isLoading}
           selectedDate={selectedDate}
-          onNavigateToLogExercise={() => router.push('/log-exercise')}
+          onNavigateToLogExercise={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
         />
       </ScrollView>
 

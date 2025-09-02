@@ -65,8 +65,6 @@ export function useMealActions() {
 
         // Close the modal after successful delete
         setViewingMealDetails(null);
-
-        toast.success('Meal deleted successfully');
       } catch (error) {
         console.error('Failed to delete meal:', error);
         toast.error('Failed to delete meal');
@@ -106,8 +104,7 @@ export function useMealActions() {
       try {
         // Delete the failed meal entry
         await deleteMealEntry.mutateAsync(meal.id);
-        toast.success('Meal deleted. Please scan again.');
-        
+
         // Force update to refresh the UI
         setForceUpdateKey((prev) => prev + 1);
       } catch (error) {

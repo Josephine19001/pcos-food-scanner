@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { AlertCircle, Plus, Eye, X } from 'lucide-react-native';
+import { AlertCircle, Plus, Check } from 'lucide-react-native';
 import { router } from 'expo-router';
 import {
   CrampsIcon,
@@ -29,7 +29,6 @@ interface TodaysSymptomsProps {
 }
 
 export function TodaysSymptoms({ selectedDate, symptomData, isLoading }: TodaysSymptomsProps) {
-  const [isNotesModalVisible, setIsNotesModalVisible] = useState(false);
   const isToday = selectedDate.toDateString() === new Date().toDateString();
   const isFuture = selectedDate > new Date() && !isToday;
 
@@ -95,84 +94,55 @@ export function TodaysSymptoms({ selectedDate, symptomData, isLoading }: TodaysS
       <View className="bg-white rounded-2xl p-4 border border-gray-100">
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">
-            <View className="w-10 h-10 rounded-2xl bg-red-100 items-center justify-center mr-3">
-              <AlertCircle size={20} color="#DC2626" />
+            <View className="w-10 h-10 rounded-2xl bg-pink-100 items-center justify-center mr-3">
+              <AlertCircle size={20} color="#f6339a" />
             </View>
             <Text className="text-lg font-semibold text-black">Symptoms</Text>
           </View>
           {!isFuture && (
             <TouchableOpacity
               onPress={() => {
-                router.push('/log-symptoms');
+                router.push(`/log-symptoms?date=${selectedDate.toISOString().split('T')[0]}`);
               }}
-              className="w-8 h-8 rounded-full bg-red-50 items-center justify-center"
+              className="w-8 h-8 rounded-full bg-pink-100 items-center justify-center"
             >
-              <Plus size={16} color="#DC2626" />
+              <Plus size={16} color="#f6339a" />
             </TouchableOpacity>
           )}
         </View>
 
         {symptomData?.symptoms && symptomData.symptoms.length > 0 ? (
-          <>
-            {/* Clean Modern Symptoms Card */}
-            <View
-              className="rounded-3xl p-6"
-              style={{
-                backgroundColor: '#FEF2F2',
-                borderWidth: 1,
-                borderColor: '#FECACA',
-                shadowColor: '#DC2626',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.08,
-                shadowRadius: 12,
-                elevation: 3,
-              }}
-            >
-              {/* Modern Symptoms Grid - 3 per row */}
-              <View className="flex-row flex-wrap justify-between">
-                {symptomData.symptoms.map((symptom, index) => (
-                  <View
-                    key={index}
-                    className="rounded-3xl p-3 mb-3"
-                    style={{
-                      width: '30%',
-                      backgroundColor: '#FEF2F2',
-                      borderWidth: 1,
-                      borderColor: '#FECACA',
-                      shadowColor: '#DC2626',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 8,
-                      elevation: 2,
-                    }}
-                  >
-                    <View className="items-center">
-                      <View className="w-12 h-12 rounded-2xl items-center justify-center mb-2">
-                        <View style={{ transform: [{ scale: 1.4 }] }}>
-                          {getSymptomIcon(symptom)}
-                        </View>
-                      </View>
-                      <Text className="text-red-900 text-xs font-medium text-center">
-                        {getSymptomLabel(symptom)}
-                      </Text>
-                    </View>
+          <View className="flex-col gap-2">
+            {symptomData.symptoms.map((symptom, index) => (
+              <View
+                key={index}
+                className="flex-row items-center justify-between bg-pink-50 rounded-2xl p-4"
+                style={{
+                  shadowColor: '#EC4899',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+              >
+                <View className="flex-row items-center flex-1">
+                  <View className="w-12 h-12 rounded-full bg-pink-200 items-center justify-center mr-4">
+                    {getSymptomIcon(symptom)}
                   </View>
-                ))}
+                  <Text className="text-gray-900 text-lg font-medium">
+                    {getSymptomLabel(symptom)}
+                  </Text>
+                </View>
+                <View className="w-8 h-8 rounded-full bg-pink-500 items-center justify-center">
+                  <Check size={16} color="#FFFFFF" />
+                </View>
               </View>
-            </View>
-          </>
+            ))}
+          </View>
         ) : (
           <View className="items-center py-8">
-            <View
-              className="w-16 h-16 rounded-3xl items-center justify-center mb-4"
-              style={{
-                backgroundColor: '#FEF2F2',
-                borderWidth: 2,
-                borderColor: '#FECACA',
-                borderStyle: 'dashed',
-              }}
-            >
-              <AlertCircle size={28} color="#DC2626" />
+            <View className="w-16 h-16 rounded-3xl items-center justify-center mb-4 border border-pink-100">
+              <AlertCircle size={28} color="#f6339a" />
             </View>
             <Text className="text-gray-700 text-center mb-2 font-medium">No symptoms today</Text>
             <Text className="text-gray-500 text-center text-sm mb-4 px-4">
@@ -180,16 +150,8 @@ export function TodaysSymptoms({ selectedDate, symptomData, isLoading }: TodaysS
             </Text>
             {!isFuture && (
               <TouchableOpacity
-                onPress={() => router.push('/log-symptoms')}
-                className="rounded-xl px-6 py-3"
-                style={{
-                  backgroundColor: '#DC2626',
-                  shadowColor: '#DC2626',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 4,
-                  elevation: 3,
-                }}
+                onPress={() => router.push(`/log-symptoms?date=${selectedDate.toISOString().split('T')[0]}`)}
+                className="rounded-xl px-6 py-3 bg-pink-500"
               >
                 <Text className="text-white font-semibold">Log Symptoms</Text>
               </TouchableOpacity>
@@ -197,62 +159,6 @@ export function TodaysSymptoms({ selectedDate, symptomData, isLoading }: TodaysS
           </View>
         )}
       </View>
-
-      {/* Modern Centered Notes Modal */}
-      <Modal
-        visible={isNotesModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsNotesModalVisible(false)}
-      >
-        <View
-          className="flex-1 justify-center items-center px-6"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-        >
-          <TouchableOpacity
-            className="absolute inset-0"
-            onPress={() => setIsNotesModalVisible(false)}
-            activeOpacity={1}
-          />
-          <View
-            className="bg-white rounded-3xl p-6 max-w-sm w-full"
-            style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
-            }}
-          >
-            {/* Close Button */}
-            <TouchableOpacity
-              onPress={() => setIsNotesModalVisible(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
-            >
-              <X size={16} color="#6B7280" />
-            </TouchableOpacity>
-
-            {/* Content */}
-            <View className="pr-8">
-              {symptomData?.severity && (
-                <View className="mb-4">
-                  <Text className="text-gray-600 text-sm font-semibold mb-1">Severity:</Text>
-                  <Text className="text-black text-base capitalize font-medium">
-                    {symptomData.severity}
-                  </Text>
-                </View>
-              )}
-
-              {symptomData?.notes && (
-                <View>
-                  <Text className="text-gray-600 text-sm font-semibold mb-2">Notes:</Text>
-                  <Text className="text-black text-base leading-relaxed">{symptomData.notes}</Text>
-                </View>
-              )}
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }

@@ -274,7 +274,7 @@ export function WorkoutsSection({
     <View className="mx-4 mb-6">
       {/* <View className="flex-row items-center justify-between mb-4">
         <Text className="text-xl font-bold text-gray-900">Today's Workouts</Text>
-        <TouchableOpacity onPress={() => router.push('/log-exercise')}>
+        <TouchableOpacity onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}>
           <Text className="text-purple-600 font-medium">Add Exercise</Text>
         </TouchableOpacity>
       </View> */}
@@ -285,8 +285,35 @@ export function WorkoutsSection({
           : `Workouts for ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
       </Text>
 
-      {allExercises.length > 0 ? (
-        <View className="gap-3">
+{todaysPlannedWorkout?.is_rest_day && allExercises.length === 0 ? (
+        /* Rest Day Display */
+        <View className="bg-white rounded-2xl p-8 items-center shadow-sm border border-gray-50">
+          <View className="w-16 h-16 bg-green-100 rounded-full items-center justify-center mb-4">
+            <Heart size={24} color="#10B981" />
+          </View>
+          <Text className="text-green-700 text-lg font-semibold mb-2">Rest Day</Text>
+          <Text className="text-gray-600 text-center">
+            Take a break and let your body recover.
+          </Text>
+        </View>
+      ) : allExercises.length > 0 ? (
+        <View>
+          {/* Show rest day indicator if it's a rest day but user has logged exercises */}
+          {todaysPlannedWorkout?.is_rest_day && (
+            <View className="bg-green-50 rounded-2xl p-4 mb-4 border border-green-100">
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center mr-3">
+                  <Heart size={20} color="#10B981" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-green-700 font-semibold">Rest Day</Text>
+                  <Text className="text-green-600 text-sm">You've logged optional exercises on your rest day!</Text>
+                </View>
+              </View>
+            </View>
+          )}
+          
+          <View className="gap-3">
           {allExercises.map((exercise: any, index: number) => {
             const isPlanned = !exercise.id; // Logged exercises have IDs, planned don't
             const exerciseType = exercise.exercise_type || exercise.category || 'general';
@@ -352,6 +379,7 @@ export function WorkoutsSection({
               </View>
             );
           })}
+          </View>
         </View>
       ) : (
         /* Empty State */

@@ -167,46 +167,44 @@ export function MonthlyCalendar({
           >
             {day ? (
               <View className="relative w-full h-full items-center justify-center">
-                {/* Background circle for different states */}
-                {isToday(day) ? (
-                  <View className="w-10 h-10 rounded-full bg-pink-100 border-2 border-pink-500 items-center justify-center">
-                    <Text className="text-sm font-medium text-pink-700">{day}</Text>
-                  </View>
-                ) : (
-                  <View
+                {/* Perfect circular backgrounds for all states */}
+                <View
+                  className={`
+                    w-9 h-9 rounded-full items-center justify-center
+                    ${
+                      isSelectedDate(day)
+                        ? 'bg-pink-500'
+                        : isPeriodDay(day)
+                          ? 'bg-red-500'
+                          : isToday(day)
+                            ? 'bg-pink-50 border-2 border-pink-400'
+                            : isPredictedDate(day)
+                              ? 'border-2 border-red-300 border-dashed bg-red-25'
+                              : 'bg-transparent'
+                    }
+                  `}
+                >
+                  <Text
                     className={`
-                      absolute inset-0 rounded-full items-center justify-center p-2
-                                           ${
-                                             isSelectedDate(day)
-                                               ? 'bg-pink-500 border-2 border-pink-500'
-                                               : isPeriodDay(day)
-                                                 ? 'bg-red-700 border-2 border-red-700'
-                                                 : isPredictedDate(day)
-                                                   ? 'bg-red-100 border-2 border-red-700 border-dashed'
-                                                   : 'bg-transparent'
-                                           }
+                      text-sm font-medium
+                      ${
+                        isFutureDate(day)
+                          ? 'text-gray-300'
+                          : isSelectedDate(day)
+                            ? 'text-white'
+                            : isPeriodDay(day)
+                              ? 'text-white'
+                              : isToday(day)
+                                ? 'text-pink-600'
+                                : isPredictedDate(day)
+                                  ? 'text-red-600'
+                                  : 'text-gray-700'
+                      }
                     `}
                   >
-                    <Text
-                      className={`
-                        text-sm font-medium
-                                             ${
-                                               isFutureDate(day)
-                                                 ? 'text-gray-300'
-                                                 : isSelectedDate(day)
-                                                   ? 'text-white'
-                                                   : isPeriodDay(day)
-                                                     ? 'text-white'
-                                                     : isPredictedDate(day)
-                                                       ? 'text-red-700'
-                                                       : 'text-gray-700'
-                                             }
-                    `}
-                    >
-                      {day}
-                    </Text>
-                  </View>
-                )}
+                    {day}
+                  </Text>
+                </View>
 
                 {/* Period indicator dots - only on start and end days */}
                 {(isStartDate(day) || isEndDate(day)) && !isSelectedDate(day) && (
@@ -221,22 +219,22 @@ export function MonthlyCalendar({
       </View>
 
       {/* Legend */}
-      <View className="flex-row justify-center flex-wrap mt-4" style={{ gap: 16 }}>
+      <View className="flex-row justify-center flex-wrap mt-6 px-2" style={{ gap: 20 }}>
         <View className="flex-row items-center">
-          <View className="w-3 h-3 rounded-full bg-pink-100 border border-pink-500 mr-1" />
-          <Text className="text-xs text-gray-600">Today</Text>
+          <View className="w-4 h-4 rounded-full bg-pink-50 border-2 border-pink-400 mr-2" />
+          <Text className="text-xs font-medium text-gray-600">Today</Text>
         </View>
         <View className="flex-row items-center">
-          <View className="w-3 h-3 rounded-full bg-red-700 mr-1" />
-          <Text className="text-xs text-gray-600">Period days</Text>
+          <View className="w-4 h-4 rounded-full bg-red-500 mr-2" />
+          <Text className="text-xs font-medium text-gray-600">Period days</Text>
         </View>
         <View className="flex-row items-center">
-          <View className="w-3 h-3 rounded-full bg-pink-500 mr-1" />
-          <Text className="text-xs text-gray-600">Selected</Text>
+          <View className="w-4 h-4 rounded-full bg-pink-500 mr-2" />
+          <Text className="text-xs font-medium text-gray-600">Selected</Text>
         </View>
         <View className="flex-row items-center">
-          <View className="w-3 h-3 rounded-full bg-red-100 border border-red-700 border-dashed mr-1" />
-          <Text className="text-xs text-gray-600">Predicted</Text>
+          <View className="w-4 h-4 rounded-full border-2 border-red-300 border-dashed mr-2" />
+          <Text className="text-xs font-medium text-gray-600">Predicted</Text>
         </View>
       </View>
     </View>

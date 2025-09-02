@@ -17,6 +17,7 @@ interface FullCalendarModalProps {
   nextPeriodPrediction: NextPeriodPrediction | null;
   onDatePress: (date: Date) => void;
   onLogPeriodPress: () => void;
+  hasOngoingPeriod?: boolean;
 }
 
 export function FullCalendarModal({
@@ -31,6 +32,7 @@ export function FullCalendarModal({
   nextPeriodPrediction,
   onDatePress,
   onLogPeriodPress,
+  hasOngoingPeriod,
 }: FullCalendarModalProps) {
   return (
     <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
@@ -68,49 +70,12 @@ export function FullCalendarModal({
             <TouchableOpacity
               onPress={onLogPeriodPress}
               className={`py-4 rounded-2xl flex-row items-center justify-center ${
-                selectedDate > new Date() &&
-                selectedDate.toDateString() !== new Date().toDateString()
-                  ? 'bg-gray-300'
-                  : (() => {
-                      // Check if today is a predicted period day
-                      const today = new Date();
-                      const todayString = today.toISOString().split('T')[0];
-                      const isPredictedDay =
-                        nextPeriodPrediction?.predictedPeriodDates?.includes(todayString);
-                      const isSelectedDateToday =
-                        selectedDate.toDateString() === today.toDateString();
-
-                      return isPredictedDay && isSelectedDateToday ? 'bg-pink-600' : 'bg-pink-500';
-                    })()
+                hasOngoingPeriod ? 'bg-red-500' : 'bg-pink-500'
               }`}
-              disabled={
-                selectedDate > new Date() &&
-                selectedDate.toDateString() !== new Date().toDateString()
-              }
             >
               <Calendar size={20} color="#FFFFFF" />
               <Text className="text-white font-semibold text-lg ml-2">
-                {(() => {
-                  const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-                  const isLoggedDate = loggedDates.includes(dateString);
-                  const isToday = selectedDate.toDateString() === new Date().toDateString();
-                  const today = new Date();
-                  const todayString = today.toISOString().split('T')[0];
-                  const isPredictedDay =
-                    nextPeriodPrediction?.predictedPeriodDates?.includes(todayString);
-
-                  if (isLoggedDate) {
-                    return `Edit Period (${isToday ? 'Today' : formatSelectedDate(selectedDate)})`;
-                  } else if (
-                    isPredictedDay &&
-                    isToday &&
-                    selectedDate.toDateString() === today.toDateString()
-                  ) {
-                    return `Start Period (Today)`;
-                  } else {
-                    return `Log Period (${isToday ? 'Today' : formatSelectedDate(selectedDate)})`;
-                  }
-                })()}
+                {hasOngoingPeriod ? 'End Period' : 'Start Period'}
               </Text>
             </TouchableOpacity>
           </View>

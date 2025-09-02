@@ -2,6 +2,7 @@ import { View, Image, ColorValue } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { LinearGradient } from 'expo-linear-gradient';
 import WeeklyCalendar from '@/components/nutrition/weekly-calendar';
+import { Avatar } from '@/components/ui/avatar';
 
 interface Props {
   children: React.ReactNode;
@@ -58,9 +59,12 @@ const PageLayout = ({
         }}
       />
       <View className="flex-row items-center justify-between pb-4 pt-12 px-4">
-        <View className="flex-1">
-          <Text className="text-3xl font-bold text-black">{title}</Text>
-          {extraSubtitle && <Text className="text-sm text-gray-600 mt-1">{extraSubtitle}</Text>}
+        <View className="flex-row items-center flex-1">
+          {theme !== 'settings' && <Avatar size={48} navigateToSettings={true} />}
+          <View className={theme !== 'settings' ? 'ml-3 flex-1' : 'flex-1'}>
+            <Text className="text-3xl font-bold text-black">{title}</Text>
+            {extraSubtitle && <Text className="text-sm text-gray-600 mt-1">{extraSubtitle}</Text>}
+          </View>
         </View>
         {image && (
           <Image

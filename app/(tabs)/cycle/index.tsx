@@ -4,15 +4,18 @@ import { Text } from '@/components/ui/text';
 import PageLayout from '@/components/layouts/page-layout';
 import { Calendar, Heart, CalendarHeart } from 'lucide-react-native';
 import { router } from 'expo-router';
-import { useAppNavigation } from '@/lib/hooks/use-navigation';
 
-import { useCycleSettings, useCurrentCyclePhase } from '@/lib/hooks/use-cycle-settings';
 import {
-  usePeriodLogsRealtime,
-  useLogPeriodData,
-  useDeletePeriodLog,
-  useUpdateCycleSettings,
-} from '@/lib/hooks/use-cycle-data';
+  useCurrentCycleInfo,
+  usePeriodCycles,
+  useStartPeriod,
+  useEndPeriod,
+  useDeletePeriodCycle,
+  useCycleSettingsV2,
+  type PeriodCycle,
+} from '@/lib/hooks/use-cycle-v2';
+import { useMoodForDate } from '@/lib/hooks/use-daily-moods';
+import { useSymptomsForDate } from '@/lib/hooks/use-daily-symptoms';
 
 import { TodaysMood } from '@/components/cycle/TodaysMood';
 import { TodaysSupplements } from '@/components/cycle/TodaysSupplements';
@@ -24,20 +27,8 @@ import { PredictionInfoModal } from '@/components/cycle/PredictionInfoModal';
 import { FullCalendarModal } from '@/components/cycle/FullCalendarModal';
 import { PeriodPredictionButton } from '@/components/cycle/PeriodPredictionButton';
 
-import {
-  getLoggedDates,
-  getStartDates,
-  getEndDates,
-  getLastPeriodStart,
-  getAllPeriodDays,
-  hasOngoingPeriod,
-  getNextPeriodPrediction,
-  getPregnancyChances,
-  getMoodDataForDate,
-  getSymptomDataForDate,
-  type PeriodLog,
-} from '@/lib/utils/cycle-utils';
 import { getLocalDateString } from '@/lib/utils/date-helpers';
+import { AnimatedWavyCard } from '@/components/cycle/animated-wavy-card';
 
 export default function CycleScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -47,30 +38,24 @@ export default function CycleScreen() {
   const [modalDate, setModalDate] = useState(new Date());
 
   const {
-    data: cycleSettings,
-    isLoading: cycleSettingsLoading,
-    error: cycleSettingsError,
-  } = useCycleSettings();
-  const {
-    data: currentPhase,
-    isError: currentPhaseError,
-    isLoading: currentPhaseLoading,
-    error: currentPhaseErrorDetails,
-  } = useCurrentCyclePhase();
-  const { data: periodLogs = [] } = usePeriodLogsRealtime();
+    data: currentCycleInfo,
+    isLoading: cycleInfoLoading,
+    error: cycleInfoError,
+  } = useCurrentCycleInfo(getLocalDateString(selectedDate));
 
-  const logPeriodData = useLogPeriodData();
-  const deletePeriodLog = useDeletePeriodLog();
-  const updateCycleSettings = useUpdateCycleSettings();
+  const { data: cycleSettings, isLoading: settingsLoading } = useCycleSettingsV2();
+  const { data: periodCycles = [] } = usePeriodCycles(10);
+  const { data: selectedDateMood } = useMoodForDate(getLocalDateString(selectedDate));
+  const { data: selectedDateSymptoms } = useSymptomsForDate(getLocalDateString(selectedDate));
 
-  const isMainDataLoading = cycleSettingsLoading || currentPhaseLoading;
+  const startPeriod = useStartPeriod();
+  const endPeriod = useEndPeriod();
+  const deletePeriodCycle = useDeletePeriodCycle();
 
-  const safeCurrentPhase = currentPhaseError ? null : currentPhase;
-
-  const hasCriticalErrors = cycleSettingsError || currentPhaseErrorDetails;
+  const isMainDataLoading = cycleInfoLoading || settingsLoading;
+  const hasCriticalErrors = cycleInfoError;
 
   const handleDateSelect = React.useCallback((date: Date) => {
-    // Don't allow future dates - clamp to today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const selectedDay = new Date(date);
@@ -90,23 +75,16 @@ export default function CycleScreen() {
   }, []);
 
   const handleStartPeriod = () => {
-    const dateString = getLocalDateString(modalDate);
+    const startDateString = getLocalDateString(modalDate);
 
-    logPeriodData.mutate(
+    startPeriod.mutate(
       {
-        date: dateString,
-        is_start_day: true,
+        start_date: startDateString,
         flow_intensity: 'moderate',
-        symptoms: [],
         notes: 'Period started',
       },
       {
         onSuccess: () => {
-          updateCycleSettings.mutate({
-            cycle_length: cycleSettings?.cycle_length || 28,
-            period_length: cycleSettings?.period_length || 5,
-            last_period_date: dateString,
-          });
           setShowPeriodModal(false);
         },
       }
@@ -114,61 +92,98 @@ export default function CycleScreen() {
   };
 
   const handleEndPeriod = () => {
-    const dateString = getLocalDateString(modalDate);
+    const endDateString = getLocalDateString(modalDate);
 
-    const currentPeriodStart = getLastPeriodStart(periodLogs as PeriodLog[]);
-
-    if (currentPeriodStart) {
-      const startDate = new Date(currentPeriodStart);
-      const endDate = modalDate;
-
-      logPeriodData.mutate(
-        {
-          date: dateString,
-          is_start_day: false,
-          flow_intensity: 'light',
-          symptoms: [],
-          notes: 'Period ended',
+    endPeriod.mutate(
+      {
+        end_date: endDateString,
+      },
+      {
+        onSuccess: () => {
+          setShowPeriodModal(false);
         },
-        {
-          onSuccess: () => {
-            const periodLength =
-              Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
-            updateCycleSettings.mutate({
-              cycle_length: cycleSettings?.cycle_length || 28,
-              period_length: periodLength,
-              last_period_date: currentPeriodStart,
-            });
-
-            setShowPeriodModal(false);
-          },
-        }
-      );
-    }
+      }
+    );
   };
 
   const handleRemovePeriod = () => {
-    const dateString = getLocalDateString(modalDate);
+    // Find the period cycle that includes this date
+    const cycleToRemove = periodCycles.find((cycle: PeriodCycle) => {
+      const modalDateString = getLocalDateString(modalDate);
+      if (!cycle.end_date) {
+        // Ongoing period - check if modal date is after start date
+        return modalDateString >= cycle.start_date;
+      }
+      // Complete period - check if modal date is within range
+      return modalDateString >= cycle.start_date && modalDateString <= cycle.end_date;
+    });
 
-    deletePeriodLog.mutate(dateString, {
-      onSuccess: () => {
-        setShowPeriodModal(false);
-      },
+    if (cycleToRemove) {
+      deletePeriodCycle.mutate(cycleToRemove.id, {
+        onSuccess: () => {
+          setShowPeriodModal(false);
+        },
+      });
+    }
+  };
+
+  // Helper functions to check period cycle states
+  const isLoggedDate = (date: Date) => {
+    const dateString = getLocalDateString(date);
+    return periodCycles.some((cycle: PeriodCycle) => {
+      if (!cycle.end_date) {
+        // Ongoing period - check if date is after start
+        return dateString >= cycle.start_date;
+      }
+      // Complete period - check if date is within range
+      return dateString >= cycle.start_date && dateString <= cycle.end_date;
     });
   };
 
-  const nextPeriodPrediction = React.useMemo(() => {
-    return getNextPeriodPrediction(periodLogs as PeriodLog[], cycleSettings, selectedDate);
-  }, [periodLogs, cycleSettings, selectedDate]);
+  const isStartDate = (date: Date) => {
+    const dateString = getLocalDateString(date);
+    return periodCycles.some((cycle: PeriodCycle) => cycle.start_date === dateString);
+  };
 
-  const pregnancyChances = React.useMemo(() => {
-    // Use pregnancy chances from current phase if available, otherwise calculate locally
-    return safeCurrentPhase?.pregnancy_chances || getPregnancyChances(selectedDate, periodLogs as PeriodLog[], cycleSettings);
-  }, [selectedDate, cycleSettings, periodLogs, safeCurrentPhase]);
+  const hasOngoingPeriod = () => {
+    return periodCycles.some((cycle: PeriodCycle) => cycle.end_date === null);
+  };
 
-  console.log('Period Logs:', periodLogs);
-  console.log('Pregnancy Chances:', pregnancyChances);
+  // Transform periodCycles to periodLogs format for CyclePhase component
+  const transformToPeriodLogs = () => {
+    const periodLogs: any[] = [];
+    periodCycles.forEach((cycle: PeriodCycle) => {
+      const startDate = new Date(cycle.start_date);
+      let endDate: Date;
+
+      if (!cycle.end_date) {
+        // Ongoing period - use today as end date for display
+        endDate = new Date();
+      } else {
+        endDate = new Date(cycle.end_date);
+      }
+
+      // Create log entries for each day in the cycle
+      const currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        const dateString = getLocalDateString(currentDate);
+        const isStartDay = dateString === cycle.start_date;
+
+        periodLogs.push({
+          date: dateString,
+          is_start_day: isStartDay,
+          notes: cycle.notes,
+        });
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+    return periodLogs;
+  };
+
+  // All calculations now come from the backend via currentCycleInfo
+  const nextPeriodPrediction = currentCycleInfo?.next_period_prediction;
+  const pregnancyChances = currentCycleInfo?.pregnancy_chances;
 
   return (
     <PageLayout
@@ -176,7 +191,7 @@ export default function CycleScreen() {
       theme="cycle"
       selectedDate={selectedDate}
       onDateSelect={handleDateSelect}
-      loggedDates={getAllPeriodDays(periodLogs as PeriodLog[])}
+      loggedDates={periodCycles.map((cycle) => cycle.start_date)}
       btn={
         <TouchableOpacity
           className="bg-pink-500 p-3 rounded-full"
@@ -233,57 +248,43 @@ export default function CycleScreen() {
             onPress={handlePeriodPredictionPress}
           />
 
-          {safeCurrentPhase && (
-            <View className="bg-white rounded-2xl p-4 mx-4 mb-4 shadow-sm border border-gray-100">
-              <View className="flex-row items-center justify-between mb-3">
-                <View className="flex-1">
-                  <Text className="text-lg font-semibold text-black">{safeCurrentPhase.name}</Text>
-                  <Text className="text-gray-600 text-sm">
-                    Day {safeCurrentPhase.day_in_cycle} • {safeCurrentPhase.days_remaining} days
-                    left
-                  </Text>
-                  {nextPeriodPrediction && nextPeriodPrediction.daysUntil > 0 && (
-                    <View className="bg-purple-50 px-2 py-1 rounded-full mt-2 self-start">
-                      <Text className="text-purple-700 text-xs font-medium">
-                        Period in {nextPeriodPrediction.daysUntil} days
-                      </Text>
-                    </View>
-                  )}
-                </View>
-                <View className="bg-pink-50 p-3 rounded-xl">
-                  <Heart size={20} color="#EC4899" />
-                </View>
-              </View>
-              <Text className="text-gray-700 text-sm mb-3">{safeCurrentPhase.description}</Text>
-            </View>
-          )}
-
           <CyclePhase
             selectedDate={selectedDate}
             periodStartDate={
-              periodLogs && periodLogs.length > 0
-                ? (() => {
-                    const lastStart = getLastPeriodStart(periodLogs as PeriodLog[]);
-                    return lastStart ? new Date(lastStart + 'T00:00:00') : undefined;
-                  })()
-                : undefined
+              periodCycles.length > 0 ? new Date(periodCycles[0].start_date) : undefined
             }
             onLogPeriod={() => setShowFullCalendar(true)}
             nextPeriodPrediction={nextPeriodPrediction}
             pregnancyChances={pregnancyChances}
-            periodLogs={periodLogs as PeriodLog[]}
+            periodLogs={transformToPeriodLogs()}
             cycleSettings={cycleSettings}
           />
 
           <TodaysSymptoms
             selectedDate={selectedDate}
-            symptomData={getSymptomDataForDate(selectedDate, periodLogs as PeriodLog[])}
+            symptomData={
+              selectedDateSymptoms
+                ? {
+                    symptoms: selectedDateSymptoms.symptoms,
+                    severity: selectedDateSymptoms.severity,
+                    notes: selectedDateSymptoms.notes,
+                  }
+                : undefined
+            }
             isLoading={false}
           />
 
           <TodaysMood
             selectedDate={selectedDate}
-            moodData={getMoodDataForDate(selectedDate, periodLogs as PeriodLog[])}
+            moodData={
+              selectedDateMood
+                ? {
+                    mood: selectedDateMood.mood,
+                    energy_level: selectedDateMood.energy_level,
+                    notes: selectedDateMood.notes,
+                  }
+                : undefined
+            }
             isLoading={false}
           />
 
@@ -294,13 +295,9 @@ export default function CycleScreen() {
       <PeriodModal
         isVisible={showPeriodModal}
         selectedDate={modalDate}
-        isLoggedDate={getLoggedDates(periodLogs as PeriodLog[]).includes(
-          getLocalDateString(modalDate)
-        )}
-        isStartDate={getStartDates(periodLogs as PeriodLog[]).includes(
-          getLocalDateString(modalDate)
-        )}
-        hasOngoingPeriod={hasOngoingPeriod(periodLogs as PeriodLog[])}
+        isLoggedDate={isLoggedDate(modalDate)}
+        isStartDate={isStartDate(modalDate)}
+        hasOngoingPeriod={hasOngoingPeriod()}
         onClose={() => setShowPeriodModal(false)}
         onStartPeriod={handleStartPeriod}
         onEndPeriod={handleEndPeriod}
@@ -317,19 +314,38 @@ export default function CycleScreen() {
         onClose={() => setShowFullCalendar(false)}
         selectedDate={selectedDate}
         onDateSelect={handleDateSelect}
-        loggedDates={getAllPeriodDays(periodLogs as PeriodLog[])}
-        startDates={getStartDates(periodLogs as PeriodLog[])}
-        endDates={getEndDates(periodLogs as PeriodLog[])}
+        loggedDates={transformToPeriodLogs().map((log) => log.date)}
+        startDates={periodCycles.map((cycle: PeriodCycle) => cycle.start_date)}
+        endDates={periodCycles
+          .map((cycle: PeriodCycle) => cycle.end_date)
+          .filter((date: string | null): date is string => date !== null)}
         predictedDates={nextPeriodPrediction?.predictedPeriodDates || []}
         nextPeriodPrediction={nextPeriodPrediction}
+        hasOngoingPeriod={hasOngoingPeriod()}
         onDatePress={(date) => {
           setModalDate(date);
           setSelectedDate(date);
           setShowPeriodModal(true);
         }}
         onLogPeriodPress={() => {
-          setModalDate(selectedDate);
-          setShowPeriodModal(true);
+          const today = new Date();
+          const hasOngoing = hasOngoingPeriod();
+
+          if (hasOngoing) {
+            // End the ongoing period
+            const endDateString = getLocalDateString(today);
+            endPeriod.mutate({
+              end_date: endDateString,
+            });
+          } else {
+            // Start a new period
+            const startDateString = getLocalDateString(today);
+            startPeriod.mutate({
+              start_date: startDateString,
+              flow_intensity: 'moderate',
+              notes: 'Period started',
+            });
+          }
         }}
       />
     </PageLayout>

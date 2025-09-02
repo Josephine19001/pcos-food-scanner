@@ -8,12 +8,11 @@ import {
   Platform,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
 import SubPageLayout from '@/components/layouts/sub-page';
 import { Heart, Zap, Battery, BatteryLow, Calendar, Check } from 'lucide-react-native';
-import { usePeriodLogs, useTodaysPeriodLog } from '@/lib/hooks/use-cycle-data';
-import { useLogMood } from '@/lib/hooks/use-symptoms-mood';
+import { useMoodForDate, useLogDailyMood } from '@/lib/hooks/use-daily-moods';
 import { getLocalDateString } from '@/lib/utils/date-helpers';
 import {
   AmazingIcon,
@@ -25,6 +24,9 @@ import {
 import { Button } from '@/components/ui/button';
 
 export default function LogMoodScreen() {
+  const { date } = useLocalSearchParams<{ date?: string }>();
+  const selectedDate = date || getLocalDateString(new Date());
+  
   const [selectedMood, setSelectedMood] = useState<
     'happy' | 'normal' | 'sad' | 'irritable' | 'anxious' | ''
   >('');
@@ -36,33 +38,23 @@ export default function LogMoodScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
-  const logMood = useLogMood();
-  const { data: periodLogs = [] } = usePeriodLogs();
-  const todaysLog = useTodaysPeriodLog();
+  const logDailyMood = useLogDailyMood();
+  const { data: moodForDate } = useMoodForDate(selectedDate);
 
   // Set initial state from existing data
   useEffect(() => {
-    if (todaysLog) {
-      if (todaysLog.mood) {
-        setSelectedMood(todaysLog.mood);
+    if (moodForDate) {
+      if (moodForDate.mood) {
+        setSelectedMood(moodForDate.mood);
       }
-
-      // Extract energy level from notes if it exists
-      if (todaysLog.notes) {
-        const energyMatch = todaysLog.notes.match(/Energy: (high|medium|low)/);
-        if (energyMatch) {
-          setSelectedEnergy(energyMatch[1] as 'high' | 'medium' | 'low');
-          // Remove energy note from notes and set the remaining text
-          const notesWithoutEnergy = todaysLog.notes
-            .replace(/Energy: (high|medium|low)\s*/, '')
-            .trim();
-          setNotes(notesWithoutEnergy);
-        } else {
-          setNotes(todaysLog.notes);
-        }
+      if (moodForDate.energy_level) {
+        setSelectedEnergy(moodForDate.energy_level);
+      }
+      if (moodForDate.notes) {
+        setNotes(moodForDate.notes);
       }
     }
-  }, [todaysLog]);
+  }, [moodForDate]);
 
   // Entrance animation
   useEffect(() => {
@@ -99,13 +91,10 @@ export default function LogMoodScreen() {
 
     setIsLoading(true);
 
-    // Use local date format to avoid timezone issues
-    const dateString = getLocalDateString();
-
     // Log mood using direct Supabase function
-    logMood.mutate(
+    logDailyMood.mutate(
       {
-        date: dateString,
+        date: selectedDate,
         mood: selectedMood as any,
         energy_level: selectedEnergy || undefined,
         notes: notes.trim() || undefined,
@@ -207,7 +196,7 @@ export default function LogMoodScreen() {
               </View>
 
               {/* Energy Level Selection */}
-              <View className="mb-8">
+              {/* <View className="mb-8">
                 <Text className="text-xl font-semibold text-gray-900 mb-4">Energy Level</Text>
                 <View style={{ gap: 16 }}>
                   {energyOptions.map((option) => {
@@ -253,10 +242,10 @@ export default function LogMoodScreen() {
                     );
                   })}
                 </View>
-              </View>
+              </View> */}
 
               {/* Notes Section */}
-              <View className="mb-8">
+              {/* <View className="mb-8">
                 <Text className="text-lg font-semibold text-black mb-4">Notes</Text>
                 <View
                   className="bg-white rounded-2xl border border-gray-200 p-4"
@@ -279,7 +268,7 @@ export default function LogMoodScreen() {
                     placeholderTextColor="#9CA3AF"
                   />
                 </View>
-              </View>
+              </View> */}
             </Animated.View>
           </ScrollView>
         </KeyboardAvoidingView>

@@ -8,12 +8,11 @@ import {
   Platform,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
 import SubPageLayout from '@/components/layouts/sub-page';
 import { Check } from 'lucide-react-native';
-import { usePeriodLogs, useTodaysPeriodLog } from '@/lib/hooks/use-cycle-data';
-import { useLogSymptoms } from '@/lib/hooks/use-symptoms-mood';
+import { useSymptomsForDate, useLogDailySymptoms } from '@/lib/hooks/use-daily-symptoms';
 import { Button } from '@/components/ui/button';
 import { getLocalDateString } from '@/lib/utils/date-helpers';
 import {
@@ -32,6 +31,9 @@ import {
 } from '@/components/icons/symptom-icons';
 
 export default function LogSymptomsScreen() {
+  const { date } = useLocalSearchParams<{ date?: string }>();
+  const selectedDate = date || getLocalDateString(new Date());
+  
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedSeverity, setSelectedSeverity] = useState<'mild' | 'moderate' | 'severe' | ''>('');
   const [notes, setNotes] = useState('');
@@ -41,9 +43,8 @@ export default function LogSymptomsScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
-  const logSymptoms = useLogSymptoms();
-  const { data: periodLogs = [] } = usePeriodLogs();
-  const todaysLog = useTodaysPeriodLog();
+  const logDailySymptoms = useLogDailySymptoms();
+  const { data: symptomsForDate } = useSymptomsForDate(selectedDate);
 
   // Entrance animation
   useEffect(() => {
@@ -63,27 +64,18 @@ export default function LogSymptomsScreen() {
 
   // Set initial state from existing data
   useEffect(() => {
-    if (todaysLog) {
-      if (todaysLog.symptoms && todaysLog.symptoms.length > 0) {
-        setSelectedSymptoms(todaysLog.symptoms);
+    if (symptomsForDate) {
+      if (symptomsForDate.symptoms && symptomsForDate.symptoms.length > 0) {
+        setSelectedSymptoms(symptomsForDate.symptoms);
       }
-
-      // Extract severity from notes if it exists
-      if (todaysLog.notes) {
-        const severityMatch = todaysLog.notes.match(/Severity: (mild|moderate|severe)/);
-        if (severityMatch) {
-          setSelectedSeverity(severityMatch[1] as 'mild' | 'moderate' | 'severe');
-          // Remove severity note from notes and set the remaining text
-          const notesWithoutSeverity = todaysLog.notes
-            .replace(/Severity: (mild|moderate|severe)\s*/, '')
-            .trim();
-          setNotes(notesWithoutSeverity);
-        } else {
-          setNotes(todaysLog.notes);
-        }
+      if (symptomsForDate.severity) {
+        setSelectedSeverity(symptomsForDate.severity);
+      }
+      if (symptomsForDate.notes) {
+        setNotes(symptomsForDate.notes);
       }
     }
-  }, [todaysLog]);
+  }, [symptomsForDate]);
 
   const symptomOptions = [
     { value: 'cramps', label: 'Cramps', icon: 'cramps' },
@@ -117,13 +109,10 @@ export default function LogSymptomsScreen() {
 
     setIsLoading(true);
 
-    // Use local date format to avoid timezone issues
-    const dateString = getLocalDateString();
-
     // Log symptoms using direct Supabase function
-    logSymptoms.mutate(
+    logDailySymptoms.mutate(
       {
-        date: dateString,
+        date: selectedDate,
         symptoms: selectedSymptoms,
         severity: selectedSeverity || undefined,
         notes: notes.trim() || undefined,

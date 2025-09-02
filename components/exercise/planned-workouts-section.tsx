@@ -4,6 +4,7 @@ import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
 import { Sparkles, Heart, Calendar } from 'lucide-react-native';
 import { PlannedExerciseItem } from './planned-exercise-item';
+import { getLocalDateString } from '@/lib/utils/date-helpers';
 
 interface PlannedWorkoutsSectionProps {
   currentWeeklyPlan?: any;
@@ -22,12 +23,7 @@ export function PlannedWorkoutsSection({
   const getTodaysWorkoutFromPlan = () => {
     if (!currentWeeklyPlan?.plan_data?.days) return null;
 
-    const dateString =
-      selectedDate.getFullYear() +
-      '-' +
-      String(selectedDate.getMonth() + 1).padStart(2, '0') +
-      '-' +
-      String(selectedDate.getDate()).padStart(2, '0');
+    const dateString = getLocalDateString(selectedDate);
 
     const todaysWorkout = currentWeeklyPlan.plan_data.days.find(
       (day: any) => day.date === dateString
@@ -94,7 +90,7 @@ export function PlannedWorkoutsSection({
             Take a break and let your body recover
           </Text>
           <TouchableOpacity
-            onPress={() => router.push('/log-exercise')}
+            onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
             className="bg-green-500 px-4 py-2 rounded-xl"
           >
             <Text className="text-white font-medium">Log Optional Exercise</Text>
@@ -127,7 +123,7 @@ export function PlannedWorkoutsSection({
               : 'This date had no planned exercises'}
           </Text>
           <TouchableOpacity
-            onPress={() => router.push('/log-exercise')}
+            onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
             className="bg-purple-500 px-6 py-3 rounded-xl"
           >
             <Text className="text-white font-medium">Log Exercise</Text>

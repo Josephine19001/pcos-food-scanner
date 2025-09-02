@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
+import { getLocalDateString } from '@/lib/utils/date-helpers';
 import {
   Dumbbell,
   Heart,
@@ -310,12 +311,7 @@ export function TodaysWorkoutSection({
   const getTodaysWorkoutFromPlan = () => {
     if (!currentWeeklyPlan?.plan_data?.days) return null;
 
-    const dateString =
-      selectedDate.getFullYear() +
-      '-' +
-      String(selectedDate.getMonth() + 1).padStart(2, '0') +
-      '-' +
-      String(selectedDate.getDate()).padStart(2, '0');
+    const dateString = getLocalDateString(selectedDate);
 
     const todaysWorkout = currentWeeklyPlan.plan_data.days.find(
       (day: any) => day.date === dateString
@@ -421,7 +417,7 @@ export function TodaysWorkoutSection({
 
                 {/* Add More Workout Button */}
                 <TouchableOpacity
-                  onPress={() => router.push('/log-exercise')}
+                  onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
                   className="bg-purple-500 py-4 rounded-2xl w-full"
                 >
                   <Text className="text-white font-semibold text-center">Log Exercise</Text>
@@ -450,7 +446,7 @@ export function TodaysWorkoutSection({
                 </View>
 
                 <TouchableOpacity
-                  onPress={() => router.push('/log-exercise')}
+                  onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
                   className="bg-purple-500 py-4 rounded-2xl w-full"
                 >
                   <Text className="text-white font-semibold text-center">Log Another Exercise</Text>
@@ -467,7 +463,7 @@ export function TodaysWorkoutSection({
               </Text>
 
               <TouchableOpacity
-                onPress={() => router.push('/log-exercise')}
+                onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
                 className="bg-purple-500 px-4 py-2 rounded-xl"
               >
                 <Text className="text-white font-medium">Add Workout</Text>

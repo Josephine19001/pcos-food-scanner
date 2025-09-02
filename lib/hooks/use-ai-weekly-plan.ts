@@ -35,24 +35,6 @@ export function useAIWeeklyPlan() {
         (payload) => {
           // Invalidate and refetch the plan
           queryClient.invalidateQueries({ queryKey: ['ai-weekly-plan'] });
-
-          // Show user notification
-          if (payload.eventType === 'UPDATE') {
-            const adaptations = payload.new?.adaptation_history || [];
-            const latestAdaptation = adaptations[adaptations.length - 1];
-
-            if (latestAdaptation) {
-              toast.success('Plan Updated', {
-                description: `Your plan has been adapted: ${latestAdaptation.reason}`,
-                duration: 5000,
-              });
-            }
-          } else if (payload.eventType === 'INSERT') {
-            toast.success('New Plan Ready!', {
-              description: 'Your AI coach has created your weekly plan',
-              duration: 5000,
-            });
-          }
         }
       )
       .subscribe();

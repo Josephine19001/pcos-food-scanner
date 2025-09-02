@@ -12,7 +12,18 @@ import {
 } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
-import { X, Trash2, Check, Apple, Beef, Wheat, Edit3, Plus, Minus, RotateCcw } from 'lucide-react-native';
+import {
+  X,
+  Trash2,
+  Check,
+  Apple,
+  Beef,
+  Wheat,
+  Edit3,
+  Plus,
+  Minus,
+  RotateCcw,
+} from 'lucide-react-native';
 import { OliveOilIcon } from '@/components/icons/olive-oil-icon';
 
 interface MealData {
@@ -60,11 +71,11 @@ export function FoodDetailsModal({
   React.useEffect(() => {
     if (meal) {
       console.log('FoodDetailsModal: Modal opened for meal:', meal.id, meal.name);
-      
+
       // Calculate the correct quantity based on current vs original nutrition values
       // This ensures the serving size matches the saved nutrition totals
       let calculatedQuantity = 1;
-      
+
       if (meal.food_items && Array.isArray(meal.food_items) && meal.food_items.length > 0) {
         const foodItem = meal.food_items[0];
         if (foodItem?.food?.nutrition) {
@@ -76,9 +87,9 @@ export function FoodDetailsModal({
           }
         }
       }
-      
+
       console.log('FoodDetailsModal: Calculated quantity based on nutrition:', calculatedQuantity);
-      
+
       setQuantity(calculatedQuantity);
       setOriginalQuantity(calculatedQuantity); // Store original for change detection
       setEditableCalories(null);
@@ -212,7 +223,12 @@ export function FoodDetailsModal({
   }
 
   console.log('FoodDetailsModal: Using baseNutrition values:', baseNutrition);
-  console.log('FoodDetailsModal: Current quantity:', quantity, 'editableCalories:', editableCalories);
+  console.log(
+    'FoodDetailsModal: Current quantity:',
+    quantity,
+    'editableCalories:',
+    editableCalories
+  );
 
   // Calculate nutrition based on quantity with safe defaults, allowing individual edits
   const nutrition = {
@@ -233,26 +249,31 @@ export function FoodDetailsModal({
   });
 
   const handleDelete = () => {
-    Alert.alert('Delete Food', `Are you sure you want to delete "${food.name || meal.name || 'this food'}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          onDelete?.(meal.id);
-          // Don't call onClose() here - the hook handles modal closure after successful delete
+    Alert.alert(
+      'Delete Food',
+      `Are you sure you want to delete "${food.name || meal.name || 'this food'}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            onDelete?.(meal.id);
+            // Don't call onClose() here - the hook handles modal closure after successful delete
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const handleSave = () => {
     // Check if any changes were made (quantity changed from original or any macro was edited)
-    const hasChanges = quantity !== originalQuantity || 
-                      editableCalories !== null || 
-                      editableProtein !== null || 
-                      editableCarbs !== null || 
-                      editableFat !== null;
+    const hasChanges =
+      quantity !== originalQuantity ||
+      editableCalories !== null ||
+      editableProtein !== null ||
+      editableCarbs !== null ||
+      editableFat !== null;
 
     if (hasChanges && onSave && meal) {
       console.log('FoodDetailsModal: Saving meal with ID:', meal.id, 'Updates:', {
@@ -261,7 +282,7 @@ export function FoodDetailsModal({
         carbs: nutrition.carbs,
         fat: nutrition.fat,
       });
-      
+
       // Call onSave with meal ID and nutrition updates in the expected format
       onSave(meal.id, {
         calories: nutrition.calories,
@@ -273,7 +294,7 @@ export function FoodDetailsModal({
     } else {
       // No changes made, just refresh data and close modal
       console.log('FoodDetailsModal: No changes made, just refreshing data and closing');
-      
+
       if (onDone) {
         onDone(); // Trigger data refresh
       }
@@ -491,7 +512,7 @@ export function FoodDetailsModal({
               <Text className="text-orange-600 font-medium ml-2">Retry Scan</Text>
             </TouchableOpacity>
           )}
-          
+
           {/* Delete Button (only show if onDelete is provided) */}
           {onDelete && (
             <TouchableOpacity

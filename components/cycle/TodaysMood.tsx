@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Heart, Plus } from 'lucide-react-native';
@@ -25,20 +24,20 @@ export function TodaysMood({ selectedDate, moodData, isLoading }: TodaysMoodProp
   const isToday = selectedDate.toDateString() === new Date().toDateString();
   const isFuture = selectedDate > new Date() && !isToday;
 
-  const getMoodIcon = (mood: string) => {
+  const getMoodIcon = (mood: string, size?: number, color?: string) => {
     switch (mood) {
       case 'happy':
-        return <AmazingIcon size={40} />;
+        return <AmazingIcon size={size || 40} color={color || '#10B981'} />;
       case 'normal':
-        return <SmileIcon size={40} />;
+        return <SmileIcon size={size || 40} color={color || '#F59E0B'} />;
       case 'sad':
-        return <OkayIcon size={40} />;
+        return <OkayIcon size={size || 40} color={color || '#EF4444'} />;
       case 'irritable':
-        return <ToughIcon size={40} />;
+        return <ToughIcon size={size || 40} color={color || '#6B7280'} />;
       case 'anxious':
-        return <StrugglingIcon size={40} />;
+        return <StrugglingIcon size={size || 40} color={color || '#6B7280'} />;
       default:
-        return <SmileIcon size={40} />;
+        return <SmileIcon size={size || 40} color={color || '#F59E0B'} />;
     }
   };
 
@@ -54,32 +53,6 @@ export function TodaysMood({ selectedDate, moodData, isLoading }: TodaysMoodProp
         return 'Tough';
       case 'anxious':
         return 'Struggling';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const getEnergyColor = (energy: string) => {
-    switch (energy) {
-      case 'high':
-        return '#10B981';
-      case 'medium':
-        return '#F59E0B';
-      case 'low':
-        return '#EF4444';
-      default:
-        return '#6B7280';
-    }
-  };
-
-  const getEnergyLabel = (energy: string) => {
-    switch (energy) {
-      case 'high':
-        return 'High Energy';
-      case 'medium':
-        return 'Medium Energy';
-      case 'low':
-        return 'Low Energy';
       default:
         return 'Unknown';
     }
@@ -108,83 +81,51 @@ export function TodaysMood({ selectedDate, moodData, isLoading }: TodaysMoodProp
 
   return (
     <View className="px-4 mb-6">
-      <View
-        className="bg-white rounded-2xl p-5 border border-gray-100"
-        style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.04,
-          shadowRadius: 12,
-          elevation: 2,
-        }}
-      >
+      <View className="bg-white rounded-2xl p-5 border border-gray-100">
         <View className="flex-row items-center justify-between mb-5">
           <View className="flex-row items-center">
-            <View
-              className="w-11 h-11 rounded-2xl items-center justify-center mr-3"
-              style={{
-                backgroundColor: '#F3E8FF',
-                shadowColor: '#A855F7',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 3,
-                elevation: 1,
-              }}
-            >
-              <Heart size={20} color="#8B5CF6" />
+            <View className="w-11 h-11 rounded-2xl items-center justify-center mr-3 bg-pink-50">
+              <Heart size={20} color="#f6339a" />
             </View>
             <Text className="text-lg font-bold text-gray-900">Mood</Text>
           </View>
           {!isFuture && (
             <TouchableOpacity
-              onPress={() => router.push('/log-mood')}
-              className="w-9 h-9 rounded-xl items-center justify-center"
-              style={{
-                backgroundColor: '#F3E8FF',
-                borderWidth: 1,
-                borderColor: '#E9D5FF',
-              }}
+              onPress={() => router.push(`/log-mood?date=${selectedDate.toISOString().split('T')[0]}`)}
+              className="w-9 h-9 rounded-xl items-center justify-center bg-pink-50"
             >
-              <Plus size={16} color="#8B5CF6" />
+              <Plus size={16} color="#f6339a" />
             </TouchableOpacity>
           )}
         </View>
 
         {moodData ? (
-          <View className="flex flex-col gap-4">
+          <View className="flex">
             {/* Main Mood Card */}
             <View
-              className="rounded-2xl p-5"
+              className="bg-pink-50 rounded-2xl p-4"
               style={{
-                backgroundColor: '#FEFCFF',
-                borderWidth: 1,
-                borderColor: '#E9D5FF',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.05,
-                shadowRadius: 8,
+                shadowColor: '#EC4899',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
                 elevation: 2,
               }}
             >
-              <View className="flex-row items-center">
+              <View className="flex flex-col items-center">
                 {/* Mood Icon */}
-                <View
-                  className="w-14 h-14 rounded-2xl items-center justify-center mr-4"
-                  style={{
-                    backgroundColor: '#F3E8FF',
-                    borderWidth: 1,
-                    borderColor: '#DDD6FE',
-                  }}
-                >
-                  <View style={{ transform: [{ scale: 1.6 }] }}>{getMoodIcon(moodData.mood)}</View>
+                <View className="rounded-2xl items-center justify-center my-8">
+                  <View style={{ transform: [{ scale: 1.6 }] }}>
+                    {getMoodIcon(moodData.mood, 60, '#10B981')}
+                  </View>
                 </View>
 
                 {/* Mood Info */}
-                <View className="flex-1">
-                  <Text className="text-gray-900 text-lg font-bold mb-1">
+                <View>
+                  <Text className="text-gray-900 text-2xl font-bold">
                     {getMoodLabel(moodData.mood)}
                   </Text>
-                  <View className="flex-row items-center">
+                  {/* <View className="flex-row items-center">
                     <View
                       className="w-2 h-2 rounded-full mr-2"
                       style={{ backgroundColor: getEnergyColor(moodData.energy_level) }}
@@ -195,13 +136,13 @@ export function TodaysMood({ selectedDate, moodData, isLoading }: TodaysMoodProp
                     >
                       {getEnergyLabel(moodData.energy_level)}
                     </Text>
-                  </View>
+                  </View> */}
                 </View>
               </View>
             </View>
 
             {/* Notes Section */}
-            {moodData.notes && (
+            {/* {moodData.notes && (
               <View
                 className="rounded-xl p-4"
                 style={{
@@ -221,7 +162,7 @@ export function TodaysMood({ selectedDate, moodData, isLoading }: TodaysMoodProp
                 </View>
                 <Text className="text-gray-700 text-sm leading-relaxed pl-3">{moodData.notes}</Text>
               </View>
-            )}
+            )} */}
           </View>
         ) : (
           <View className="items-center py-6">
@@ -249,16 +190,8 @@ export function TodaysMood({ selectedDate, moodData, isLoading }: TodaysMoodProp
             {/* Action Button */}
             {!isFuture && (
               <TouchableOpacity
-                onPress={() => router.push('/log-mood')}
-                className="rounded-xl px-6 py-3 flex-row items-center"
-                style={{
-                  backgroundColor: '#A855F7',
-                  shadowColor: '#A855F7',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.15,
-                  shadowRadius: 6,
-                  elevation: 3,
-                }}
+                onPress={() => router.push(`/log-mood?date=${selectedDate.toISOString().split('T')[0]}`)}
+                className="rounded-xl px-6 py-3 flex-row items-center bg-pink-500"
               >
                 <Plus size={16} color="white" style={{ marginRight: 6 }} />
                 <Text className="text-white font-semibold text-sm">Log Mood</Text>

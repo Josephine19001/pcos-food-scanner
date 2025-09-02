@@ -1,7 +1,8 @@
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useAppNavigation } from '@/lib/hooks/use-navigation';
+import { getLocalDateString, getLocalTimeString } from '@/lib/utils/date-helpers';
 import { useState } from 'react';
 import { toast } from 'sonner-native';
 import SubPageLayout from '@/components/layouts/sub-page';
@@ -21,6 +22,9 @@ import { ExerciseLoggingModal } from '@/components/exercise/exercise-logging-mod
 import { ExerciseList } from '@/components/exercise/exercise-list';
 
 export default function LogExerciseScreen() {
+  const { date } = useLocalSearchParams<{ date?: string }>();
+  const selectedDate = date || getLocalDateString(new Date());
+  
   const { goBack } = useAppNavigation();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
@@ -64,6 +68,8 @@ export default function LogExerciseScreen() {
         ...data,
         duration_minutes: data.duration_minutes || 0,
         intensity: (data.intensity as 'low' | 'moderate' | 'high') || 'moderate',
+        logged_date: selectedDate,
+        logged_time: getLocalTimeString(),
       });
       console.log('✅ Exercise logged successfully:', result);
       goBack();

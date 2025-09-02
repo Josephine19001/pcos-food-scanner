@@ -1,21 +1,6 @@
-import { View, Pressable, Linking, Share, Alert, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Pressable, Linking, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from '@/components/ui/text';
-import {
-  UserRound,
-  FileText,
-  Shield,
-  UserMinus,
-  LogOut,
-  Star,
-  Lightbulb,
-  Bell,
-  Target,
-  Apple,
-  Scale,
-  Sparkles,
-  Scissors,
-  Pill,
-} from 'lucide-react-native';
+import { FileText, Shield, UserMinus, LogOut, Target, Apple, Scale } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ConfirmationModal, Skeleton } from '@/components/ui';
@@ -24,7 +9,6 @@ import { useAuth } from '@/context/auth-provider';
 import { toast } from 'sonner-native';
 import { useAccount, useDeleteAccount } from '@/lib/hooks/use-accounts';
 import { AvatarUpload } from '@/components/settings/avatar-upload';
-import { SetupVerification } from '@/components/settings/setup-verification';
 
 function SettingsPageSkeleton() {
   return (
@@ -182,7 +166,7 @@ export default function SettingsScreen() {
 
   return (
     <>
-      <PageLayout title="Settings">
+      <PageLayout title="My Profile">
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
