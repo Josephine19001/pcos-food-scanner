@@ -101,7 +101,6 @@ export function useProcessOnboarding() {
       qc.invalidateQueries({ queryKey: queryKeys.settings.weightGoals() });
       qc.invalidateQueries({ queryKey: queryKeys.settings.weightHistory() });
       qc.invalidateQueries({ queryKey: queryKeys.settings.reminderSettings });
-      toast.success('Welcome! Your profile has been set up successfully.');
     },
     onError: (err: any) => handleError(err, 'Failed to process onboarding'),
   });

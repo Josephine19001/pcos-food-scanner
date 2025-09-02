@@ -1,16 +1,9 @@
-import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
-import {
-  Calendar,
-  Droplets,
-  Flower,
-  Heart,
-  Leaf,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-} from 'lucide-react-native';
+import { Calendar, Plus } from 'lucide-react-native';
+import { useCycleDay } from '@/lib/hooks/use-cycle-day';
+import type { PeriodLog } from '@/lib/utils/cycle-utils';
+import { getPhaseData } from '@/lib/utils/cycle-phase-data';
 
 interface CyclePhaseProps {
   selectedDate: Date;
@@ -25,123 +18,9 @@ interface CyclePhaseProps {
     color: string;
     description: string;
   };
+  periodLogs?: PeriodLog[];
+  cycleSettings?: { cycle_length?: number; period_length?: number } | null | undefined;
 }
-
-// Detailed cycle data with specific messages for each day
-const getPhaseData = (day: number) => {
-  // Menstrual Phase (Days 1-5)
-  if (day === 1) {
-    return {
-      phase: 'Menstrual',
-      type: 'Period Day 1',
-      message:
-        "Your period just started. Take it easy today - rest, stay hydrated, and use heat therapy for cramps. Iron-rich foods can help replenish what you're losing.",
-      icon: 'droplets',
-    };
-  } else if (day === 2) {
-    return {
-      phase: 'Menstrual',
-      type: 'Period Day 2',
-      message:
-        'Usually the heaviest flow day. Be gentle with yourself, stay warm, and consider light stretching or yoga. Magnesium can help with muscle tension.',
-      icon: 'droplets',
-    };
-  } else if (day === 3) {
-    return {
-      phase: 'Menstrual',
-      type: 'Period Day 3',
-      message:
-        'Flow is moderating. You might start feeling a bit more energetic. Gentle walks and warm baths can be soothing. Keep eating nourishing foods.',
-      icon: 'droplets',
-    };
-  } else if (day === 4) {
-    return {
-      phase: 'Menstrual',
-      type: 'Period Day 4',
-      message:
-        "Energy is slowly returning. Light exercise like walking or gentle yoga can help with mood and circulation. You're almost through the hardest part!",
-      icon: 'droplets',
-    };
-  } else if (day === 5) {
-    return {
-      phase: 'Menstrual',
-      type: 'Period Day 5',
-      message:
-        'Final period day for most people. You might feel relief and renewed energy. Perfect time to plan ahead for the productive follicular phase coming up.',
-      icon: 'droplets',
-    };
-  }
-  // Follicular Phase (Days 6-11)
-  else if (day <= 8) {
-    return {
-      phase: 'Follicular',
-      type: 'Early Follicular',
-      message:
-        'Post-period recovery time. Your energy is building back up. Great time to start planning new projects and gradually increase activity levels.',
-      icon: 'leaf',
-    };
-  } else if (day <= 11) {
-    return {
-      phase: 'Follicular',
-      type: 'Growing Phase',
-      message:
-        'Energy rising daily! Perfect time for challenging workouts, learning new skills, and tackling ambitious goals. Your brain is sharp and focused.',
-      icon: 'leaf',
-    };
-  }
-  // Ovulatory Phase (Days 12-15)
-  else if (day === 12) {
-    return {
-      phase: 'Ovulatory',
-      type: 'Pre-Ovulation',
-      message:
-        "Approaching your peak! Energy and confidence are high. Great for social activities, presentations, and important conversations. You're naturally more charismatic.",
-      icon: 'flower',
-    };
-  } else if (day === 13 || day === 14) {
-    return {
-      phase: 'Ovulatory',
-      type: 'Peak Fertility',
-      message:
-        "Your most fertile days with peak energy! Perfect for high-intensity workouts, public speaking, and making important decisions. You're at your most confident.",
-      icon: 'flower',
-    };
-  } else if (day === 15) {
-    return {
-      phase: 'Ovulatory',
-      type: 'Post-Ovulation',
-      message:
-        'Energy is still high but starting to shift. Good time to wrap up big projects before the more introspective luteal phase begins.',
-      icon: 'flower',
-    };
-  }
-  // Luteal Phase (Days 16-28)
-  else if (day <= 21) {
-    return {
-      phase: 'Luteal',
-      type: 'Early Luteal',
-      message:
-        'Energy is settling into a calmer rhythm. Perfect for detailed work, organization, and completing projects. Your body craves more protein and healthy fats.',
-      icon: 'heart',
-    };
-  } else if (day <= 25) {
-    return {
-      phase: 'Luteal',
-      type: 'Mid Luteal',
-      message:
-        'You might notice mood changes and food cravings. Listen to your body - it needs more rest and comfort foods. Great time for cozy, nurturing activities.',
-      icon: 'heart',
-    };
-  } else {
-    return {
-      phase: 'Luteal',
-      type: 'Late Luteal (PMS)',
-      message:
-        'PMS symptoms may be present. Be extra kind to yourself. Focus on gentle movement, stress management, and preparing for your upcoming period.',
-      icon: 'heart',
-    };
-  }
-};
 
 // Circular Progress Component using CSS/Style approach
 const CircularProgress = ({ progress, size = 180 }: { progress: number; size?: number }) => {
@@ -224,6 +103,8 @@ export function CyclePhase({
   onLogPeriod,
   nextPeriodPrediction,
   pregnancyChances,
+  periodLogs = [],
+  cycleSettings,
 }: CyclePhaseProps) {
   // If no period data, show tracking encouragement
   if (!periodStartDate) {
@@ -247,32 +128,15 @@ export function CyclePhase({
     );
   }
 
-  // Calculate cycle day with proper timezone handling
-  const getCycleDay = () => {
-    // Normalize both dates to local date strings without timezone offset
-    const normalizeDate = (date: Date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    const selectedDateString = normalizeDate(selectedDate);
-    const periodStartString = normalizeDate(periodStartDate);
-
-    const selectedLocalDate = new Date(selectedDateString + 'T00:00:00');
-    const periodStartLocalDate = new Date(periodStartString + 'T00:00:00');
-
-    const timeDiff = selectedLocalDate.getTime() - periodStartLocalDate.getTime();
-    const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
-
-    if (daysDiff < 0) return 1;
-    if (daysDiff > 30) return (daysDiff % 28) + 1;
-    return daysDiff + 1;
-  };
-
-  const cycleDay = getCycleDay();
+  // Use centralized cycle day calculation
+  const { cycleDay } = useCycleDay({
+    selectedDate,
+    periodLogs,
+    cycleSettings: cycleSettings || null,
+  });
   const phaseData = getPhaseData(cycleDay);
+  console.log('cycle day:', cycleDay);
+  console.log('phase data:', phaseData);
 
   // Calculate progress percentage (assuming 28-day cycle)
   const progressPercentage = (cycleDay / 28) * 100;

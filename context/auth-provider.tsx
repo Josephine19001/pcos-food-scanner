@@ -441,7 +441,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           : '/(tabs)/nutrition';
 
       router.replace(route as any);
-      toast.success('Account created successfully!');
     } catch (error: any) {
       console.error('Signup with onboarding failed:', error);
       throw error;
@@ -501,7 +500,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           : '/(tabs)/nutrition';
 
       router.replace(route as any);
-      toast.success('Account created successfully!');
     } catch (error: any) {
       if (error.code === 'ERR_REQUEST_CANCELED') {
         // User canceled the sign-in flow

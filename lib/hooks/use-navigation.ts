@@ -82,6 +82,7 @@ export function useAppNavigation() {
   };
 
   return {
+    goBack: goBackWithFallback, // Export as goBack for compatibility
     goBackWithFallback,
     safeNavigate,
     router,

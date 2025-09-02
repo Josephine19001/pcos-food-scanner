@@ -232,9 +232,6 @@ export function ProductScanningModal({
       await addBeautyProduct.mutateAsync(beautyProduct);
 
       toast.dismiss();
-      toast.success(`${productType} product added!`, {
-        description: 'Added to your product collection',
-      });
 
       setShowProductDetail(false);
       onClose();

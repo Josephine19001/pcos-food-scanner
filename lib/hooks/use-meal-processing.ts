@@ -27,13 +27,16 @@ export function useMealProcessing(dailySummary: any) {
 
         const isAnalyzingMeal =
           meal.analysis_status === 'analyzing' ||
-          meal.food_items.some(
-            (item: any) =>
-              item.food.name === 'AI analyzing your food...' ||
-              item.food.name === 'Analyzing food...' ||
-              item.food.brand === 'AI Scanning' ||
-              item.food.category === 'scanning'
-          );
+          (meal.analysis_status !== 'completed' &&
+            meal.analysis_status !== 'failed' &&
+            meal.analysis_stage !== 'failed' &&
+            meal.food_items.some(
+              (item: any) =>
+                item.food.name === 'AI analyzing your food...' ||
+                item.food.name === 'Analyzing food...' ||
+                item.food.brand === 'AI Scanning' ||
+                item.food.category === 'scanning'
+            ));
 
         const isPendingMeal = meal.notes?.includes('AI scan') && !meal.confirmed;
 

@@ -181,9 +181,6 @@ export default function AddHaircareProductScreen() {
       await addBeautyProduct.mutateAsync(beautyProduct);
 
       toast.dismiss();
-      toast.success('Adding to your collection...', {
-        description: 'Product will appear in your list automatically',
-      });
 
       // Reset form and go back
       setManualProduct({ name: '', brand: '', category: 'Shampoo' });

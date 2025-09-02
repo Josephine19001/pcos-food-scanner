@@ -5,6 +5,12 @@ import { toast } from 'sonner-native';
 import { queryKeys } from './query-keys';
 import type { MealEntry } from '@/lib/types/nutrition-tracking';
 
+interface RealtimePayload {
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new: Record<string, any> | null;
+  old: Record<string, any> | null;
+}
+
 interface FoodAnalysisRealtimeHookProps {
   onAnalysisComplete?: (mealEntry: MealEntry) => void;
   onAnalysisFailed?: (mealEntry: MealEntry) => void;
@@ -17,9 +23,11 @@ export function useFoodAnalysisRealtime({
   onAnalysisProgress,
 }: FoodAnalysisRealtimeHookProps = {}) {
   const queryClient = useQueryClient();
+  const pollIntervalRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const subscriptionRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const handleRealtimeEvent = useCallback(
-    (payload: any) => {
+    (payload: RealtimePayload) => {
       const { eventType, new: newRecord, old: oldRecord } = payload;
 
       // Only handle meal entry updates for analysis status changes
@@ -56,34 +64,16 @@ export function useFoodAnalysisRealtime({
             case 'completed':
               onAnalysisComplete?.(mealEntry);
 
-              // Show success notification with food name
-              const foodName = mealEntry.food_items?.[0]?.food?.name || 'Food';
-              toast.success('✅ Analysis Complete!', {
-                description: `${foodName} has been added to your meals`,
-                duration: 4000,
-              });
               break;
 
             case 'failed':
               onAnalysisFailed?.(mealEntry);
 
-              // Show error notification
-              toast.error('❌ Analysis Failed', {
-                description: 'Unable to analyze your food. Please try again.',
-                duration: 5000,
-              });
               break;
 
             case 'analyzing':
               onAnalysisProgress?.(mealEntry);
 
-              // Show progress notification (only once when starting)
-              if (oldMealEntry.analysis_status !== 'analyzing') {
-                toast.success('🔍 Analyzing Food', {
-                  description: 'AI is analyzing your food photo...',
-                  duration: 2000,
-                });
-              }
               break;
           }
         }
@@ -201,8 +191,6 @@ export function useFoodAnalysisRealtime({
 
   // Add a polling fallback for analyzing meals to ensure we don't miss updates
   useEffect(() => {
-    const pollInterval = useRef<NodeJS.Timeout>();
-
     const pollAnalyzingMeals = async () => {
       try {
         const { data: user } = await supabase.auth.getUser();
@@ -231,7 +219,7 @@ export function useFoodAnalysisRealtime({
           });
 
           // Continue polling
-          pollInterval.current = setTimeout(pollAnalyzingMeals, 2000);
+          pollIntervalRef.current = setTimeout(pollAnalyzingMeals, 2000);
         } else {
           // No more analyzing meals, stop polling
           console.log('✅ No more analyzing meals, stopping poll');
@@ -242,11 +230,11 @@ export function useFoodAnalysisRealtime({
     };
 
     // Start polling when there might be analyzing meals
-    pollInterval.current = setTimeout(pollAnalyzingMeals, 3000);
+    pollIntervalRef.current = setTimeout(pollAnalyzingMeals, 3000);
 
     return () => {
-      if (pollInterval.current) {
-        clearTimeout(pollInterval.current);
+      if (pollIntervalRef.current) {
+        clearTimeout(pollIntervalRef.current);
       }
     };
   }, [queryClient]);

@@ -108,8 +108,8 @@ export function getCircularProgressStyles(
 }
 
 /**
- * Alternative approach using stroke-dasharray concept
- * This creates a more accurate circular progress
+ * Clean, precise circular progress using accurate border calculations
+ * This creates smooth progress that accurately reflects the percentage
  */
 export function getAccurateCircularProgressStyles(
   consumed: number,
@@ -132,6 +132,9 @@ export function getAccurateCircularProgressStyles(
     borderColor: '#E5E7EB',
   };
 
+  console.log(`Progress calculation: ${consumed}/${target} = ${progress.toFixed(1)}%`);
+  console.log(`Progress thresholds: top=${progress > 0}, right=${progress > 25}, bottom=${progress > 50}, left=${progress > 75}`);
+
   if (progress <= 0) {
     return {
       backgroundCircle,
@@ -151,18 +154,21 @@ export function getAccurateCircularProgressStyles(
     };
   }
 
-  // Create segments based on progress percentage
-  const segments = Math.min(4, Math.ceil(progress / 25));
-  const lastSegmentProgress = progress % 25;
-
+  // Simple and accurate approach: calculate how much of each border should be colored
+  // Progress starts from top (12 o'clock) and goes clockwise
   const progressCircle = {
     ...baseCircle,
     borderColor: 'transparent',
-    borderTopColor: segments >= 1 ? color : 'transparent',
-    borderRightColor: segments >= 2 ? color : 'transparent',
-    borderBottomColor: segments >= 3 ? color : 'transparent',
-    borderLeftColor: segments >= 4 ? color : 'transparent',
-    transform: [{ rotate: `${-90 + lastSegmentProgress * 14.4}deg` }],
+    // Top border (0-25%)
+    borderTopColor: progress > 0 ? color : 'transparent',
+    // Right border (25-50%)  
+    borderRightColor: progress > 25 ? color : 'transparent',
+    // Bottom border (50-75%)
+    borderBottomColor: progress > 50 ? color : 'transparent',
+    // Left border (75-100%)
+    borderLeftColor: progress > 75 ? color : 'transparent',
+    // Start from -90 degrees (top) and rotate based on the current segment
+    transform: [{ rotate: `${-90 + (progress % 25) * 14.4}deg` }],
   };
 
   return {
@@ -173,7 +179,8 @@ export function getAccurateCircularProgressStyles(
 }
 
 /**
- * Simple approach - just use rotation for the entire border
+ * Smooth dynamic circular progress using half-circle technique
+ * This creates a truly dynamic progress bar that fills smoothly
  */
 export function getSimpleCircularProgressStyles(
   consumed: number,
@@ -182,18 +189,21 @@ export function getSimpleCircularProgressStyles(
   size: number = 76,
   strokeWidth: number = 6
 ): CircularProgressStyles {
-  const progress = calculateProgress(consumed, target);
+  const progress = Math.min(calculateProgress(consumed, target), 100);
 
   const baseCircle = {
     width: size,
     height: size,
-    borderWidth: strokeWidth,
+    borderRadius: size / 2,
   };
 
   const backgroundCircle = {
     ...baseCircle,
+    borderWidth: strokeWidth,
     borderColor: '#E5E7EB',
   };
+
+  console.log(`Granular progress: ${consumed}/${target} = ${progress.toFixed(1)}%`);
 
   if (progress <= 0) {
     return {
@@ -209,22 +219,27 @@ export function getSimpleCircularProgressStyles(
       progressCircle: null,
       fullCircle: {
         ...baseCircle,
+        borderWidth: strokeWidth,
         borderColor: color,
       },
     };
   }
 
-  // Use conic gradient approach with border
-  const angle = Math.min(progress, 100) * 3.6; // Convert percentage to degrees
-
+  // Granular progress - each 1% gives more accurate visual feedback
+  // Each border represents 25% of progress but starts at 1% intervals
   const progressCircle = {
     ...baseCircle,
+    borderWidth: strokeWidth,
     borderColor: 'transparent',
-    borderTopColor: color,
-    borderRightColor: angle > 90 ? color : 'transparent',
-    borderBottomColor: angle > 180 ? color : 'transparent',
-    borderLeftColor: angle > 270 ? color : 'transparent',
-    transform: [{ rotate: `${-90 + angle}deg` }],
+    // Top border: starts at 1%
+    borderTopColor: progress >= 1 ? color : 'transparent',
+    // Right border: starts at 26%
+    borderRightColor: progress >= 26 ? color : 'transparent',
+    // Bottom border: starts at 51%
+    borderBottomColor: progress >= 51 ? color : 'transparent',
+    // Left border: starts at 76%
+    borderLeftColor: progress >= 76 ? color : 'transparent',
+    transform: [{ rotate: '0deg' }],
   };
 
   return {

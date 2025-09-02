@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
 import PageLayout from '@/components/layouts/page-layout';
@@ -18,7 +18,6 @@ import { getLocalDateString } from '@/lib/utils/date-helpers';
 import { useMealProcessing } from '@/lib/hooks/use-meal-processing';
 import { useDateRange } from '@/lib/hooks/use-date-range';
 import { useMealActions } from '@/lib/hooks/use-meal-actions';
-import { useMealCleanup } from '@/lib/hooks/use-meal-cleanup';
 import { useMacroData } from '@/lib/hooks/use-macro-data';
 
 import CaloriesSummaryCard from '@/components/nutrition/calories-summary-card';
@@ -30,9 +29,8 @@ import {
   NutritionPageSkeleton,
   StreakDisplaySkeleton,
 } from '@/components/nutrition/nutrition-skeleton';
-import MealEditModal from '@/components/nutrition/meal-edit-modal';
 import { EmptyGoalsState } from '@/components/nutrition/empty-goals-state';
-import { AnalyzedFoodModal } from '@/components/food/analyzed-food-modal';
+import { FoodDetailsModal } from '@/components/nutrition/food-details-modal';
 
 export default function NutritionScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -40,19 +38,18 @@ export default function NutritionScreen() {
 
   const { startDate, endDate } = useDateRange();
   const {
-    editingMeal,
-    viewingAnalyzedFood,
+    viewingMealDetails,
     forceUpdateKey,
     handleMealEdit,
     handleMealSave,
     handleMealDelete,
+    handleMealDone,
     handleSavePendingFood,
     handleDiscardPendingFood,
-    setEditingMeal,
-    setViewingAnalyzedFood,
+    handleRetryAnalysis,
+    setViewingMealDetails,
     forceUpdate,
   } = useMealActions();
-  const { cleanupStuckAnalyzingMeals } = useMealCleanup();
 
   useMealEntriesRealtime(forceUpdate);
 
@@ -71,6 +68,37 @@ export default function NutritionScreen() {
 
   const macroData = useMacroData(progress);
   const todaysMeals = useMealProcessing(dailySummary);
+
+  // Debug logging to track data changes
+  React.useEffect(() => {
+    console.log('🍎 NutritionScreen: Data updated', {
+      forceUpdateKey,
+      macroData: macroData
+        ? {
+            calories: macroData.calories,
+            protein: macroData.protein,
+            carbs: macroData.carbs,
+            fat: macroData.fat,
+          }
+        : 'null',
+      progress: progress
+        ? {
+            calories: progress.calories,
+            protein: progress.protein,
+            carbs: progress.carbs,
+            fat: progress.fat,
+          }
+        : 'null',
+      dailySummary: dailySummary
+        ? {
+            total_calories: dailySummary.total_calories,
+            total_protein: dailySummary.total_protein,
+            meal_count: dailySummary.meal_count,
+          }
+        : 'null',
+      todaysMealsCount: todaysMeals?.length || 0,
+    });
+  }, [forceUpdateKey, macroData, progress, dailySummary, todaysMeals]);
 
   const waterData = {
     consumed: waterProgress.consumed,
@@ -153,30 +181,23 @@ export default function NutritionScreen() {
         ) : (
           <>
             <CaloriesSummaryCard
+              key={`calories-${forceUpdateKey}`}
               macroData={macroData}
               dailySummary={dailySummary}
               isLoading={isLoading}
             />
 
-            <MacroBreakdown macroData={macroData} isLoading={isLoading} />
+            <MacroBreakdown
+              key={`macros-${forceUpdateKey}`}
+              macroData={macroData}
+              isLoading={isLoading}
+            />
 
             <WaterIntakeCard
               waterData={waterData}
               onAddWaterPress={() => router.push('/log-water')}
               onQuickAdd={() => quickAddWater.mutate({ date: dateString })}
             />
-
-            {/* Temporary debug button - remove after fixing */}
-            {__DEV__ && (
-              <TouchableOpacity
-                onPress={() => cleanupStuckAnalyzingMeals(dailySummary)}
-                className="mx-4 mb-4 bg-red-500 py-3 rounded-xl"
-              >
-                <Text className="text-white text-center font-medium">
-                  🧹 Clean Up Stuck Analyzing Meals
-                </Text>
-              </TouchableOpacity>
-            )}
 
             <MealsSection
               key={`meals-${forceUpdateKey}`}
@@ -199,28 +220,14 @@ export default function NutritionScreen() {
         title="Select Date"
       />
 
-      <MealEditModal
-        isVisible={!!editingMeal}
-        meal={editingMeal}
-        onClose={() => setEditingMeal(null)}
+      <FoodDetailsModal
+        visible={!!viewingMealDetails}
+        meal={viewingMealDetails}
+        onClose={() => setViewingMealDetails(null)}
         onSave={handleMealSave}
         onDelete={handleMealDelete}
-      />
-
-      <AnalyzedFoodModal
-        visible={!!viewingAnalyzedFood}
-        meal={viewingAnalyzedFood}
-        onClose={() => setViewingAnalyzedFood(null)}
-        onEdit={(meal) => {
-          setViewingAnalyzedFood(null);
-          setEditingMeal(meal);
-        }}
-        onDelete={handleMealDelete}
-        onSave={(updatedMeal) => {
-          handleMealSave(updatedMeal.id, {
-            food_items: updatedMeal.food_items,
-          });
-        }}
+        onDone={handleMealDone}
+        onRetry={handleRetryAnalysis}
       />
     </PageLayout>
   );

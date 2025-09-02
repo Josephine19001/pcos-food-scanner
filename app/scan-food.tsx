@@ -50,48 +50,13 @@ export default function ScanFoodScreen() {
 
   const [foodContext] = useState<string>(''); // Keep empty since we removed the input
 
-  // Handle camera permission
-  if (!permission) {
-    return <View />;
-  }
-
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#000000" />
-        <View style={styles.permissionContainer}>
-          <Text style={styles.permissionText}>We need your permission to show the camera</Text>
-          <TouchableOpacity onPress={requestPermission} style={styles.permissionButton}>
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  const convertImageToBase64 = async (imageUri: string): Promise<string> => {
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
-
   const takePicture = async () => {
     if (!cameraRef.current) return;
-
     try {
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.8,
         base64: false,
       });
-
       if (photo) {
         await analyzeFoodImage(photo.uri);
       }
@@ -112,14 +77,12 @@ export default function ScanFoodScreen() {
         );
         return;
       }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
-
       if (!result.canceled && result.assets[0]) {
         await analyzeFoodImage(result.assets[0].uri);
       }
@@ -132,8 +95,6 @@ export default function ScanFoodScreen() {
   const analyzeFoodImage = async (imageUri: string) => {
     try {
       const { date, time } = getLocalDateTime();
-
-      // Create an analyzing meal entry that will be updated via realtime
       const analyzingMealEntry = {
         meal_type: selectedMealType as 'breakfast' | 'lunch' | 'dinner' | 'snack',
         food_items: [
@@ -144,7 +105,6 @@ export default function ScanFoodScreen() {
               brand: 'AI Scanning',
               category: 'scanning',
               servingSize: '1 serving',
-              units: {},
               nutrition: {
                 calories: 0,
                 protein: 0,
@@ -152,12 +112,7 @@ export default function ScanFoodScreen() {
                 fat: 0,
                 fiber: 0,
                 sugar: 0,
-                sodium_mg: 0,
               },
-              confidence: 0,
-              isPackaged: false,
-              sourceLabel: null,
-              image_url: imageUri,
             },
             quantity: 1,
           },
@@ -165,50 +120,37 @@ export default function ScanFoodScreen() {
         logged_date: date,
         logged_time: time,
         notes: 'AI analyzing food',
-        // Set initial analysis status
         analysis_status: 'analyzing' as const,
         analysis_progress: 0,
         analysis_stage: 'uploading' as const,
+        image_url: imageUri, // Add the image URL immediately
       };
 
-      // Create the analyzing meal entry
       createMealEntry.mutate(analyzingMealEntry, {
         onSuccess: async (analyzingMeal) => {
           console.log('🔍 Created analyzing meal entry:', analyzingMeal.id);
-
-          // Navigate back to show the analyzing state in Today's meals
           const returnTo = (params.returnTo as string) || '/(tabs)/nutrition';
           router.push(returnTo as any);
-
-          // Update progress to show we're starting analysis
           await updateAnalysisProgress(analyzingMeal.id, 10, 'uploading');
 
           try {
-            // Convert image to base64
             const imageBase64 = await convertImageToBase64(imageUri);
-
-            // Update progress for analysis stage
             await updateAnalysisProgress(analyzingMeal.id, 30, 'analyzing');
-
-            // Start the AI analysis
             scanFood.mutate(
               {
                 image_base64: imageBase64,
                 context: foodContext.trim() || undefined,
                 meal_type: selectedMealType,
-                auto_save: false, // We'll handle the meal entry update manually
-                meal_entry_id: analyzingMeal.id, // Pass meal entry ID for realtime progress
+                auto_save: false,
+                meal_entry_id: analyzingMeal.id,
               },
               {
                 onSuccess: async (response) => {
                   console.log('✅ Scan response received:', response);
-                  // The edge function now handles updating the meal entry with real data
-                  // and marking it as completed. The realtime hook will handle notifications.
                 },
                 onError: async (error) => {
                   console.error('❌ Food analysis error:', error);
                   await markAnalysisFailed(analyzingMeal.id);
-                  // The realtime hook will handle the error notification
                 },
               }
             );
@@ -229,57 +171,86 @@ export default function ScanFoodScreen() {
     }
   };
 
-  // Camera and library functions updated for new UI
+  const convertImageToBase64 = async (imageUri: string): Promise<string> => {
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
 
+  // Render based on permission state - no early returns after hooks
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
-
-      {/* Camera View */}
-      <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <X size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.helpButton}>
-            <HelpCircle size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Camera Frame */}
-        <View style={styles.cameraFrame}>
-          <View style={styles.frameCorner} />
-          <View style={[styles.frameCorner, styles.frameCornerTopRight]} />
-          <View style={[styles.frameCorner, styles.frameCornerBottomLeft]} />
-          <View style={[styles.frameCorner, styles.frameCornerBottomRight]} />
-        </View>
-
-        {/* Bottom Controls */}
-        <View style={styles.bottomControls}>
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.actionButton} onPress={takePicture}>
-              <Camera size={20} color="#000000" />
-              <Text style={styles.actionButtonText}>Scan Food</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton} onPress={pickFromLibrary}>
-              <ImageIcon size={20} color="#000000" />
-              <Text style={styles.actionButtonText}>Library</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Capture Button */}
-          <View style={styles.captureContainer}>
-            <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-              <View style={styles.captureButtonInner} />
+    <>
+      {!permission ? (
+        <View />
+      ) : !permission.granted ? (
+        <View style={styles.container}>
+          <StatusBar barStyle="light-content" backgroundColor="#000000" />
+          <View style={styles.permissionContainer}>
+            <Text style={styles.permissionText}>We need your permission to show the camera</Text>
+            <TouchableOpacity onPress={requestPermission} style={styles.permissionButton}>
+              <Text style={styles.permissionButtonText}>Grant Permission</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </CameraView>
-    </View>
+      ) : (
+        <View style={styles.container}>
+          <StatusBar barStyle="light-content" backgroundColor="#000000" />
+
+          {/* Camera View */}
+          <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+                <X size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.helpButton}>
+                <HelpCircle size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Camera Frame */}
+            <View style={styles.cameraFrame}>
+              <View style={styles.frameCorner} />
+              <View style={[styles.frameCorner, styles.frameCornerTopRight]} />
+              <View style={[styles.frameCorner, styles.frameCornerBottomLeft]} />
+              <View style={[styles.frameCorner, styles.frameCornerBottomRight]} />
+            </View>
+
+            {/* Bottom Controls */}
+            <View style={styles.bottomControls}>
+              {/* Action Buttons */}
+              <View style={styles.actionButtons}>
+                <TouchableOpacity style={styles.actionButton} onPress={takePicture}>
+                  <Camera size={20} color="#000000" />
+                  <Text style={styles.actionButtonText}>Scan Food</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionButton} onPress={pickFromLibrary}>
+                  <ImageIcon size={20} color="#000000" />
+                  <Text style={styles.actionButtonText}>Library</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Capture Button */}
+              <View style={styles.captureContainer}>
+                <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+                  <View style={styles.captureButtonInner} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </CameraView>
+        </View>
+      )}
+    </>
   );
 }
 

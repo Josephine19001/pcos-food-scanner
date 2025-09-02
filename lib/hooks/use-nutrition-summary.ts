@@ -39,7 +39,7 @@ export function useDailyNutritionSummary(date: string) {
   const { data: nutritionGoals, isLoading: goalsLoading } = useNutritionGoals();
 
   return useQuery({
-    queryKey: [...queryKeys.logs.dailyNutrition, date, mealEntries?.length, waterEntries?.length],
+    queryKey: [...queryKeys.logs.dailyNutrition, date, mealEntries?.length, waterEntries?.length, mealEntries?.map(m => `${m.id}-${m.total_calories}-${m.total_protein}-${m.total_carbs}-${m.total_fat}`).join(',')],
     queryFn: () => {
       if (mealsLoading || waterLoading || goalsLoading) {
         return null;
@@ -104,6 +104,9 @@ export function useNutritionProgress(date: string) {
       ...queryKeys.logs.nutritionProgress,
       date,
       dailySummary?.total_calories,
+      dailySummary?.total_protein,
+      dailySummary?.total_carbs,
+      dailySummary?.total_fat,
       nutritionGoals?.calories,
     ],
     queryFn: (): NutritionProgress | null => {

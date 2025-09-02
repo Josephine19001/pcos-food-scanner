@@ -110,7 +110,8 @@ export function useCreateMealEntry() {
         logged_time: data.logged_time || new Date().toTimeString().split(' ')[0],
       };
 
-      // Add analysis fields if provided
+      // Add optional fields if provided
+      if (data.image_url) insertData.image_url = data.image_url;
       if (data.analysis_status) insertData.analysis_status = data.analysis_status;
       if (data.analysis_progress !== undefined)
         insertData.analysis_progress = data.analysis_progress;

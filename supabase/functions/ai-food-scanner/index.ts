@@ -220,6 +220,7 @@ Deno.serve(async (req) => {
             meal_entry_id: request_meal_entry_id,
             status: 'failed',
             progress: 0,
+            stage: 'failed',
           });
         }
 
@@ -278,13 +279,14 @@ Deno.serve(async (req) => {
               brand: analyzedItem.brand || 'AI Detected',
               category: analyzedItem.category,
               servingSize: analyzedItem.serving_size,
-              units: {},
-              nutrition: analyzedItem.nutrition,
-              confidence: analyzedItem.confidence,
-              isPackaged: false,
-              sourceLabel: null,
-              detailed_ingredients: (analyzedItem as any).detailed_ingredients,
-              image_url: imageUrl,
+              nutrition: {
+                calories: analyzedItem.nutrition.calories,
+                protein: analyzedItem.nutrition.protein,
+                carbs: analyzedItem.nutrition.carbs,
+                fat: analyzedItem.nutrition.fat,
+                fiber: analyzedItem.nutrition.fiber || 0,
+                sugar: analyzedItem.nutrition.sugar || 0,
+              },
             },
             quantity: 1,
           },
@@ -298,10 +300,34 @@ Deno.serve(async (req) => {
         const totalFiber = analyzedItem.nutrition.fiber || 0;
         const totalSugar = analyzedItem.nutrition.sugar || 0;
 
+        console.log('📊 Calculated nutrition totals:', {
+          totalCalories,
+          totalProtein,
+          totalCarbs,
+          totalFat,
+          totalFiber,
+          totalSugar,
+          analyzedItemNutrition: analyzedItem.nutrition,
+        });
+
+        console.log('🍽️ Updated food items structure:', JSON.stringify(updatedFoodItems, null, 2));
+
         // Update the meal entry with real data
-        const { error: updateError } = await supabase
-          .from('meal_entries')
-          .update({
+        console.log('🔄 Starting meal update for ID:', request_meal_entry_id);
+        console.log('🔄 Update data:', {
+          food_items: updatedFoodItems,
+          total_calories: totalCalories,
+          total_protein: totalProtein,
+          total_carbs: totalCarbs,
+          total_fat: totalFat,
+          analysis_status: 'completed'
+        });
+
+        // Try using RPC to update meal data (might bypass RLS issues)
+        const { data: updateResult, error: updateError } = await supabase.rpc(
+          'update_completed_meal_analysis',
+          {
+            meal_entry_id: request_meal_entry_id,
             food_items: updatedFoodItems,
             total_calories: totalCalories,
             total_protein: totalProtein,
@@ -309,35 +335,48 @@ Deno.serve(async (req) => {
             total_fat: totalFat,
             total_fiber: totalFiber,
             total_sugar: totalSugar,
-            notes: context
+            notes_text: context
               ? `AI scan (${analyzedItem.confidence}%) • ${context}`
               : `AI scan (${analyzedItem.confidence}%)`,
-            image_url: imageUrl,
-            analysis_status: 'completed',
-            analysis_progress: 100,
-            analysis_stage: null,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', request_meal_entry_id);
+            image_url_text: imageUrl
+          }
+        );
+
+        console.log('🔍 Update result:', { updateResult, updateError });
 
         if (updateError) {
           console.error('❌ Failed to update meal with analyzed data:', updateError);
-          // Fallback to just marking as completed
+          console.error('Update error details:', JSON.stringify(updateError, null, 2));
+          
+          // Try to mark as failed instead of completed since the data update failed
           await supabase.rpc('update_meal_analysis_progress', {
             meal_entry_id: request_meal_entry_id,
-            status: 'completed',
-            progress: 100,
+            status: 'failed',
+            progress: 0,
+            stage: 'failed',
           });
         } else {
-          console.log('✅ Successfully updated meal with analyzed data');
+          console.log('✅ Successfully updated meal with analyzed data via RPC');
+          
+          // Verify the update worked by fetching the updated meal
+          const { data: updatedMeal } = await supabase
+            .from('meal_entries')
+            .select('*')
+            .eq('id', request_meal_entry_id)
+            .single();
+          
+          console.log('✅ Verified updated meal data:', updatedMeal);
         }
       } catch (updateError) {
         console.error('❌ Failed to update meal with analyzed data:', updateError);
-        // Fallback to just marking as completed
+        console.error('Catch error details:', JSON.stringify(updateError, null, 2));
+        
+        // Mark as failed since we couldn't update the data
         await supabase.rpc('update_meal_analysis_progress', {
           meal_entry_id: request_meal_entry_id,
-          status: 'completed',
-          progress: 100,
+          status: 'failed',
+          progress: 0,
+          stage: 'failed',
         });
       }
     }
@@ -366,6 +405,7 @@ Deno.serve(async (req) => {
           meal_entry_id: meal_entry_id,
           status: 'failed',
           progress: 0,
+          stage: 'failed',
         });
       } catch (cleanupError) {
         console.error('Failed to mark meal as failed during cleanup:', cleanupError);

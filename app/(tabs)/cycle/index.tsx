@@ -163,8 +163,12 @@ export default function CycleScreen() {
   }, [periodLogs, cycleSettings, selectedDate]);
 
   const pregnancyChances = React.useMemo(() => {
-    return getPregnancyChances(selectedDate, periodLogs as PeriodLog[], cycleSettings);
-  }, [selectedDate, cycleSettings, periodLogs]);
+    // Use pregnancy chances from current phase if available, otherwise calculate locally
+    return safeCurrentPhase?.pregnancy_chances || getPregnancyChances(selectedDate, periodLogs as PeriodLog[], cycleSettings);
+  }, [selectedDate, cycleSettings, periodLogs, safeCurrentPhase]);
+
+  console.log('Period Logs:', periodLogs);
+  console.log('Pregnancy Chances:', pregnancyChances);
 
   return (
     <PageLayout
@@ -267,6 +271,8 @@ export default function CycleScreen() {
             onLogPeriod={() => setShowFullCalendar(true)}
             nextPeriodPrediction={nextPeriodPrediction}
             pregnancyChances={pregnancyChances}
+            periodLogs={periodLogs as PeriodLog[]}
+            cycleSettings={cycleSettings}
           />
 
           <TodaysSymptoms

@@ -89,7 +89,6 @@ export default function SupplementsScreen() {
         { id: editingSupplement.id, ...supplementData },
         {
           onSuccess: () => {
-            toast.success('Supplement updated!');
             setShowAddModal(false);
             resetForm();
           },
@@ -98,7 +97,6 @@ export default function SupplementsScreen() {
     } else {
       addSupplement.mutate(supplementData, {
         onSuccess: () => {
-          toast.success('Supplement added!');
           setShowAddModal(false);
           resetForm();
         },
@@ -108,9 +106,7 @@ export default function SupplementsScreen() {
 
   const handleDeleteSupplement = (supplementId: string) => {
     deleteSupplement.mutate(supplementId, {
-      onSuccess: () => {
-        toast.success('Supplement removed');
-      },
+      onSuccess: () => {},
     });
   };
 

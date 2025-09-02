@@ -310,7 +310,6 @@ export default function PaywallScreen() {
                       customerInfo.entitlements.active &&
                       Object.keys(customerInfo.entitlements.active).length > 0
                     ) {
-                      toast.success('Purchases restored successfully!');
                       if (successRoute) {
                         router.replace(successRoute as any);
                       } else {

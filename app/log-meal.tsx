@@ -160,11 +160,11 @@ export default function LogMealScreen() {
   };
 
   const handleScanFood = () => {
-    router.push(`/scan-food?mealType=${selectedMealType}&returnTo=/log-meal`);
+    router.push(`/scan-food?mealType=${selectedMealType}&returnTo=/(tabs)/nutrition`);
   };
 
   const handleAIScan = () => {
-    router.push(`/scan-food?mealType=${selectedMealType}&returnTo=/log-meal`);
+    router.push(`/scan-food?mealType=${selectedMealType}&returnTo=/(tabs)/nutrition`);
   };
 
   // Image scanning functions
@@ -221,19 +221,25 @@ export default function LogMealScreen() {
       const response = await scanFood.mutateAsync({ image_base64: base64Data });
       const analysis = response.analysis;
 
+      // Get the first food item from the analysis
+      const firstItem = analysis.items?.[0];
+      if (!firstItem) {
+        throw new Error('No food items detected');
+      }
+
       const detectedFood: FoodItem = {
         id: `scanned_${Date.now()}`,
-        name: analysis.food_name,
-        brand: analysis.brand || 'AI Detected',
-        category: analysis.category,
-        servingSize: analysis.serving_size,
+        name: firstItem.food_name,
+        brand: firstItem.brand || 'AI Detected',
+        category: firstItem.category,
+        servingSize: firstItem.serving_size,
         nutrition: {
-          calories: analysis.nutrition.calories,
-          protein: analysis.nutrition.protein,
-          carbs: analysis.nutrition.carbs,
-          fat: analysis.nutrition.fat,
-          fiber: analysis.nutrition.fiber || 0,
-          sugar: analysis.nutrition.sugar || 0,
+          calories: firstItem.nutrition.calories,
+          protein: firstItem.nutrition.protein,
+          carbs: firstItem.nutrition.carbs,
+          fat: firstItem.nutrition.fat,
+          fiber: firstItem.nutrition.fiber || 0,
+          sugar: firstItem.nutrition.sugar || 0,
         },
       };
 
@@ -253,7 +259,7 @@ export default function LogMealScreen() {
 
     try {
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -277,7 +283,7 @@ export default function LogMealScreen() {
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -293,7 +299,7 @@ export default function LogMealScreen() {
     }
   };
 
-  const handleAddCustomFood = (shareWithCommunity = false) => {
+  const handleAddCustomFood = () => {
     const nutrition = {
       calories: parseFloat(customFood.calories) || 0,
       protein: parseFloat(customFood.protein) || 0,
@@ -310,20 +316,11 @@ export default function LogMealScreen() {
       category: customFood.category,
       servingSize: customFood.servingSize.trim(),
       nutrition,
-      isCustom: true,
-      shareWithCommunity,
     };
 
     setSelectedFoods([...selectedFoods, { food: newFood, quantity: 1 }]);
     resetCustomFood();
     setShowCustomFood(false);
-
-    // Show confirmation toast
-    if (shareWithCommunity) {
-      toast.success('Custom food added and will be shared with community!');
-    } else {
-      toast.success('Custom food added to your meal!');
-    }
   };
 
   const resetCustomFood = () => {

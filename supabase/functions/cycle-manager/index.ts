@@ -50,6 +50,11 @@ interface CurrentCyclePhase {
   energy_level: 'low' | 'building' | 'high' | 'declining';
   description: string;
   recommended_exercises: string[];
+  pregnancy_chances?: {
+    level: string;
+    color: string;
+    description: string;
+  };
 }
 
 function jsonResponse(data: any, status = 200) {
@@ -61,6 +66,47 @@ function jsonResponse(data: any, status = 200) {
 
 function errorResponse(message: string, status = 400) {
   return jsonResponse({ error: message }, status);
+}
+
+// Calculate pregnancy chances based on cycle day
+function calculatePregnancyChances(dayInCycle: number) {
+  if (dayInCycle <= 5) {
+    return {
+      level: 'Very Low',
+      color: '#10B981',
+      description: 'Menstrual phase - very low fertility',
+    };
+  } else if (dayInCycle <= 9) {
+    return {
+      level: 'Low',
+      color: '#10B981',
+      description: 'Early follicular phase - low fertility',
+    };
+  } else if (dayInCycle <= 11) {
+    return {
+      level: 'Medium',
+      color: '#F59E0B',
+      description: 'Late follicular phase - fertility increasing',
+    };
+  } else if (dayInCycle >= 12 && dayInCycle <= 16) {
+    return {
+      level: 'High',
+      color: '#EF4444',
+      description: 'Ovulatory phase - peak fertility window',
+    };
+  } else if (dayInCycle <= 21) {
+    return {
+      level: 'Medium',
+      color: '#F59E0B',
+      description: 'Early luteal phase - moderate fertility',
+    };
+  } else {
+    return {
+      level: 'Low',
+      color: '#10B981',
+      description: 'Late luteal phase - low fertility',
+    };
+  }
 }
 
 // Calculate current cycle phase based on settings and logs
@@ -159,6 +205,7 @@ function calculateCyclePhase(settings: CycleSettings, periodLogs: any[]): Curren
     energy_level,
     description,
     recommended_exercises,
+    pregnancy_chances: calculatePregnancyChances(dayInCycle),
   };
 }
 

@@ -212,9 +212,6 @@ export default function ScanBeautyScreen() {
       await saveScanWithInsights.mutateAsync(scanData);
 
       toast.dismiss();
-      toast.success('Product saved!', {
-        description: 'Check it out in your cycle tab',
-      });
 
       setShowProductDetail(false);
       router.back();

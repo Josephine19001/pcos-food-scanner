@@ -63,6 +63,7 @@ export interface CreateMealEntryData {
   logged_date?: string;
   logged_time?: string;
   share_with_community?: boolean;
+  image_url?: string;
   // Analysis fields for AI food scanning
   analysis_status?: 'analyzing' | 'completed' | 'failed';
   analysis_progress?: number;
