@@ -1,12 +1,11 @@
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import 'expo-router/entry';
+import '../global.css';
 
 import { Stack } from 'expo-router';
 
 import { RootProvider } from '@/context/root-provider';
-
-import '../global.css';
 
 export default function Layout() {
   return (
@@ -29,7 +28,7 @@ export default function Layout() {
         <Stack.Screen name="log-meal" options={{ headerShown: false }} />
         <Stack.Screen name="log-exercise" options={{ headerShown: false }} />
         <Stack.Screen name="log-water" options={{ headerShown: false }} />
-        <Stack.Screen name="log-sleep" options={{ headerShown: false }} />
+
         <Stack.Screen name="log-mood" options={{ headerShown: false }} />
         <Stack.Screen name="log-symptoms" options={{ headerShown: false }} />
         <Stack.Screen name="log-supplements" options={{ headerShown: false }} />
@@ -38,7 +37,7 @@ export default function Layout() {
         <Stack.Screen name="scan-food" options={{ headerShown: false }} />
 
         {/* Cycle Tracking */}
-        <Stack.Screen name="period-tracker" options={{ headerShown: false }} />
+
         <Stack.Screen name="cycle-history" options={{ headerShown: false }} />
         <Stack.Screen name="edit-period" options={{ headerShown: false }} />
 

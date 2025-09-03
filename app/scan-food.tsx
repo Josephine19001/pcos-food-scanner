@@ -7,6 +7,7 @@ import { useScanFood } from '@/lib/hooks/use-food-scanner';
 import { useCreateMealEntry } from '@/lib/hooks/use-meal-tracking';
 import { useFoodAnalysisRealtime } from '@/lib/hooks/use-food-analysis-realtime';
 import { getLocalDateTime } from '@/lib/utils/date-helpers';
+import { FoodScanGuideModal } from '@/components/food-scan-help';
 
 import { Camera, Image as ImageIcon, X, HelpCircle } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -35,6 +36,7 @@ export default function ScanFoodScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [facing, setFacing] = useState<CameraType>('back');
   const cameraRef = useRef<CameraView>(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const [selectedMealType, setSelectedMealType] = useState(() => {
     const mealType = (params.mealType as string) || 'breakfast';
@@ -202,7 +204,10 @@ export default function ScanFoodScreen() {
                 <X size={24} color="#FFFFFF" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.helpButton}>
+              <TouchableOpacity 
+                style={styles.helpButton}
+                onPress={() => setShowHelpModal(true)}
+              >
                 <HelpCircle size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
@@ -238,6 +243,12 @@ export default function ScanFoodScreen() {
               </View>
             </View>
           </CameraView>
+
+          {/* Help Modal */}
+          <FoodScanGuideModal 
+            visible={showHelpModal} 
+            onClose={() => setShowHelpModal(false)} 
+          />
         </View>
       )}
     </>
