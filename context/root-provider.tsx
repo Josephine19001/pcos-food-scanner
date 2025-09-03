@@ -10,7 +10,6 @@ import { Toaster } from 'sonner-native';
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 import { AuthProvider } from './auth-provider';
 import { RevenueCatProvider } from './revenuecat-provider';
-import { PendingFoodsProvider } from './pending-foods-provider';
 import { PaywallProvider } from './paywall-provider';
 
 const queryClient = new QueryClient({
@@ -39,14 +38,12 @@ export const RootProvider = ({ children }: PropsWithChildren) => {
       <AuthProvider>
         <RevenueCatProvider>
           <PaywallProvider>
-            <PendingFoodsProvider>
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <BottomSheetModalProvider>
-                  {children}
-                  <Toaster />
-                </BottomSheetModalProvider>
-              </GestureHandlerRootView>
-            </PendingFoodsProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <BottomSheetModalProvider>
+                {children}
+                <Toaster />
+              </BottomSheetModalProvider>
+            </GestureHandlerRootView>
           </PaywallProvider>
         </RevenueCatProvider>
       </AuthProvider>

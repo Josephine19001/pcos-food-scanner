@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { Apple, Coffee, Utensils, Sandwich, Cookie } from 'lucide-react-native';
+import { Coffee, Utensils, Sandwich, Cookie, Flame } from 'lucide-react-native';
 import { DailyNutritionSummary } from '@/lib/types/nutrition-tracking';
 import { CaloriesSummaryCardSkeleton } from './nutrition-skeleton';
 import { getAccurateCircularProgressStyles } from '@/lib/utils/progress-circle';
@@ -107,7 +107,7 @@ export default function CaloriesSummaryCard({
 
             {/* Center icon - smaller and positioned in the center */}
             <View className="w-12 h-12 bg-orange-100 rounded-full items-center justify-center">
-              <Apple size={20} color="#F59E0B" />
+              <Flame size={20} color="#F59E0B" />
             </View>
           </View>
         </View>

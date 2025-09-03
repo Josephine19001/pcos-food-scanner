@@ -169,12 +169,12 @@ export default function WeightTrackingScreen() {
     <SubPageLayout title="Weight Tracking">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Weight Chart */}
-        <View className="px-4 mb-4">
+        {/* <View className="px-4 mb-4">
           <WeightChart
             weightHistory={weightHistory || []}
             bodyMeasurements={bodyMeasurements || null}
           />
-        </View>
+        </View> */}
 
         {/* Stats Cards */}
         <WeightStatsCards

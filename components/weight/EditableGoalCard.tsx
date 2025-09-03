@@ -34,12 +34,12 @@ export function EditableGoalCard({
   return (
     <View className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
       <View className="flex-row items-center mb-3">
-        <View className="bg-gray-100 w-10 h-10 rounded-xl items-center justify-center mr-3">
+        <View className="bg-gray-100 w-12 h-12 rounded-xl items-center justify-center mr-3">
           {React.createElement(icon, { size: 20, color: '#374151' })}
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{title}</Text>
-          <Text className="text-xs text-gray-500">{subtitle}</Text>
+          <Text className="text-lg font-semibold text-gray-900">{title}</Text>
+          <Text className="text-sm text-gray-500">{subtitle}</Text>
         </View>
         {trend && (
           <View

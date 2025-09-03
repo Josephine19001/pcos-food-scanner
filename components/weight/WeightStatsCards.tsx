@@ -27,15 +27,19 @@ export function WeightStatsCards({
 }: WeightStatsCardsProps) {
   return (
     <View className="px-4 mb-4">
-      <Text className="text-xl font-bold text-gray-900 mb-3">Current Stats</Text>
-
       <EditableGoalCard
         icon={Scale}
         title="Current Weight"
         value={bodyMeasurements?.current_weight || 0}
         subtitle="Latest recorded weight"
         field="current_weight"
-        units={bodyMeasurements?.units || 'kg'}
+        units={
+          bodyMeasurements?.units === 'metric'
+            ? 'kg'
+            : bodyMeasurements?.units === 'imperial'
+              ? 'lbs'
+              : bodyMeasurements?.units || 'kg'
+        }
         editingField={editingField}
         tempValue={tempValue}
         onEdit={onEdit}
@@ -49,7 +53,13 @@ export function WeightStatsCards({
         value={bodyMeasurements?.goal_weight || 0}
         subtitle="Target weight"
         field="goal_weight"
-        units={bodyMeasurements?.units || 'kg'}
+        units={
+          bodyMeasurements?.units === 'metric'
+            ? 'kg'
+            : bodyMeasurements?.units === 'imperial'
+              ? 'lbs'
+              : bodyMeasurements?.units || 'kg'
+        }
         editingField={editingField}
         tempValue={tempValue}
         onEdit={onEdit}
@@ -114,7 +124,7 @@ export function WeightStatsCards({
         value={Math.abs(Number(progress.weeklyRate))}
         subtitle="Average weekly change"
         field="weeklyRate"
-        units={`${bodyMeasurements?.units || 'kg'}/week`}
+        units={`${bodyMeasurements?.units === 'metric' ? 'kg' : bodyMeasurements?.units === 'imperial' ? 'lbs' : bodyMeasurements?.units || 'kg'}`}
         trend={
           Number(progress.weeklyRate) < -0.1
             ? 'down'

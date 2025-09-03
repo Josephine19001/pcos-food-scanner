@@ -7,8 +7,8 @@ import {
   Animated,
   type GestureResponderEvent,
 } from 'react-native';
-import { Settings, Plus, Apple, Activity, CalendarHeart, X } from 'lucide-react-native';
-import { usePathname, useRouter } from 'expo-router';
+import { Plus, Apple, Activity, CalendarHeart, X, Dumbbell } from 'lucide-react-native';
+import { usePathname } from 'expo-router';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
@@ -16,6 +16,7 @@ import { SubscriptionGuard } from '@/components/subscription-guard';
 import { LoggerModal } from '@/components/logger-modal';
 
 const HIDDEN_ROUTES = [
+  '/settings/index',
   '/settings/personal-details',
   '/settings/reminder-settings',
   '/settings/fitness-goals',
@@ -149,29 +150,30 @@ export default function TabLayout() {
                   <TabButton
                     {...props}
                     label="Workouts"
-                    Icon={Activity}
+                    Icon={Dumbbell}
                     isActive={pathname === '/exercise'}
                   />
                 ),
               }}
             />
 
-            {/* Settings Tab */}
             <Tabs.Screen
-              name="settings/index"
+              name="progress/index"
               options={{
                 tabBarButton: (props) => (
                   <TabButton
                     {...props}
-                    label="My Profile"
-                    Icon={Settings}
-                    isActive={pathname === '/settings'}
+                    label="Progress"
+                    Icon={Activity}
+                    isActive={pathname === '/progress'}
                   />
                 ),
               }}
             />
+            {/* Settings Tab */}
 
             {/* Hidden screens */}
+            <Tabs.Screen name="settings/index" options={{ href: null, headerShown: false }} />
             <Tabs.Screen
               name="settings/personal-details"
               options={{ href: null, headerShown: false }}

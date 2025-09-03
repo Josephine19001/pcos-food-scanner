@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Modal, SafeAreaView, Pressable, TextInput } from 'react-native';
+import { View, Text, Modal, SafeAreaView, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { type BodyMeasurements } from '@/lib/hooks/use-weight-tracking';
 
@@ -26,7 +26,10 @@ export function AddWeightModal({
 }: AddWeightModalProps) {
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View className="flex-1 justify-end bg-black/50">
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1 justify-end bg-black/50"
+      >
         <SafeAreaView className="bg-white rounded-t-3xl">
           <View className="p-6">
             <View className="flex-row justify-between items-center mb-6">
@@ -38,12 +41,12 @@ export function AddWeightModal({
 
             <View className="mb-4">
               <Text className="text-base font-medium text-gray-700 mb-2">
-                Weight ({bodyMeasurements?.units || 'kg'})
+                Weight ({bodyMeasurements?.units === 'metric' ? 'kg' : bodyMeasurements?.units === 'imperial' ? 'lbs' : bodyMeasurements?.units || 'kg'})
               </Text>
               <TextInput
                 value={newWeight}
                 onChangeText={onWeightChange}
-                placeholder={`Enter weight in ${bodyMeasurements?.units || 'kg'}`}
+                placeholder={`Enter weight in ${bodyMeasurements?.units === 'metric' ? 'kg' : bodyMeasurements?.units === 'imperial' ? 'lbs' : bodyMeasurements?.units || 'kg'}`}
                 keyboardType="numeric"
                 className="border border-gray-200 rounded-xl p-4 text-base"
               />
@@ -68,7 +71,7 @@ export function AddWeightModal({
             />
           </View>
         </SafeAreaView>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

@@ -85,6 +85,31 @@ export function useWeightHistory(limit?: number) {
 }
 
 /**
+ * Hook to get user's weight history for a specific date range
+ */
+export function useWeightHistoryRange(startDate: string, endDate: string) {
+  return useQuery({
+    queryKey: [...queryKeys.logs.weightEntries(), 'range', startDate, endDate],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('weight_history')
+        .select('*')
+        .eq('user_id', user.user.id)
+        .gte('measured_at', startDate + 'T00:00:00')
+        .lte('measured_at', endDate + 'T23:59:59')
+        .order('measured_at', { ascending: true });
+
+      if (error) throw error;
+      return data as WeightEntry[];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
  * Hook to add a weight entry
  */
 export function useAddWeightEntry() {

@@ -162,3 +162,57 @@ export function isYesterday(dateString: string): boolean {
   yesterday.setDate(yesterday.getDate() - 1);
   return dateString === getLocalDateString(yesterday);
 }
+
+/**
+ * Get start of week (Sunday) for a given date
+ */
+export function getStartOfWeek(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const diff = d.getDate() - day; // Adjust for Sunday start
+  return new Date(d.setDate(diff));
+}
+
+/**
+ * Get end of week (Saturday) for a given date
+ */
+export function getEndOfWeek(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() + (6 - day); // Saturday end
+  return new Date(d.setDate(diff));
+}
+
+/**
+ * Subtract days from a date
+ */
+export function subtractDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() - days);
+  return d;
+}
+
+/**
+ * Subtract weeks from a date
+ */
+export function subtractWeeks(date: Date, weeks: number): Date {
+  return subtractDays(date, weeks * 7);
+}
+
+/**
+ * Subtract months from a date
+ */
+export function subtractMonths(date: Date, months: number): Date {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() - months);
+  return d;
+}
+
+/**
+ * Subtract years from a date
+ */
+export function subtractYears(date: Date, years: number): Date {
+  const d = new Date(date);
+  d.setFullYear(d.getFullYear() - years);
+  return d;
+}

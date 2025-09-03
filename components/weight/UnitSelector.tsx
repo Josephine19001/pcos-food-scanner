@@ -24,7 +24,9 @@ export function UnitSelector({ bodyMeasurements, onShowUnitPicker }: UnitSelecto
         </Pressable>
       </View>
 
-      <Text className="text-2xl font-bold text-gray-900">{bodyMeasurements?.units || 'kg'}</Text>
+      <Text className="text-2xl font-bold text-gray-900">
+        {bodyMeasurements?.units === 'metric' ? 'Metric' : bodyMeasurements?.units === 'imperial' ? 'Imperial' : bodyMeasurements?.units === 'kg' ? 'Metric' : bodyMeasurements?.units === 'lbs' ? 'Imperial' : 'Metric'}
+      </Text>
     </View>
   );
 }

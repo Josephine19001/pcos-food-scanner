@@ -2,7 +2,7 @@ import { View, Image, ColorValue } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { LinearGradient } from 'expo-linear-gradient';
 import WeeklyCalendar from '@/components/nutrition/weekly-calendar';
-import { Avatar } from '@/components/ui/avatar';
+import { NavigableAvatar } from '@/components/ui/avatar';
 
 interface Props {
   children: React.ReactNode;
@@ -10,7 +10,7 @@ interface Props {
   extraSubtitle?: string;
   image?: string;
   btn?: React.ReactNode;
-  theme?: 'nutrition' | 'cycle' | 'exercise' | 'settings';
+  theme?: 'nutrition' | 'cycle' | 'exercise' | 'settings' | 'progress';
   // Calendar props - only required when theme is not 'settings'
   selectedDate?: Date;
   onDateSelect?: (date: Date) => void;
@@ -37,12 +37,15 @@ const PageLayout = ({
       case 'exercise':
         return ['#f5f3ff', '#f1f5f9', '#f1f5f9']; // Very light purple
       case 'settings':
+      case 'progress':
       default:
         return ['#f1f5f9', '#f1f5f9', '#f1f5f9']; // Simple slate
     }
   };
 
   const gradientColors = getGradientColors();
+  const shouldShowCalendar =
+    theme !== 'settings' && theme !== 'progress' && selectedDate && onDateSelect;
 
   return (
     <View className="flex-1 pt-5">
@@ -60,7 +63,7 @@ const PageLayout = ({
       />
       <View className="flex-row items-center justify-between pb-4 pt-12 px-4">
         <View className="flex-row items-center flex-1">
-          {theme !== 'settings' && <Avatar size={48} navigateToSettings={true} />}
+          {theme !== 'settings' && <NavigableAvatar size={48} />}
           <View className={theme !== 'settings' ? 'ml-3 flex-1' : 'flex-1'}>
             <Text className="text-3xl font-bold text-black">{title}</Text>
             {extraSubtitle && <Text className="text-sm text-gray-600 mt-1">{extraSubtitle}</Text>}
@@ -76,7 +79,7 @@ const PageLayout = ({
       </View>
 
       {/* Only show WeeklyCalendar for non-settings themes */}
-      {theme !== 'settings' && selectedDate && onDateSelect && (
+      {shouldShowCalendar && (
         <WeeklyCalendar
           selectedDate={selectedDate}
           onDateSelect={onDateSelect}

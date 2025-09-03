@@ -36,7 +36,7 @@ export function UnitPickerModal({
               <Pressable
                 onPress={() => onUnitChange('kg')}
                 className={`p-4 rounded-xl border-2 ${
-                  bodyMeasurements?.units === 'kg'
+                  bodyMeasurements?.units === 'kg' || bodyMeasurements?.units === 'metric'
                     ? 'border-pink-500 bg-pink-50'
                     : 'border-gray-200 bg-white'
                 }`}
@@ -46,14 +46,14 @@ export function UnitPickerModal({
                     <Text className="text-lg font-semibold text-gray-900">Kilograms (kg)</Text>
                     <Text className="text-sm text-gray-500">Metric system</Text>
                   </View>
-                  {bodyMeasurements?.units === 'kg' && <Check size={24} color="#ec4899" />}
+                  {(bodyMeasurements?.units === 'kg' || bodyMeasurements?.units === 'metric') && <Check size={24} color="#ec4899" />}
                 </View>
               </Pressable>
 
               <Pressable
                 onPress={() => onUnitChange('lbs')}
                 className={`p-4 rounded-xl border-2 ${
-                  bodyMeasurements?.units === 'lbs'
+                  bodyMeasurements?.units === 'lbs' || bodyMeasurements?.units === 'imperial'
                     ? 'border-pink-500 bg-pink-50'
                     : 'border-gray-200 bg-white'
                 }`}
@@ -63,7 +63,7 @@ export function UnitPickerModal({
                     <Text className="text-lg font-semibold text-gray-900">Pounds (lbs)</Text>
                     <Text className="text-sm text-gray-500">Imperial system</Text>
                   </View>
-                  {bodyMeasurements?.units === 'lbs' && <Check size={24} color="#ec4899" />}
+                  {(bodyMeasurements?.units === 'lbs' || bodyMeasurements?.units === 'imperial') && <Check size={24} color="#ec4899" />}
                 </View>
               </Pressable>
             </View>

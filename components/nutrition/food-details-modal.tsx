@@ -16,7 +16,7 @@ import {
   X,
   Trash2,
   Check,
-  Apple,
+  Flame,
   Beef,
   Wheat,
   Edit3,
@@ -375,7 +375,7 @@ export function FoodDetailsModal({
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center flex-1">
                   <View className="w-10 h-10 bg-yellow-100 rounded-full items-center justify-center mr-3">
-                    <Apple size={18} color="#EAB308" />
+                    <Flame size={18} color="#EAB308" />
                   </View>
                   <View className="flex-1">
                     <Text className="text-lg font-semibold text-gray-800">Calories</Text>
