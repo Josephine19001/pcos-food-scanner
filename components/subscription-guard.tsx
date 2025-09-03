@@ -41,16 +41,17 @@ export function SubscriptionGuard({
     return <>{children}</>;
   }
 
+  // If subscription not required, always show content
+  if (!requireSubscription) {
+    return <>{children}</>;
+  }
+
   // If user is subscribed or in grace period, show content
-  if (
-    !requireSubscription ||
-    subscriptionStatus?.isSubscribed ||
-    subscriptionStatus?.isInGracePeriod
-  ) {
+  if (subscriptionStatus?.isSubscribed || subscriptionStatus?.isInGracePeriod) {
     return <>{children}</>;
   }
 
   // If subscription is required but user is not subscribed and not in grace period
-  // The paywall will show, but we can still render children underneath
-  return <>{children}</>;
+  // Don't render children - the paywall will be shown by the useEffect above
+  return null;
 }

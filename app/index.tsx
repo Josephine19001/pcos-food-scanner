@@ -29,14 +29,14 @@ export default function Index() {
   useEffect(() => {
     if (fontsReady && !authLoading) {
       if (session && session.user) {
-        handleUserSession(session.user.id);
+        handleUserSession();
       } else {
         SplashScreen.hideAsync();
       }
     }
   }, [fontsReady, authLoading, session]);
 
-  const handleUserSession = async (userId: string) => {
+  const handleUserSession = async () => {
     try {
       await SplashScreen.hideAsync();
 
@@ -46,7 +46,8 @@ export default function Index() {
       }
 
       if (user) {
-        router.replace('/(tabs)/nutrition');
+        // Let the subscription guard handle routing based on subscription status
+        router.replace('/paywall?source=app_launch&successRoute=/(tabs)/nutrition');
       } else {
         router.replace('/');
       }

@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+.yarn/cache
 
 # Expo
 .expo/
@@ -17,6 +18,20 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+
+# iOS
+ios
+ios/build/
+ios/DerivedData/
+ios/**/*.xcworkspace/xcuserdata/
+ios/**/*.xcodeproj/xcuserdata/
+*.ipa
+
+# Android
+android/app/build/
+android/build/
+*.apk
+*.aab
 
 # Metro
 .metro-health-check*
@@ -41,3 +56,10 @@ yarn-error.*
 .cursorß
 
 .secret_gen.rb
+
+# Build files
+build/
+
+# Claude Code
+CLAUDE.md
+.claude/

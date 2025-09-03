@@ -62,21 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Helper function to determine where to redirect after auth
-  const getPostAuthRoute = async (
-    userId: string,
-    plan?: string,
-    isNewUser?: boolean
-  ): Promise<string> => {
+  const getPostAuthRoute = async (userId: string): Promise<string> => {
     try {
       // Ensure account record exists
       await ensureAccountExists(userId);
 
-      // If explicitly marked as new user (from onboarding flow), go to paywall
-      if (isNewUser) {
-        return '/paywall?source=onboarding&successRoute=/(tabs)/nutrition';
-      }
-
-      // For uncertain cases (like Apple sign-in), check if user has completed onboarding
+      // Check if user has completed onboarding
       const { data: account } = await supabase
         .from('accounts')
         .select('onboarding_completed')
@@ -88,12 +79,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return '/onboarding';
       }
 
-      // Existing users with completed onboarding go directly to main app
-      return '/(tabs)/nutrition';
+      // Existing users - let subscription guard handle paywall logic
+      return '/paywall?source=auth_existing&successRoute=/(tabs)/nutrition';
     } catch (error) {
       console.error('Error in getPostAuthRoute:', error);
-      // Fallback: go to main app, let subscription guard handle the rest
-      return '/(tabs)/nutrition';
+      // Fallback: let subscription guard handle the rest
+      return '/paywall?source=auth_fallback&successRoute=/(tabs)/nutrition';
     }
   };
 
@@ -137,8 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
     });
     if (data.user) {
-      // Existing user signing in - no plan needed
-      const route = await getPostAuthRoute(data.user.id, undefined, false);
+      const route = await getPostAuthRoute(data.user.id);
       router.replace(route as any);
     }
     setLoading(false);
@@ -194,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               p_units: onboardingData.units,
             };
 
-            const { data: rpcData, error: rpcError } = await supabase.rpc(
+            const { error: rpcError } = await supabase.rpc(
               'process_onboarding_data',
               rpcParams
             );
@@ -213,8 +203,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        // New user signing up with a plan
-        const route = await getPostAuthRoute(data.user.id, plan, true);
+        // New user signup - redirect to paywall or main app based on plan
+        const route = plan && plan !== 'free' 
+          ? '/paywall?source=onboarding&successRoute=/(tabs)/nutrition'
+          : await getPostAuthRoute(data.user.id);
         router.replace(route as any);
       }
     } catch (error: any) {
@@ -278,8 +270,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Navigate based on the new flow
-      const route = await getPostAuthRoute(data.user.id, 'free', true);
+      // Free signup - check onboarding status
+      const route = await getPostAuthRoute(data.user.id);
       router.replace(route as any);
     }
     setLoading(false);
@@ -370,10 +362,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        // Check if this is a new user or existing user
-        // If we have onboarding data, it's definitely a new user from the signup flow
-        const isNewUser = !!onboardingData;
-        const route = await getPostAuthRoute(data.user.id, plan, isNewUser);
+        // Apple sign-in routing - check onboarding status
+        const route = await getPostAuthRoute(data.user.id);
         router.replace(route as any);
       }
 

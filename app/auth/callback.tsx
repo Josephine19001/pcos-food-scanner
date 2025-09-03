@@ -3,35 +3,13 @@ import { View, ActivityIndicator, Text } from 'react-native';
 import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner-native';
-import { useAuth } from '@/context/auth-provider';
 
 export default function AuthCallback() {
   const [isProcessing, setIsProcessing] = useState(true);
-  const { user } = useAuth();
 
   useEffect(() => {
     handleAuthCallback();
   }, []);
-
-  // Helper function to determine where to redirect after auth
-  const getPostAuthRoute = async (userId: string): Promise<string> => {
-    try {
-      if (!user) {
-        console.error('User not found');
-        // Default to paywall if we can't check subscription
-        return '/paywall';
-      }
-
-      // If user has active subscription, go to nutrition
-      // Otherwise, go to paywall
-      // return result.isSubscribed ? '/(tabs)/nutrition' : '/paywall';
-      return '/(tabs)/nutrition';
-    } catch (error) {
-      console.error('Error checking subscription status:', error);
-      // Default to paywall if we can't check subscription
-      return '/paywall';
-    }
-  };
 
   const handleAuthCallback = async () => {
     try {
@@ -45,8 +23,8 @@ export default function AuthCallback() {
       }
 
       if (data.session?.user) {
-        const route = await getPostAuthRoute(data.session.user.id);
-        router.replace(route as any);
+        // Redirect to paywall - subscription guard will handle routing based on subscription status
+        router.replace('/paywall?source=auth_callback&successRoute=/(tabs)/nutrition' as any);
       } else {
         router.replace('/auth?mode=signin');
       }

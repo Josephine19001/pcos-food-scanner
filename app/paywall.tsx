@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/text';
@@ -8,8 +8,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRevenueCat } from '@/context/revenuecat-provider';
 import { router, useLocalSearchParams } from 'expo-router';
 import { toast } from 'sonner-native';
-import Animated, { FadeIn, SlideInUp } from 'react-native-reanimated';
 import { DefaultLoader } from '@/components/ui/default-loader';
+import { useSubscriptionStatus } from '@/lib/hooks/use-subscription-status';
 
 const features = [
   {
@@ -46,6 +46,7 @@ export default function PaywallScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
   const { offerings, purchasePackage, restorePurchases, error, loading } = useRevenueCat();
+  const { data: subscriptionStatus, isLoading: subscriptionLoading } = useSubscriptionStatus();
   const params = useLocalSearchParams();
 
   // Get params for customization
@@ -55,6 +56,15 @@ export default function PaywallScreen() {
   const customSubtitle = params.subtitle as string;
   const dismissible = params.dismissible !== 'false'; // Default to true unless explicitly false
   const successRoute = (params.successRoute as string) || '/(tabs)/nutrition';
+
+  // Auto-redirect if user is already subscribed or in grace period
+  useEffect(() => {
+    if (!subscriptionLoading && subscriptionStatus) {
+      if (subscriptionStatus.isSubscribed || (subscriptionStatus.isInGracePeriod && dismissible)) {
+        router.replace(successRoute as any);
+      }
+    }
+  }, [subscriptionStatus, subscriptionLoading, successRoute, dismissible]);
 
   const handlePurchase = async (planType: 'monthly' | 'yearly') => {
     if (!offerings?.current) {
@@ -146,8 +156,8 @@ export default function PaywallScreen() {
   const monthlyCost = monthlyPackage?.product.price || 12.99;
   const savings = Math.round(((monthlyCost - yearlyMonthlyCost) / monthlyCost) * 100);
 
-  // Show loading state while RevenueCat initializes
-  if (loading) {
+  // Show loading state while RevenueCat initializes or checking subscription
+  if (loading || subscriptionLoading) {
     return <DefaultLoader />;
   }
 
@@ -191,39 +201,38 @@ export default function PaywallScreen() {
       <SafeAreaView style={{ flex: 1 }}>
         <View className="flex-1 pt-8">
           {/* Title Section */}
-          <Animated.View className="px-6 py-6" entering={FadeIn.delay(200)}>
-            <Text className="text-2xl font-bold text-slate-900 text-center mb-3">
+          <View className="px-6 py-8 mb-8">
+            <Text className="text-2xl font-bold text-slate-900 text-center mb-4">
               {getDisplayTitle()}
             </Text>
-            <Text className="text-base text-slate-600 text-center leading-5">
+            <Text className="text-base text-slate-600 text-center leading-6">
               {getDisplaySubtitle()}
             </Text>
-          </Animated.View>
+          </View>
 
           {/* Features List - Grid Layout */}
-          <Animated.View className="px-6 mb-6" entering={FadeIn.delay(400)}>
-            <View className="flex-row flex-wrap gap-3">
+          <View className="px-6 mb-10">
+            <View className="flex-row flex-wrap justify-between">
               {features.map((feature, index) => (
-                <Animated.View
+                <View
                   key={feature.title}
-                  className="flex-1 min-w-[45%] p-5 bg-gray-50 rounded-2xl border border-gray-100"
-                  entering={SlideInUp.delay(600 + index * 100)}
+                  className="w-[48%] p-4 bg-gray-50 rounded-2xl border border-gray-100 mb-3"
                 >
                   <View
-                    className="w-12 h-12 rounded-2xl items-center justify-center mb-4"
+                    className="w-12 h-12 rounded-2xl items-center justify-center mb-3"
                     style={{ backgroundColor: feature.bgColor }}
                   >
                     <feature.icon size={24} color={feature.color} />
                   </View>
-                  <Text className="text-slate-900 font-bold text-lg mb-2">{feature.title}</Text>
-                  <Text className="text-slate-600 text-sm leading-5">{feature.description}</Text>
-                </Animated.View>
+                  <Text className="text-slate-900 font-bold text-base mb-2">{feature.title}</Text>
+                  <Text className="text-slate-600 text-xs leading-4">{feature.description}</Text>
+                </View>
               ))}
             </View>
-          </Animated.View>
+          </View>
 
           {/* Pricing Plans */}
-          <Animated.View className="px-6 flex-1 justify-end pb-8" entering={FadeIn.delay(1000)}>
+          <View className="px-6 flex-1 justify-end pb-8">
             <View className="flex flex-row gap-4 mb-6">
               {/* Monthly Plan */}
               <TouchableOpacity
@@ -346,7 +355,7 @@ export default function PaywallScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-          </Animated.View>
+          </View>
         </View>
       </SafeAreaView>
     </View>

@@ -125,6 +125,12 @@ export default function ScanFoodScreen() {
         onSuccess: async (analyzingMeal) => {
           const returnTo = (params.returnTo as string) || '/(tabs)/nutrition';
           router.push(returnTo as any);
+          
+          // Show success toast for 20 seconds
+          toast.success('Image uploaded successfully! AI is analyzing your food...', {
+            duration: 20000,
+          });
+          
           await updateAnalysisProgress(analyzingMeal.id, 10, 'uploading');
 
           try {

@@ -14,7 +14,8 @@ export function WelcomeScreen() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/(tabs)/nutrition');
+      // Let the subscription guard handle routing based on subscription status
+      router.replace('/paywall?source=app_launch&successRoute=/(tabs)/nutrition');
     }
   }, [user, loading]);
 
