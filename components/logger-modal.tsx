@@ -136,18 +136,6 @@ export function LoggerModal({ visible, onClose }: LoggerModalProps) {
                       }
                     />
 
-                    <LoggerCard
-                      title="Log mood"
-                      icon={Smile}
-                      iconColor="#8B5CF6"
-                      bgColor="#F3F4F6"
-                      onPress={() =>
-                        handleAction(() => {
-                          router.push('/log-mood' as any);
-                        })
-                      }
-                    />
-
                     {/* <LoggerCard
                     title="Scan skincare"
                     icon={Sparkles}
@@ -175,6 +163,18 @@ export function LoggerModal({ visible, onClose }: LoggerModalProps) {
                       }
                     />
 
+                    <LoggerCard
+                      title="Log mood"
+                      icon={Smile}
+                      iconColor="#8B5CF6"
+                      bgColor="#F3F4F6"
+                      onPress={() =>
+                        handleAction(() => {
+                          router.push('/log-mood' as any);
+                        })
+                      }
+                    />
+
                     {/* <LoggerCard
                     title="Log sleep"
                     icon={Bed}
@@ -191,18 +191,18 @@ export function LoggerModal({ visible, onClose }: LoggerModalProps) {
                   {/* Row 3 */}
                   <View className="flex-row justify-between">
                     <LoggerCard
-                      title="Period tracking"
+                      title="Log period"
                       icon={Moon}
                       iconColor="#EC4899"
                       bgColor="#FDF2F8"
                       onPress={() =>
                         handleAction(() => {
-                          router.push('/(tabs)/cycle');
+                          router.push('/log-period');
                         })
                       }
                     />
 
-                    <LoggerCard
+                    {/* <LoggerCard
                       title="Log supplements"
                       icon={Pill}
                       iconColor="#F59E0B"
@@ -212,7 +212,7 @@ export function LoggerModal({ visible, onClose }: LoggerModalProps) {
                           router.push('/log-supplements' as any);
                         })
                       }
-                    />
+                    /> */}
 
                     <LoggerCard
                       title="Log meal"

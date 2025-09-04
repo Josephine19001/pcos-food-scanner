@@ -54,7 +54,6 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
   // Load subscription when user changes
   useEffect(() => {
     if (user) {
-      // Identify user with RevenueCat
       Purchases.logIn(user.id)
         .then(() => {
           return loadSubscriptionStatus();

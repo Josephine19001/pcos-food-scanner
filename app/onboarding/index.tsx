@@ -96,7 +96,7 @@ export default function OnboardingScreen() {
     if (Platform.OS === 'android') {
       setShowCalendar(false);
       if (date && calendarType === 'birthday') {
-        const dateString = date.toISOString().split('T')[0];
+        const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         updateData('dateOfBirth', dateString);
         setSelectedDate(date);
       }
@@ -112,7 +112,7 @@ export default function OnboardingScreen() {
   const handleDateConfirm = () => {
     // This handles the iOS "Done" button press
     if (calendarType === 'birthday') {
-      const dateString = selectedDate.toISOString().split('T')[0];
+      const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
       updateData('dateOfBirth', dateString);
     }
     setShowCalendar(false);

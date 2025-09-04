@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
 import PageLayout from '@/components/layouts/page-layout';
-import { Calendar, Heart, CalendarHeart } from 'lucide-react-native';
+import { Calendar, CalendarHeart } from 'lucide-react-native';
 import { router } from 'expo-router';
 
 import {
   useCurrentCycleInfo,
   usePeriodCycles,
-  useStartPeriod,
-  useEndPeriod,
-  useDeletePeriodCycle,
   useCycleSettings,
   type PeriodCycle,
 } from '@/lib/hooks/use-cycle-flo-style';
@@ -18,21 +15,17 @@ import { useMoodForDate } from '@/lib/hooks/use-daily-moods';
 import { useSymptomsForDate } from '@/lib/hooks/use-daily-symptoms';
 
 import { TodaysMood } from '@/components/cycle/TodaysMood';
-import { TodaysSupplements } from '@/components/cycle/TodaysSupplements';
 import { TodaysSymptoms } from '@/components/cycle/TodaysSymptoms';
 import { CyclePhase } from '@/components/cycle/CyclePhase';
 import { CyclePageSkeleton } from '@/components/cycle/cycle-skeleton';
 import { PredictionInfoModal } from '@/components/cycle/PredictionInfoModal';
-import { FullCalendarModal } from '@/components/cycle/FullCalendarModal';
 import { PeriodPredictionButton } from '@/components/cycle/PeriodPredictionButton';
 
 import { getLocalDateString } from '@/lib/utils/date-helpers';
-import { AnimatedWavyCard } from '@/components/cycle/animated-wavy-card';
 
 export default function CycleScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPredictionInfoModal, setShowPredictionInfoModal] = useState(false);
-  const [showFullCalendar, setShowFullCalendar] = useState(false);
 
   const {
     data: currentCycleInfo,
@@ -40,19 +33,22 @@ export default function CycleScreen() {
     error: cycleInfoError,
   } = useCurrentCycleInfo(getLocalDateString(selectedDate));
 
-  const { data: cycleSettings, isLoading: settingsLoading } = useCycleSettings();
+  const { isLoading: settingsLoading } = useCycleSettings();
   const { data: periodCycles = [] } = usePeriodCycles(10);
   const { data: selectedDateMood } = useMoodForDate(getLocalDateString(selectedDate));
   const { data: selectedDateSymptoms } = useSymptomsForDate(getLocalDateString(selectedDate));
 
-  const startPeriod = useStartPeriod();
-  const endPeriod = useEndPeriod();
-  const deletePeriodCycle = useDeletePeriodCycle();
 
   const isMainDataLoading = cycleInfoLoading || settingsLoading;
   const hasCriticalErrors = cycleInfoError;
 
   const handleDateSelect = React.useCallback((date: Date) => {
+    // Ensure we have a valid date
+    if (!date || isNaN(date.getTime())) {
+      console.warn('Invalid date passed to handleDateSelect:', date);
+      return;
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const selectedDay = new Date(date);
@@ -66,68 +62,62 @@ export default function CycleScreen() {
   }, []);
 
   const handlePeriodPredictionPress = React.useCallback(() => {
-    setShowFullCalendar(true);
+    router.push('/log-period');
   }, []);
-
-
-
-
-
-  const hasOngoingPeriod = React.useCallback(() => {
-    return periodCycles.some((cycle: PeriodCycle) => cycle.end_date === null);
-  }, [periodCycles]);
 
   // Get all period dates for calendar display (actual + predicted)
   const getAllPeriodDatesForCalendar = () => {
     const allDates: string[] = [];
-    
-    // Add actual period dates from completed cycles
-    periodCycles.forEach((cycle: PeriodCycle) => {
-      const startDate = new Date(cycle.start_date);
-      let endDate: Date;
-      
-      if (cycle.end_date) {
-        // Completed cycle
-        endDate = new Date(cycle.end_date);
-      } else if (cycle.predicted_end_date) {
-        // Ongoing cycle with predicted end
-        endDate = new Date(cycle.predicted_end_date);
-      } else {
-        // Ongoing cycle without prediction, use today
-        endDate = new Date();
-      }
-      
-      const currentDate = new Date(startDate);
-      while (currentDate <= endDate) {
-        allDates.push(getLocalDateString(currentDate));
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-    });
-    
+
+    try {
+      // Add actual period dates from completed cycles
+      periodCycles.forEach((cycle: PeriodCycle) => {
+        try {
+          const startDate = new Date(cycle.start_date);
+          if (isNaN(startDate.getTime())) {
+            console.warn('Invalid start date in cycle:', cycle.start_date);
+            return;
+          }
+
+          let endDate: Date;
+
+          if (cycle.end_date) {
+            // Completed cycle
+            endDate = new Date(cycle.end_date);
+          } else if (cycle.predicted_end_date) {
+            // Ongoing cycle with predicted end
+            endDate = new Date(cycle.predicted_end_date);
+          } else {
+            // Ongoing cycle without prediction, use today
+            endDate = new Date();
+          }
+
+          if (isNaN(endDate.getTime())) {
+            console.warn('Invalid end date in cycle:', cycle);
+            return;
+          }
+
+          const currentDate = new Date(startDate);
+          while (currentDate <= endDate && !isNaN(currentDate.getTime())) {
+            allDates.push(getLocalDateString(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+
+            // Safety check to prevent infinite loop
+            if (allDates.length > 1000) {
+              console.warn('Too many dates generated, breaking loop');
+              break;
+            }
+          }
+        } catch (error) {
+          console.error('Error processing cycle:', cycle, error);
+        }
+      });
+    } catch (error) {
+      console.error('Error generating calendar dates:', error);
+    }
+
     return allDates;
   };
-
-  // Get predicted next period dates for calendar
-  const getPredictedPeriodDates = () => {
-    if (!currentCycleInfo?.next_period_prediction) return [];
-    
-    const prediction = currentCycleInfo.next_period_prediction;
-    
-    // Option 1: Show only start date as predicted
-    return [prediction.start_date];
-    
-    // Option 2: Show full predicted period range (original logic)
-    // const predictedDates: string[] = [];
-    // const startDate = new Date(prediction.start_date);
-    // const endDate = new Date(prediction.end_date);
-    // const currentDate = new Date(startDate);
-    // while (currentDate <= endDate) {
-    //   predictedDates.push(getLocalDateString(currentDate));
-    //   currentDate.setDate(currentDate.getDate() + 1);
-    // }
-    // return predictedDates;
-  };
-
   // All predictions now come from currentCycleInfo
   const nextPeriodPrediction = currentCycleInfo?.next_period_prediction;
 
@@ -141,7 +131,7 @@ export default function CycleScreen() {
       btn={
         <TouchableOpacity
           className="bg-pink-500 p-3 rounded-full"
-          onPress={() => setShowFullCalendar(true)}
+          onPress={() => router.push('/log-period')}
           style={{
             shadowColor: '#EC4899',
             shadowOffset: { width: 0, height: 2 },
@@ -190,16 +180,13 @@ export default function CycleScreen() {
           contentContainerStyle={{ paddingBottom: 100 }}
         >
           <PeriodPredictionButton
-            nextPeriodPrediction={nextPeriodPrediction ? {
-              daysUntil: nextPeriodPrediction.days_until,
-              date: nextPeriodPrediction.start_date
-            } : null}
+            nextPeriodPrediction={nextPeriodPrediction}
             onPress={handlePeriodPredictionPress}
           />
 
           <CyclePhase
             currentCycleInfo={currentCycleInfo}
-            onLogPeriod={() => setShowFullCalendar(true)}
+            onLogPeriod={() => router.push('/log-period')}
             isLoading={isMainDataLoading}
             selectedDate={selectedDate}
           />
@@ -236,62 +223,9 @@ export default function CycleScreen() {
         </ScrollView>
       )}
 
-
       <PredictionInfoModal
         visible={showPredictionInfoModal}
         onClose={() => setShowPredictionInfoModal(false)}
-      />
-
-      <FullCalendarModal
-        visible={showFullCalendar}
-        onClose={() => setShowFullCalendar(false)}
-        selectedDate={selectedDate}
-        onDateSelect={handleDateSelect}
-        loggedDates={getAllPeriodDatesForCalendar()}
-        startDates={periodCycles.map((cycle: PeriodCycle) => cycle.start_date)}
-        endDates={periodCycles
-          .map((cycle: PeriodCycle) => cycle.end_date)
-          .filter((date: string | null): date is string => date !== null)}
-        predictedDates={getPredictedPeriodDates()}
-        nextPeriodPrediction={nextPeriodPrediction}
-        hasOngoingPeriod={hasOngoingPeriod()}
-        currentCycleInfo={currentCycleInfo}
-        onDatePress={handleDateSelect}
-        onStartPeriod={(date: Date) => {
-          const startDateString = getLocalDateString(date);
-          
-          // If there's an ongoing period, end it first, then start new one
-          if (hasOngoingPeriod()) {
-            const ongoingCycle = periodCycles.find((cycle: PeriodCycle) => cycle.end_date === null);
-            if (ongoingCycle) {
-              // Delete the ongoing period first
-              deletePeriodCycle.mutate(ongoingCycle.id, {
-                onSuccess: () => {
-                  // Then start the new period
-                  startPeriod.mutate({
-                    start_date: startDateString,
-                    flow_intensity: 'moderate',
-                    notes: 'Period started',
-                  });
-                },
-              });
-              return;
-            }
-          }
-          
-          // Normal case: no ongoing period
-          startPeriod.mutate({
-            start_date: startDateString,
-            flow_intensity: 'moderate',
-            notes: 'Period started',
-          });
-        }}
-        onEndPeriod={(date: Date) => {
-          const endDateString = getLocalDateString(date);
-          endPeriod.mutate({
-            end_date: endDateString,
-          });
-        }}
       />
 
     </PageLayout>

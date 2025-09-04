@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import { toast } from 'sonner-native';
+import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase/client';
 import { queryKeys } from './query-keys';
 import { handleError } from './utils';
@@ -107,6 +108,8 @@ export function useDeleteAccount() {
     },
     onSuccess: () => {
       qc.clear();
+      // Navigate to auth page with signup mode after account deletion
+      router.replace('/auth?mode=signup');
     },
     onError: (err: any) => handleError(err, 'Failed to delete account'),
   });

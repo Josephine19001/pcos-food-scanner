@@ -1,8 +1,7 @@
-import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Calendar } from 'lucide-react-native';
-import { type NextPeriodPrediction } from '@/lib/utils/cycle-utils';
+import { type NextPeriodPrediction } from '@/lib/hooks/use-cycle-flo-style';
 import { getTodayDateString } from '@/lib/utils/date-helpers';
 
 interface PeriodPredictionButtonProps {
@@ -20,8 +19,8 @@ export function PeriodPredictionButton({
   }
 
   const todayString = getTodayDateString();
-  const isPredictedToday = nextPeriodPrediction.predictedPeriodDates?.includes(todayString);
-  const daysUntilPeriod = nextPeriodPrediction.daysUntil || 0;
+  const isPredictedToday = nextPeriodPrediction.start_date === todayString;
+  const daysUntilPeriod = nextPeriodPrediction.days_until || 0;
 
   // Only show button if period is predicted today or within 2 days
   const shouldShowButton = isPredictedToday || (daysUntilPeriod >= 0 && daysUntilPeriod <= 2);

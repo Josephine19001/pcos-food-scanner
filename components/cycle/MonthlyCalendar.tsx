@@ -48,15 +48,32 @@ export function MonthlyCalendar({
   }
 
   const goToPreviousMonth = () => {
-    setCurrentMonth(new Date(currentYear, currentMonthIndex - 1, 1));
+    const newDate = new Date(currentYear, currentMonthIndex - 1, 1);
+    if (!isNaN(newDate.getTime())) {
+      setCurrentMonth(newDate);
+    } else {
+      console.warn('Invalid date when navigating to previous month');
+    }
   };
 
   const goToNextMonth = () => {
-    setCurrentMonth(new Date(currentYear, currentMonthIndex + 1, 1));
+    const newDate = new Date(currentYear, currentMonthIndex + 1, 1);
+    if (!isNaN(newDate.getTime())) {
+      setCurrentMonth(newDate);
+    } else {
+      console.warn('Invalid date when navigating to next month');
+    }
   };
 
   const handleDayPress = (day: number) => {
     const newDate = new Date(currentYear, currentMonthIndex, day);
+    
+    // Ensure we have a valid date before proceeding
+    if (isNaN(newDate.getTime())) {
+      console.warn('Invalid date created in calendar:', { currentYear, currentMonthIndex, day });
+      return;
+    }
+    
     onDateSelect(newDate);
 
     // If onDatePress is provided, call it for period logging

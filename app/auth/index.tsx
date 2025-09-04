@@ -9,15 +9,11 @@ import { useLocalSearchParams, router } from 'expo-router';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { OnboardingStorage } from '@/lib/utils/onboarding-storage';
+import { useRevenueCat } from '@/context/revenuecat-provider';
 
 export default function AuthScreen() {
-  const {
-    signInWithEmail,
-    signUpWithEmail,
-    signInWithApple,
-    signUpWithOnboarding,
-    signUpWithAppleOnboarding,
-  } = useAuth();
+  const { signInWithEmail, signInWithApple, signUpWithOnboarding, signUpWithAppleOnboarding } =
+    useAuth();
 
   const { mode } = useLocalSearchParams<{
     mode?: 'signin' | 'signup';
@@ -31,6 +27,7 @@ export default function AuthScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [hasOnboardingData, setHasOnboardingData] = useState(false);
+  const { shouldShowPaywall } = useRevenueCat();
 
   const canSignUp = mode === 'signup';
 
@@ -51,6 +48,13 @@ export default function AuthScreen() {
     checkOnboardingData();
   }, []);
 
+  const handlePostAuth = () => {
+    if (shouldShowPaywall) {
+      router.replace('/paywall');
+    } else {
+      router.replace('/(tabs)/nutrition');
+    }
+  };
   const handleEmailAuth = async () => {
     if (!email || !password) {
       toast.error('Please enter email and password');
@@ -70,14 +74,13 @@ export default function AuthScreen() {
     setIsSubmitting(true);
     try {
       if (isSignUp) {
-        if (hasOnboardingData) {
-          await signUpWithOnboarding(email, password, firstName.trim(), lastName.trim());
-        } else {
-          await signUpWithEmail(email, password, firstName.trim(), lastName.trim());
-        }
+        await signUpWithOnboarding(email, password, firstName.trim(), lastName.trim());
+        toast.success('Your account has been created🤩');
       } else {
         await signInWithEmail(email, password);
+        handlePostAuth();
       }
+      // Navigate back to index after successful auth - let index.tsx handle routing
     } catch (error: any) {
       toast.error(error.message || `Failed to ${isSignUp ? 'sign up' : 'sign in'}`);
     } finally {
@@ -89,20 +92,12 @@ export default function AuthScreen() {
     setIsSubmitting(true);
     try {
       if (isSignUp) {
-        if (hasOnboardingData) {
-          try {
-            await signUpWithAppleOnboarding();
-          } catch (signupError: any) {
-            await signInWithApple();
-          }
-        } else {
-          await signInWithApple();
-        }
+        await signUpWithAppleOnboarding();
+        toast.success('Your account has been created🤩');
       } else {
         await signInWithApple();
+        handlePostAuth();
       }
-
-      // After successful authentication, let index page handle navigation
     } catch (error: any) {
       // Check if this is a user cancellation - don't show error for that
       if (!error.message?.includes('cancelled') && !error.message?.includes('canceled')) {

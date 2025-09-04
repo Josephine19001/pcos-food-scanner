@@ -46,7 +46,11 @@ const PageLayout = ({
 
   const gradientColors = getGradientColors();
   const shouldShowCalendar =
-    theme !== 'settings' && theme !== 'progress' && selectedDate && onDateSelect;
+    theme !== 'settings' && 
+    theme !== 'progress' && 
+    selectedDate && 
+    !isNaN(selectedDate.getTime()) && 
+    onDateSelect;
 
   return (
     <View className="flex-1 pt-5">
@@ -85,12 +89,14 @@ const PageLayout = ({
 
       {/* Only show WeeklyCalendar for non-settings themes */}
       {shouldShowCalendar && (
-        <WeeklyCalendar
-          selectedDate={selectedDate}
-          onDateSelect={onDateSelect}
-          loggedDates={loggedDates || []}
-          theme={theme}
-        />
+        <NavigationErrorBoundary fallback={<View />}>
+          <WeeklyCalendar
+            selectedDate={selectedDate!}
+            onDateSelect={onDateSelect!}
+            loggedDates={loggedDates || []}
+            theme={theme}
+          />
+        </NavigationErrorBoundary>
       )}
 
       {children}

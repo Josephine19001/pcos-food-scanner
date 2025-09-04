@@ -15,6 +15,12 @@ export default function WeeklyCalendar({
   loggedDates = [],
   theme = 'nutrition',
 }: WeeklyCalendarProps) {
+  // Add defensive check for selectedDate
+  if (!selectedDate || isNaN(selectedDate.getTime())) {
+    console.warn('WeeklyCalendar: Invalid selectedDate provided:', selectedDate);
+    return null;
+  }
+
   const { data: account } = useAccount();
 
   const themeColors = {
@@ -42,19 +48,30 @@ export default function WeeklyCalendar({
   // ---- Helpers (day-level comparisons) ----
   const startOfDay = (d: Date) => {
     const x = new Date(d);
+    // Ensure we have a valid date
+    if (isNaN(x.getTime())) {
+      return new Date(); // Return current date if invalid
+    }
     x.setHours(0, 0, 0, 0);
     return x;
   };
   const addDays = (d: Date, n: number) => {
     const x = new Date(d);
+    // Ensure we have a valid date before manipulation
+    if (isNaN(x.getTime())) {
+      return new Date(); // Return current date if invalid
+    }
     x.setDate(x.getDate() + n);
+    // Ensure the result is still a valid date
+    if (isNaN(x.getTime())) {
+      return new Date(); // Return current date if result is invalid
+    }
     return x;
   };
   const minDate = (a: Date, b: Date) => (a < b ? a : b);
   const maxDate = (a: Date, b: Date) => (a > b ? a : b);
 
   const today = startOfDay(new Date());
-  const tomorrow = startOfDay(addDays(today, 1)); // MAX future
   const signupDate = account?.created_at ? startOfDay(new Date(account.created_at)) : null;
 
   const isToday = (date: Date) => startOfDay(date).getTime() === today.getTime();
@@ -107,7 +124,13 @@ export default function WeeklyCalendar({
               <TouchableOpacity
                 key={index}
                 onPress={() => {
-                  if (!disabled) onDateSelect(date);
+                  try {
+                    if (!disabled && !isNaN(date.getTime())) {
+                      onDateSelect(date);
+                    }
+                  } catch (error) {
+                    console.warn('WeeklyCalendar: Error in onPress handler:', error);
+                  }
                 }}
                 className={`items-center flex-1 ${disabled ? 'opacity-40' : ''}`}
                 activeOpacity={0.7}
