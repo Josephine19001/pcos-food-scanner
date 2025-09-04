@@ -64,6 +64,12 @@ export default function LogSymptomsScreen() {
 
   // Set initial state from existing data
   useEffect(() => {
+    // Reset state first to ensure clean slate for each date
+    setSelectedSymptoms([]);
+    setSelectedSeverity('');
+    setNotes('');
+    
+    // Then populate with data if it exists for this specific date
     if (symptomsForDate) {
       if (symptomsForDate.symptoms && symptomsForDate.symptoms.length > 0) {
         setSelectedSymptoms(symptomsForDate.symptoms);
@@ -75,7 +81,7 @@ export default function LogSymptomsScreen() {
         setNotes(symptomsForDate.notes);
       }
     }
-  }, [symptomsForDate]);
+  }, [symptomsForDate, selectedDate]);
 
   const symptomOptions = [
     { value: 'cramps', label: 'Cramps', icon: 'cramps' },

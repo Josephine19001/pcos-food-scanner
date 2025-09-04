@@ -43,6 +43,12 @@ export default function LogMoodScreen() {
 
   // Set initial state from existing data
   useEffect(() => {
+    // Reset state first to ensure clean slate for each date
+    setSelectedMood('');
+    setSelectedEnergy('');
+    setNotes('');
+    
+    // Then populate with data if it exists for this specific date
     if (moodForDate) {
       if (moodForDate.mood) {
         setSelectedMood(moodForDate.mood);
@@ -54,7 +60,7 @@ export default function LogMoodScreen() {
         setNotes(moodForDate.notes);
       }
     }
-  }, [moodForDate]);
+  }, [moodForDate, selectedDate]);
 
   // Entrance animation
   useEffect(() => {

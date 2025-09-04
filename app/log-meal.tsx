@@ -32,8 +32,17 @@ export default function LogMealScreen() {
   const createMealEntry = useCreateMealEntry();
   const scanFood = useScanFood();
 
+  // Get current meal type based on time of day
+  const getCurrentMealType = () => {
+    const hour = new Date().getHours();
+    if (hour < 11) return 'breakfast';
+    if (hour < 16) return 'lunch';
+    if (hour < 20) return 'dinner';
+    return 'snack';
+  };
+
   // Form state
-  const [selectedMealType, setSelectedMealType] = useState('breakfast');
+  const [selectedMealType, setSelectedMealType] = useState(getCurrentMealType());
   const [selectedFoods, setSelectedFoods] = useState<FoodItemWithQuantity[]>([]);
 
   // Modal states
