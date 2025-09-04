@@ -4,8 +4,7 @@ import { supabase } from '@/lib/supabase/client';
 import { queryKeys } from './query-keys';
 import { handleError } from './utils';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
-import * as ImageManipulator from 'expo-image-manipulator';
+import { uploadImage } from '@/lib/utils/image-upload';
 
 export interface AvatarData {
   avatarUrl: string | null;
@@ -122,60 +121,27 @@ export function useUploadAvatar() {
         throw new Error('User not authenticated');
       }
 
-      // Resize and compress image to ensure it's under 5MB
-      const manipulatedImage = await ImageManipulator.manipulateAsync(
-        imageUri,
-        [{ resize: { width: 800, height: 800 } }], // Resize to max 800x800
-        {
-          compress: 0.7, // Compress to 70% quality
-          format: ImageManipulator.SaveFormat.JPEG,
-        }
-      );
-
-      // Create file extension and path
-      const fileName = `${user.user.id}-${Date.now()}.jpg`; // Always use jpg for consistency
+      // Create file path for avatar
+      const fileName = `${user.user.id}-${Date.now()}.jpg`;
       const filePath = `${user.user.id}/${fileName}`;
 
-      // Read the compressed image file as base64
-      const base64 = await FileSystem.readAsStringAsync(manipulatedImage.uri, {
-        encoding: FileSystem.EncodingType.Base64,
+      // Use common upload utility with avatar-specific settings
+      const { publicUrl } = await uploadImage(imageUri, 'avatars', filePath, {
+        maxSize: 800,
+        quality: 0.7,
+        upsert: true,
       });
-
-      if (!base64) throw new Error('Failed to convert image to base64');
-
-      // Convert base64 to binary for Supabase storage
-      const binaryString = atob(base64);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-
-      // Upload to Supabase Storage using binary data
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, bytes, {
-          contentType: 'image/jpeg',
-          upsert: true,
-        });
-
-      if (uploadError) {
-        throw new Error(uploadError.message);
-      }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      const avatarUrl = urlData.publicUrl;
 
       // Update account with new avatar URL
       const { error: updateError } = await supabase.rpc('update_account_profile', {
-        p_avatar: avatarUrl,
+        p_avatar: publicUrl,
       });
 
       if (updateError) {
         throw new Error(updateError.message);
       }
 
-      return avatarUrl;
+      return publicUrl;
     },
     onSuccess: (avatarUrl) => {
       qc.invalidateQueries({ queryKey: queryKeys.settings.avatar() });

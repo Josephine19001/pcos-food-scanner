@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner-native';
 import { queryKeys } from './query-keys';
 import * as ImagePicker from 'expo-image-picker';
+import { uploadImage } from '@/lib/utils/image-upload';
 
 export type ProgressPhoto = {
   id: string;
@@ -17,10 +18,10 @@ export function useProgressPhotosLogsRange(startDate: string, endDate: string) {
   return useQuery({
     queryKey: queryKeys.progress.photos(startDate, endDate),
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
-
-      console.log('Fetching photos for user:', user.id, 'dateRange:', startDate, '-', endDate);
 
       const { data, error } = await supabase.rpc('get_progress_photos_for_user', {
         p_start_date: startDate,
@@ -33,8 +34,6 @@ export function useProgressPhotosLogsRange(startDate: string, endDate: string) {
         console.error('Error fetching progress photos:', error);
         throw error;
       }
-
-      console.log('Raw progress photos data:', data);
 
       const mappedPhotos = data.map((photo: any) => ({
         id: photo.id,
@@ -56,54 +55,24 @@ export function useUploadProgressPhoto() {
 
   return useMutation({
     mutationFn: async (asset: ImagePicker.ImagePickerAsset) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      console.log('Starting photo upload for user:', user.id);
-
       // Create unique filename for storage bucket
-      const fileExt = asset.uri.split('.').pop() || 'jpg';
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${Date.now()}.jpg`;
 
-      // Convert image to blob for upload to bucket
-      const response = await fetch(asset.uri);
-      const blob = await response.blob();
-
-      console.log('Uploading to progress-photos bucket:', fileName);
-
-      // Upload to Supabase Storage bucket
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('progress-photos')
-        .upload(fileName, blob, {
-          contentType: `image/${fileExt}`,
-          upsert: false,
-        });
-
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        throw uploadError;
-      }
-
-      console.log('Upload successful:', uploadData);
-
-      // Get public URL from the bucket
-      const { data: { publicUrl } } = supabase.storage
-        .from('progress-photos')
-        .getPublicUrl(fileName);
-
-      console.log('Got public URL:', publicUrl);
-
-      // Verify the URL is accessible
-      try {
-        const testResponse = await fetch(publicUrl);
-        console.log('URL test response status:', testResponse.status);
-      } catch (testError) {
-        console.error('URL test failed:', testError);
-      }
+      // Use common upload utility with progress photo settings
+      const { publicUrl } = await uploadImage(asset.uri, 'progress-photos', fileName, {
+        maxSize: 1000, // Larger than avatar for better progress photo quality
+        quality: 0.8,
+        upsert: false,
+      });
 
       // Save to database with current date and bucket URL
       const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      
+
       const { data, error: dbError } = await supabase
         .from('progress_photos')
         .insert({
@@ -120,8 +89,6 @@ export function useUploadProgressPhoto() {
         throw dbError;
       }
 
-      console.log('Photo saved to database:', data);
-
       return {
         id: data.id,
         uri: data.image_url,
@@ -131,10 +98,7 @@ export function useUploadProgressPhoto() {
       } as ProgressPhoto;
     },
     onSuccess: (newPhoto) => {
-      console.log('Upload successful, new photo:', newPhoto);
-      // Invalidate all progress photo queries to refresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.progress.all });
-      toast.success('Progress picture uploaded successfully!');
     },
     onError: (error: Error) => {
       toast.error(`Upload failed: ${error.message}`);
@@ -148,7 +112,9 @@ export function useDeleteProgressPhoto() {
 
   return useMutation({
     mutationFn: async (photoId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
       // Get photo details first to get the file path for bucket deletion

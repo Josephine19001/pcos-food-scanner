@@ -116,23 +116,79 @@ export function useAddWeightEntry() {
 
   return useMutation({
     mutationFn: async (entryData: CreateWeightEntryData) => {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('User not authenticated');
+      try {
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) throw new Error('User not authenticated');
 
-      const { data, error } = await supabase
-        .from('weight_history')
-        .insert({
+        // Validate and prepare data
+        const weight = parseFloat(entryData.weight?.toString() || '0');
+        if (!weight || weight <= 0 || isNaN(weight)) {
+          throw new Error('Invalid weight value. Must be a positive number.');
+        }
+
+        // Convert units to database format: 'metric' or 'imperial' (as per constraint)
+        let units = entryData.units?.toString() || 'metric';
+        if (units === 'kg') {
+          units = 'metric';
+        } else if (units === 'lbs') {
+          units = 'imperial';
+        }
+        // Validate that units is now one of the accepted values
+        if (units !== 'metric' && units !== 'imperial') {
+          units = 'metric'; // Default fallback
+        }
+        const measuredAt = entryData.measured_at || new Date().toISOString();
+        const note = entryData.note?.toString() || null;
+
+        const insertData = {
           user_id: user.user.id,
-          weight: entryData.weight,
-          units: entryData.units || 'kg',
-          measured_at: entryData.measured_at || new Date().toISOString(),
-          note: entryData.note,
-        })
-        .select()
-        .single();
+          weight: weight,
+          units: units,
+          measured_at: measuredAt,
+          note: note,
+        };
 
-      if (error) throw error;
-      return data;
+        console.log('Inserting weight entry data:', insertData);
+
+        const { data, error } = await supabase
+          .from('weight_history')
+          .insert(insertData)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('❌ Weight entry database error details:', {
+            error: error,
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code,
+            insertData: insertData
+          });
+          
+          // Provide user-friendly error messages
+          let userMessage = 'Something went wrong while saving your weight. Please try again.';
+          
+          if (error.code === '23514' && error.message.includes('units_check')) {
+            userMessage = 'There was an issue with the weight units. Please try again.';
+          } else if (error.code === '23505') {
+            userMessage = 'A weight entry for this time already exists. Please try a different time.';
+          } else if (error.code === '23502') {
+            userMessage = 'Some required information is missing. Please fill out all fields.';
+          }
+          
+          throw new Error(userMessage);
+        }
+
+        console.log('✅ Weight entry saved successfully:', data);
+        return data;
+      } catch (error) {
+        console.error('❌ Weight entry creation error:', error);
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error('Something went wrong while saving your weight. Please try again.');
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.logs.weightEntries() });
