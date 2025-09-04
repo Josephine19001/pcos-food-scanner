@@ -8,13 +8,15 @@ export function useAppNavigation() {
   const goBackWithFallback = () => {
     try {
       // Special handling for nested settings pages
-      if (pathname.includes('settings') && 
-          (pathname.includes('/fitness-goals') || 
-           pathname.includes('/weight') || 
-           pathname.includes('/nutrition-goals') || 
-           pathname.includes('/personal-details') ||
-           pathname.includes('/reminder-settings') ||
-           pathname.includes('/supplements'))) {
+      if (
+        pathname.includes('settings') &&
+        (pathname.includes('/fitness-goals') ||
+          pathname.includes('/weight') ||
+          pathname.includes('/nutrition-goals') ||
+          pathname.includes('/personal-details') ||
+          pathname.includes('/reminder-settings') ||
+          pathname.includes('/supplements'))
+      ) {
         // For nested settings pages, explicitly navigate to settings index
         router.push('/(tabs)/settings' as any);
         return;
@@ -71,7 +73,8 @@ export function useAppNavigation() {
         currentPath.includes('/fitness-goals') ||
         currentPath.includes('/weight') ||
         currentPath.includes('/nutrition-goals') ||
-        currentPath.includes('/personal-details')
+        currentPath.includes('/personal-details') ||
+        currentPath.includes('/report')
       ) {
         return '/(tabs)/settings';
       }

@@ -1,6 +1,17 @@
 import { View, Pressable, Linking, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { FileText, Shield, UserMinus, LogOut, Target, Apple, Scale } from 'lucide-react-native';
+import {
+  FileText,
+  Shield,
+  UserMinus,
+  LogOut,
+  Target,
+  Apple,
+  Scale,
+  MessageCircle,
+  Bug,
+  Star,
+} from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ConfirmationModal, Skeleton } from '@/components/ui';
@@ -9,6 +20,7 @@ import { useAuth } from '@/context/auth-provider';
 import { toast } from 'sonner-native';
 import { useAccount, useDeleteAccount } from '@/lib/hooks/use-accounts';
 import { AvatarUpload } from '@/components/settings/avatar-upload';
+import * as StoreReview from 'expo-store-review';
 
 function SettingsPageSkeleton() {
   return (
@@ -103,7 +115,7 @@ function SettingsPageSkeleton() {
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { data: account, isLoading } = useAccount();
@@ -118,13 +130,36 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     try {
-      await deleteAccount();
+      deleteAccount();
       setShowDeleteModal(false);
     } catch (error) {
       toast.error('Failed to delete your account. Please try again or contact support.');
       setShowDeleteModal(false);
+    }
+  };
+
+  const handleRateUs = async () => {
+    try {
+      // Check if the device supports in-app reviews
+      const isAvailable = await StoreReview.isAvailableAsync();
+
+      if (isAvailable) {
+        // Request in-app review
+        await StoreReview.requestReview();
+      } else {
+        // Fallback to opening App Store
+        await Linking.openURL('https://apps.apple.com/app/id6751772486?action=write-review');
+      }
+    } catch (error) {
+      console.error('Failed to request review:', error);
+      // Fallback to App Store if in-app review fails
+      try {
+        await Linking.openURL('https://apps.apple.com/app/id6751772486?action=write-review');
+      } catch (linkingError) {
+        toast.error('Unable to open rating page');
+      }
     }
   };
 
@@ -249,6 +284,23 @@ export default function SettingsScreen() {
                   onPress={() => router.push('/settings/weight')}
                   isLast
                 />
+              </View>
+
+              {/* Support Section */}
+              <View className="bg-white mx-4 rounded-2xl shadow mb-4">
+                <SettingsItem
+                  icon={MessageCircle}
+                  label="Contact"
+                  onPress={() =>
+                    Linking.openURL('mailto:team@lunasync.app?subject=Support Request')
+                  }
+                />
+                <SettingsItem
+                  icon={Bug}
+                  label="Report"
+                  onPress={() => router.push('/settings/report')}
+                />
+                <SettingsItem icon={Star} label="Rate Us" onPress={handleRateUs} isLast />
               </View>
 
               {/* App Feedback */}
