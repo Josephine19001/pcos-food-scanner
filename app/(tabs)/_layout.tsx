@@ -22,6 +22,7 @@ const HIDDEN_ROUTES = [
   '/settings/nutrition-goals',
   '/settings/weight',
   '/settings/supplements',
+  '/settings/medical-sources',
   '/settings/report',
   '/log-exercise',
   '/log-mood',
@@ -179,6 +180,7 @@ export default function TabLayout() {
         <Tabs.Screen name="settings/weight" options={{ href: null, headerShown: false }} />
         <Tabs.Screen name="settings/supplements" options={{ href: null, headerShown: false }} />
         <Tabs.Screen name="settings/report" options={{ href: null, headerShown: false }} />
+        <Tabs.Screen name="settings/medical-sources" options={{ href: null, headerShown: false }} />
       </Tabs>
 
       {/* Logger Modal */}

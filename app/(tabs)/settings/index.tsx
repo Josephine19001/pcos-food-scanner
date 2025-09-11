@@ -13,6 +13,7 @@ import {
   Star,
   Crown,
   Sparkles,
+  Brain,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -356,6 +357,11 @@ export default function SettingsScreen() {
 
               {/* Support Section */}
               <View className={`bg-white ${isTablet ? 'mx-8' : 'mx-4'} rounded-2xl shadow mb-4`}>
+                <SettingsItem
+                  icon={Brain}
+                  label="How Luna works"
+                  onPress={() => router.push('/settings/medical-sources')}
+                />
                 <SettingsItem
                   icon={MessageCircle}
                   label="Contact"
