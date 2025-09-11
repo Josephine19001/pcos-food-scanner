@@ -18,7 +18,10 @@ export function ProgressPicturesSection({ startDate, endDate }: ProgressPictures
   const requestPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please grant camera roll permissions to upload progress pictures.');
+      Alert.alert('Permission Required', 'Please grant photo library access to upload progress pictures.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Continue', onPress: () => ImagePicker.requestMediaLibraryPermissionsAsync() }
+      ]);
       return false;
     }
     return true;
@@ -50,7 +53,10 @@ export function ProgressPicturesSection({ startDate, endDate }: ProgressPictures
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Please grant camera permissions to take progress pictures.');
+      Alert.alert('Permission Required', 'Please grant camera access to take progress pictures.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Continue', onPress: () => ImagePicker.requestCameraPermissionsAsync() }
+      ]);
       return;
     }
 

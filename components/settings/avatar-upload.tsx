@@ -6,9 +6,10 @@ import { useAvatar, useAvatarUpload } from '@/lib/hooks/use-avatar';
 interface AvatarUploadProps {
   size?: number;
   showActions?: boolean;
+  showIcon?: boolean;
 }
 
-export const AvatarUpload = ({ size = 80, showActions = true }: AvatarUploadProps) => {
+export const AvatarUpload = ({ size = 80, showActions = true, showIcon = true }: AvatarUploadProps) => {
   const { data: avatarUrl, isLoading } = useAvatar();
   const avatarUpload = useAvatarUpload();
 
@@ -31,8 +32,8 @@ export const AvatarUpload = ({ size = 80, showActions = true }: AvatarUploadProp
   const showUploadOptions = () => {
     Alert.alert('Update Avatar', 'Choose how you want to update your avatar', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Camera', onPress: handleUploadFromCamera },
-      { text: 'Photo Gallery', onPress: handleUploadFromGallery },
+      { text: 'Take Photo', onPress: handleUploadFromCamera },
+      { text: 'Choose from Gallery', onPress: handleUploadFromGallery },
     ]);
   };
 
@@ -59,7 +60,7 @@ export const AvatarUpload = ({ size = 80, showActions = true }: AvatarUploadProp
           )}
         </View>
 
-        {showActions && (
+        {showActions && showIcon && (
           <View className="absolute -bottom-2 -right-2 bg-pink-500 rounded-full p-2">
             <Camera size={16} color="white" />
           </View>

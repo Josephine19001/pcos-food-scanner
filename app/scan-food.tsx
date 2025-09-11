@@ -13,6 +13,7 @@ import { useRevenueCat } from '@/context/revenuecat-provider';
 import { Camera, Image as ImageIcon, X, HelpCircle } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { CameraPermissionPrompt } from '@/components/ui/camera-permission-prompt';
 
 export default function ScanFoodScreen() {
   const router = useRouter();
@@ -198,15 +199,15 @@ export default function ScanFoodScreen() {
       {!permission ? (
         <View />
       ) : !permission.granted ? (
-        <View style={styles.container}>
+        <>
           <StatusBar barStyle="light-content" backgroundColor="#000000" />
-          <View style={styles.permissionContainer}>
-            <Text style={styles.permissionText}>We need your permission to show the camera</Text>
-            <TouchableOpacity onPress={requestPermission} style={styles.permissionButton}>
-              <Text style={styles.permissionButtonText}>Grant Permission</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          <CameraPermissionPrompt
+            message="We need your permission to show the camera"
+            onRequestPermission={requestPermission}
+            style="dark"
+            redirectToSettings={permission?.canAskAgain === false}
+          />
+        </>
       ) : (
         <View style={styles.container}>
           <StatusBar barStyle="light-content" backgroundColor="#000000" />
@@ -274,29 +275,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  permissionText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  permissionButton: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  permissionButtonText: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: '600',
   },
   camera: {
     flex: 1,

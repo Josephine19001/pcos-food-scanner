@@ -18,11 +18,11 @@
       "userInterfaceStyle": "light",
       "bundleIdentifier": "com.lunasync.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "LunaSync uses your camera to capture meal photos for nutrition tracking, and take profile avatar pictures to personalize your experience.",
-        "NSPhotoLibraryUsageDescription": "LunaSync accesses your photo library to select product images for ingredient analysis, upload meal photos for nutrition tracking, and choose profile avatar pictures.",
+        "NSCameraUsageDescription": "LunaSync uses your camera to capture meal photos for nutrition tracking, take profile avatar pictures to personalize your experience, and add progress pictures for your insights.",
+        "NSPhotoLibraryUsageDescription": "LunaSync accesses your photo library to upload meal photos for nutrition tracking, choose profile avatar pictures, and add progress pictures for your insights.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "17"
+      "buildNumber": "19"
     },
     "android": {
       "userInterfaceStyle": "light",

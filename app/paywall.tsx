@@ -152,6 +152,7 @@ export default function PaywallScreen() {
   // Calculate yearly savings
   const yearlyMonthlyCost = yearlyPackage ? yearlyPackage.product.price / 12 : 2.49;
   const monthlyCost = monthlyPackage?.product.price || 3.99;
+  const yearlyCost = yearlyPackage?.product.price || 29.99;
   const savings = Math.round(((monthlyCost - yearlyMonthlyCost) / monthlyCost) * 100);
 
   // Show loading state - since data is preloaded during app initialization,
@@ -207,7 +208,7 @@ export default function PaywallScreen() {
             <View
               className={`${
                 isTablet ? 'px-12' : 'px-6'
-              } mb-4 flex-row items-center justify-between`}
+              } mb-2 flex-row items-center justify-between`}
             >
               <TouchableOpacity onPress={() => router.back()} className="flex-row items-center">
                 <ArrowLeft size={20} color="#6B7280" />
@@ -226,7 +227,7 @@ export default function PaywallScreen() {
             </View>
 
             {/* Title Section */}
-            <View className={`${isTablet ? 'px-12' : 'px-6'} py-8 mb-8`}>
+            <View className={`${isTablet ? 'px-12' : 'px-6'} py-6 mb-4`}>
               <Text
                 className={`${
                   isTablet ? 'text-4xl' : 'text-2xl'
@@ -237,9 +238,9 @@ export default function PaywallScreen() {
               <Text
                 className={`${
                   isTablet ? 'text-lg' : 'text-base'
-                } text-slate-600 text-center leading-6`}
+                } text-slate-600 text-center leading-6 px-6`}
               >
-                Join thousands of women taking control of their health
+                Your body changes every month, LunaSync adapts with you.
               </Text>
             </View>
 
@@ -363,15 +364,15 @@ export default function PaywallScreen() {
                       className={`${isTablet ? 'text-4xl' : 'text-3xl'} font-black text-gray-900`}
                     >
                       {yearlyPackage?.product.priceString
-                        ? (yearlyPackage.product.price / 12).toLocaleString('en-US', {
+                        ? yearlyPackage.product.price.toLocaleString('en-US', {
                             style: 'currency',
                             currency: yearlyPackage.product.currencyCode || 'USD',
                           })
-                        : `$${yearlyMonthlyCost.toFixed(2)}`}{' '}
+                        : `$${yearlyCost.toFixed(2)}`}{' '}
                       <Text
                         className={`${isTablet ? 'text-xl' : 'text-lg'} font-medium text-gray-500`}
                       >
-                        /mo
+                        /yr
                       </Text>
                     </Text>
                   </View>

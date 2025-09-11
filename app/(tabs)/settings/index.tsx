@@ -23,6 +23,7 @@ import { useAuth } from '@/context/auth-provider';
 import { toast } from 'sonner-native';
 import { useAccount, useDeleteAccount } from '@/lib/hooks/use-accounts';
 import { AvatarUpload } from '@/components/settings/avatar-upload';
+import { useAvatar } from '@/lib/hooks/use-avatar';
 import * as StoreReview from 'expo-store-review';
 import { useRevenueCat } from '@/context/revenuecat-provider';
 import { supabase } from '@/lib/supabase/client';
@@ -127,6 +128,7 @@ export default function SettingsScreen() {
   const { data: account, isLoading } = useAccount();
   const { mutate: deleteAccount, isPending: isDeleting } = useDeleteAccount();
   const { isSubscribed, isInGracePeriod } = useRevenueCat();
+  const { data: avatarUrl } = useAvatar();
 
   const handleLogout = async () => {
     try {
@@ -231,7 +233,7 @@ export default function SettingsScreen() {
                 onPress={() => router.push('/settings/personal-details')}
               >
                 <View className="flex-row items-center">
-                  <AvatarUpload size={60} showActions={false} />
+                  <AvatarUpload size={60} showActions={true} showIcon={!avatarUrl} />
                   <View className="ml-4 flex-1">
                     <Text className="text-xl font-semibold">{getUserDisplayData().name}</Text>
                     <Text className="text-gray-500">{getUserDisplayData().ageText}</Text>

@@ -45,11 +45,11 @@ export function useAvatarPermissions() {
       const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (cameraPermission.status !== 'granted') {
-        throw new Error('Camera permission is required');
+        throw new Error('Camera access is required to take photos');
       }
 
       if (mediaLibraryPermission.status !== 'granted') {
-        throw new Error('Photo library permission is required');
+        throw new Error('Photo library access is required to select images');
       }
 
       return true;
@@ -69,11 +69,11 @@ export function useImagePicker() {
       const mediaLibraryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (cameraPermission.status !== 'granted') {
-        throw new Error('Camera permission is required to take photos');
+        throw new Error('Camera access is required to take photos');
       }
 
       if (mediaLibraryPermission.status !== 'granted') {
-        throw new Error('Photo library permission is required to select images');
+        throw new Error('Photo library access is required to select images');
       }
 
       const options: ImagePicker.ImagePickerOptions = {
