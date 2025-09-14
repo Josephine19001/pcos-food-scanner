@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { OnboardingData } from '@/types/onboarding';
+import { OnboardingData, ChatOnboardingState } from '@/types/onboarding';
 
 const ONBOARDING_DATA_KEY = '@lunasync_onboarding_data';
+const CHAT_PROGRESS_KEY = '@lunasync_chat_progress';
 
 export class OnboardingStorage {
   /**
@@ -68,6 +69,66 @@ export class OnboardingStorage {
     } catch (error) {
       console.error('Failed to check onboarding data existence:', error);
       return false;
+    }
+  }
+
+  /**
+   * Save chat progress to local storage
+   */
+  static async saveChatProgress(state: ChatOnboardingState, messages?: any[]): Promise<void> {
+    try {
+      const progressData = {
+        currentQuestionIndex: state.currentQuestionIndex,
+        responses: state.responses,
+        isComplete: state.isComplete,
+        messages: messages || [],
+        lastUpdated: Date.now(),
+      };
+      const jsonData = JSON.stringify(progressData);
+      await AsyncStorage.setItem(CHAT_PROGRESS_KEY, jsonData);
+    } catch (error) {
+      console.error('Failed to save chat progress:', error);
+      throw new Error('Failed to save chat progress');
+    }
+  }
+
+  /**
+   * Load chat progress from local storage
+   */
+  static async loadChatProgress(): Promise<Partial<ChatOnboardingState> | null> {
+    try {
+      const jsonData = await AsyncStorage.getItem(CHAT_PROGRESS_KEY);
+      if (!jsonData) return null;
+
+      return JSON.parse(jsonData);
+    } catch (error) {
+      console.error('Failed to load chat progress:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Check if chat progress exists
+   */
+  static async chatProgressExists(): Promise<boolean> {
+    try {
+      const data = await AsyncStorage.getItem(CHAT_PROGRESS_KEY);
+      return data !== null;
+    } catch (error) {
+      console.error('Failed to check chat progress existence:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clear chat progress from local storage
+   */
+  static async clearChatProgress(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(CHAT_PROGRESS_KEY);
+    } catch (error) {
+      console.error('Failed to clear chat progress:', error);
+      throw new Error('Failed to clear chat progress');
     }
   }
 }

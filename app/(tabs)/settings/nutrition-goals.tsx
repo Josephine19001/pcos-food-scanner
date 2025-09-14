@@ -17,15 +17,81 @@ import {
   Edit3,
   X,
   Check,
+  Leaf,
+  Utensils,
+  Zap,
+  Activity,
+  Shuffle,
 } from 'lucide-react-native';
 import { OliveOilIcon } from '@/components/icons/olive-oil-icon';
 import { useNutritionGoals, useUpdateNutritionGoals } from '@/lib/hooks/use-nutrition-goals';
 import { useNutritionGoalSetter } from '@/lib/hooks/use-nutrition-goal-setter';
 import { useBodyMeasurements } from '@/lib/hooks/use-weight-tracking';
-import { nutritionQuestionnaireSteps, formatGoal } from '@/constants/nutrition-questionnaire';
+import { nutritionQuestionnaireSteps, formatGoal, formatActivityLevel, formatNutritionStyle } from '@/constants/nutrition-questionnaire';
 import { NutritionGoalsSkeleton } from '@/components/nutrition/nutrition-goals-skeleton';
 import { NutritionGoalsEmptyState } from '@/components/nutrition/nutrition-goals-empty-state';
 import { GenerateMacrosButton } from '@/components/nutrition/generate-macros-button';
+
+// Helper functions for nutrition style icons and colors
+const getNutritionStyleIcon = (style: string | null) => {
+  switch (style) {
+    case 'all':
+      return <Utensils size={24} color="#f59e0b" />;
+    case 'plants':
+      return <Leaf size={24} color="#10b981" />;
+    case 'vegan':
+      return <Leaf size={24} color="#059669" />;
+    case 'surprise':
+      return <Shuffle size={24} color="#8b5cf6" />;
+    default:
+      return <Utensils size={24} color="#6b7280" />;
+  }
+};
+
+const getNutritionStyleBg = (style: string | null, isDark: boolean) => {
+  switch (style) {
+    case 'all':
+      return isDark ? 'bg-amber-900/30' : 'bg-amber-100';
+    case 'plants':
+      return isDark ? 'bg-emerald-900/30' : 'bg-emerald-100';
+    case 'vegan':
+      return isDark ? 'bg-green-900/30' : 'bg-green-100';
+    case 'surprise':
+      return isDark ? 'bg-purple-900/30' : 'bg-purple-100';
+    default:
+      return isDark ? 'bg-gray-600' : 'bg-gray-200';
+  }
+};
+
+const getActivityLevelIcon = (level: string | null) => {
+  switch (level) {
+    case 'sedentary':
+      return <Target size={24} color="#6b7280" />;
+    case 'light':
+      return <Activity size={24} color="#3b82f6" />;
+    case 'moderate':
+      return <Zap size={24} color="#f59e0b" />;
+    case 'active':
+      return <Flame size={24} color="#ef4444" />;
+    default:
+      return <Activity size={24} color="#6b7280" />;
+  }
+};
+
+const getActivityLevelBg = (level: string | null, isDark: boolean) => {
+  switch (level) {
+    case 'sedentary':
+      return isDark ? 'bg-gray-700' : 'bg-gray-100';
+    case 'light':
+      return isDark ? 'bg-blue-900/30' : 'bg-blue-100';
+    case 'moderate':
+      return isDark ? 'bg-amber-900/30' : 'bg-amber-100';
+    case 'active':
+      return isDark ? 'bg-red-900/30' : 'bg-red-100';
+    default:
+      return isDark ? 'bg-gray-600' : 'bg-gray-200';
+  }
+};
 
 export default function NutritionGoalsScreen() {
   const router = useRouter();
@@ -518,6 +584,48 @@ export default function NutritionGoalsScreen() {
                 <Text className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {formatGoal(nutritionGoals.primary_goal)}
                 </Text>
+              </View>
+
+              {/* Nutrition Preferences */}
+              <View className={`${isDark ? 'bg-card-dark' : 'bg-white'} rounded-2xl p-6 mb-4 shadow-sm`}>
+                <Text className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'} mb-4`}>
+                  Your Preferences
+                </Text>
+                <View className="flex flex-row gap-4">
+                  {/* Nutrition Style */}
+                  <View className={`flex-1 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-4 rounded-xl`}>
+                    <View className="flex-row items-center">
+                      <View className={`${getNutritionStyleBg(nutritionGoals.nutrition_style, isDark)} p-3 rounded-full mr-3`}>
+                        {getNutritionStyleIcon(nutritionGoals.nutrition_style)}
+                      </View>
+                      <View className="flex-1">
+                        <Text className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'} uppercase tracking-wide`}>
+                          Style
+                        </Text>
+                        <Text className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {nutritionGoals.nutrition_style ? formatNutritionStyle(nutritionGoals.nutrition_style) : '--'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Activity Level */}
+                  <View className={`flex-1 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} p-4 rounded-xl`}>
+                    <View className="flex-row items-center">
+                      <View className={`${getActivityLevelBg(nutritionGoals.activity_level, isDark)} p-3 rounded-full mr-3`}>
+                        {getActivityLevelIcon(nutritionGoals.activity_level)}
+                      </View>
+                      <View className="flex-1">
+                        <Text className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'} uppercase tracking-wide`}>
+                          Activity
+                        </Text>
+                        <Text className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {nutritionGoals.activity_level ? formatActivityLevel(nutritionGoals.activity_level) : '--'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
               </View>
             </>
           ) : (

@@ -4,7 +4,7 @@ import Svg, { G, Path, Circle } from 'react-native-svg';
 interface RobotIconProps {
   size?: number;
   color?: string;
-  theme?: 'nutrition' | 'cycle' | 'exercise';
+  theme?: 'nutrition' | 'cycle' | 'exercise' | 'onboarding';
 }
 
 export function RobotIcon({ size = 24, color, theme }: RobotIconProps) {
@@ -19,6 +19,8 @@ export function RobotIcon({ size = 24, color, theme }: RobotIconProps) {
         return '#f59e0b'; // orange
       case 'exercise':
         return '#8b5cf6'; // purple
+      case 'onboarding':
+        return '#ec4899'; // primary pink
       default:
         return '#6b7280'; // gray
     }

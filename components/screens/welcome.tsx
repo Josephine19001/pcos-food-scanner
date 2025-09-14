@@ -8,6 +8,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { useTheme } from '@/context/theme-provider';
 import { CosmicBackground } from '@/components/ui/cosmic-background';
+import { ChevronRight } from 'lucide-react-native';
 
 export function WelcomeScreen() {
   // No automatic redirection logic - handled by main app index now
@@ -17,12 +18,18 @@ export function WelcomeScreen() {
 
   const onSignIn = useCallback(() => {
     setIsNavigating(true);
-    setTimeout(() => router.push('/auth?mode=signin'), 150);
+    setTimeout(() => {
+      router.push('/auth?mode=signin');
+      setIsNavigating(false); // Reset state after navigation
+    }, 150);
   }, []);
 
   const onGetStarted = useCallback(() => {
     setIsNavigating(true);
-    setTimeout(() => router.push('/onboarding'), 150);
+    setTimeout(() => {
+      router.push('/onboarding');
+      setIsNavigating(false); // Reset state after navigation
+    }, 150);
   }, []);
 
   return (
@@ -64,20 +71,20 @@ export function WelcomeScreen() {
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             paddingHorizontal: 24,
-            paddingTop: 32,
-            paddingBottom: 50, // Account for home indicator
+            paddingTop: 40,
+            paddingBottom: 60, // Account for home indicator
           }}
         >
           <Animated.View entering={FadeIn.delay(300).duration(800)}>
             <Text
-              className={`text-5xl font-bold mb-4 leading-tight ${
+              className={`text-5xl font-bold mb-6 leading-tight ${
                 isDark ? 'text-white' : 'text-black'
               }`}
             >
               Wellness, but make it personal
             </Text>
             <Text
-              className={`text-xl mb-8 leading-relaxed ${
+              className={`text-2xl mb-8 leading-relaxed ${
                 isDark ? 'text-gray-300' : 'text-gray-700'
               }`}
             >
@@ -91,7 +98,8 @@ export function WelcomeScreen() {
                 onPress={onGetStarted}
                 variant="primary"
                 size="large"
-                className="bg-pink-500"
+                className="bg-pink-500 justify-between"
+                postIcon={<ChevronRight size={24} color="white" />}
                 disabled={isNavigating}
               />
               <TouchableOpacity onPress={onSignIn} className="py-3">

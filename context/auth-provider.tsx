@@ -136,22 +136,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (onboardingData) {
           try {
             const rpcParams = {
+              // Required parameters first
               p_user_id: data.user.id,
               p_name: onboardingData.name,
               p_date_of_birth: onboardingData.dateOfBirth,
-              p_fitness_goal: onboardingData.fitnessGoal,
-              p_fitness_frequency: onboardingData.fitnessFrequency,
-              p_fitness_experience: onboardingData.fitnessExperience,
               p_nutrition_goal: onboardingData.nutritionGoal,
               p_activity_level: onboardingData.activityLevel,
-              p_nutrition_experience: onboardingData.nutritionExperience,
+              p_fitness_goal: onboardingData.fitnessGoal,
+              p_fitness_frequency: onboardingData.fitnessFrequency,
               p_height: onboardingData.height,
               p_weight: onboardingData.weight,
-              p_weight_goal: onboardingData.weightGoal,
               p_units: onboardingData.units,
+              
+              // Optional parameters with defaults
+              p_last_period_start: onboardingData.lastPeriodStart,
+              p_cycle_regularity: onboardingData.cycleRegularity,
+              p_cycle_symptoms: onboardingData.cycleSymptoms || [],
+              p_nutrition_style: onboardingData.nutritionStyle,
+              p_nutrition_experience: onboardingData.nutritionExperience,
+              p_fitness_experience: onboardingData.fitnessExperience,
+              p_fitness_styles: onboardingData.fitnessStyles || [],
+              p_fitness_location: onboardingData.fitnessLocation,
+              p_weight_goal: onboardingData.weightGoal,
+              p_plan: plan || 'free'
             };
 
-            const { error } = await supabase.rpc('process_onboarding_data', rpcParams);
+            const { error } = await supabase.rpc('process_chat_onboarding_data', rpcParams);
 
             if (error) {
               console.error('Onboarding processing failed:', error.message);

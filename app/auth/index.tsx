@@ -17,8 +17,9 @@ export default function AuthScreen() {
   const { signInWithEmail, signInWithApple, signUpWithOnboarding, signUpWithAppleOnboarding } =
     useAuth();
 
-  const { mode } = useLocalSearchParams<{
+  const { mode, method } = useLocalSearchParams<{
     mode?: 'signin' | 'signup';
+    method?: 'apple' | 'google' | 'email';
   }>();
 
   const [isSignUp, setIsSignUp] = useState(mode === 'signup');
@@ -50,6 +51,17 @@ export default function AuthScreen() {
 
     checkOnboardingData();
   }, []);
+
+  // Handle automatic auth method triggering from chat onboarding
+  useEffect(() => {
+    if (method && isSignUp && hasOnboardingData) {
+      if (method === 'apple') {
+        handleAppleAuth();
+      }
+      // Note: Google and Email methods would require additional UI interaction
+      // so they're not automatically triggered
+    }
+  }, [method, isSignUp, hasOnboardingData]);
 
   const handlePostAuth = () => {
     if (shouldShowPaywall) {

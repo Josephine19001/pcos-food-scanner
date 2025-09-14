@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -20,27 +20,26 @@ interface Star {
 export function CosmicBackground({ children, theme = 'settings', isDark = true }: CosmicBackgroundProps) {
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const starsRef = useRef<Star[]>([]);
+  const [containerDimensions, setContainerDimensions] = useState<{width: number, height: number}>({ width: screenWidth, height: screenHeight });
 
-  // Generate stars only once
+  // Generate stars based on container dimensions
   useEffect(() => {
-    if (starsRef.current.length === 0) {
-      const stars: Star[] = [];
-      const starCount = isDark ? 150 : 30; // Much more stars in dark mode
-      
-      for (let i = 0; i < starCount; i++) {
-        stars.push({
-          id: i,
-          x: Math.random() * screenWidth,
-          y: Math.random() * screenHeight,
-          size: Math.random() * 2 + 0.5, // Size between 0.5-2.5 (more variety)
-          opacity: new Animated.Value(Math.random() * 0.8 + 0.2),
-          animationDelay: Math.random() * 3000, // Stagger animations
-        });
-      }
-      
-      starsRef.current = stars;
+    const stars: Star[] = [];
+    const starCount = isDark ? 150 : 30; // Much more stars in dark mode
+    
+    for (let i = 0; i < starCount; i++) {
+      stars.push({
+        id: i,
+        x: Math.random() * containerDimensions.width,
+        y: Math.random() * containerDimensions.height,
+        size: Math.random() * 2 + 0.5, // Size between 0.5-2.5 (more variety)
+        opacity: new Animated.Value(Math.random() * 0.8 + 0.2),
+        animationDelay: Math.random() * 3000, // Stagger animations
+      });
     }
-  }, [screenWidth, screenHeight, isDark]);
+    
+    starsRef.current = stars;
+  }, [containerDimensions.width, containerDimensions.height, isDark]);
 
   // Animate stars
   useEffect(() => {
@@ -77,7 +76,7 @@ export function CosmicBackground({ children, theme = 'settings', isDark = true }
         case 'nutrition':
           return ['#0a0f0a', '#1a2e1a', '#2d4a2d']; // Deep cosmic green
         case 'cycle':
-          return ['#0f0a14', '#2e1a2b', '#4a2d42']; // Deep cosmic pink
+          return ['#1a0f1f', '#3d2249', '#5d3366']; // Brighter cosmic pink
         case 'exercise':
           return ['#0f0a1c', '#2e1a32', '#4a2d47']; // Deep cosmic purple
         case 'settings':
@@ -104,7 +103,13 @@ export function CosmicBackground({ children, theme = 'settings', isDark = true }
   const gradientColors = getCosmicGradient();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View 
+      style={{ flex: 1 }}
+      onLayout={(event) => {
+        const { width, height } = event.nativeEvent.layout;
+        setContainerDimensions({ width, height });
+      }}
+    >
       {/* Cosmic gradient background */}
       <LinearGradient
         colors={gradientColors}

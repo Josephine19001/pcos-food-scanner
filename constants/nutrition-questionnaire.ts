@@ -67,11 +67,14 @@ export const nutritionQuestionnaireSteps: QuestionnaireStep[] = [
 export const formatGoal = (goal: string) => {
   const goalMap: Record<string, string> = {
     lose_weight: 'Lose Weight',
-    gain_muscle: 'Gain Muscle',
+    gain_muscle: 'Gain Muscle', 
     maintain: 'Maintain Weight',
     improve_health: 'Improve Health',
+    // NEW VALUES from onboarding chat
+    hormone_balance: 'Hormone Balance',
+    better_energy: 'Better Energy',
   };
-  return goalMap[goal] || goal;
+  return goalMap[goal] || goal.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
 export const formatActivityLevel = (level: string) => {
@@ -82,4 +85,14 @@ export const formatActivityLevel = (level: string) => {
     active: 'Very Active',
   };
   return levelMap[level] || level.replace('_', ' ');
+};
+
+export const formatNutritionStyle = (style: string) => {
+  const styleMap: Record<string, string> = {
+    all: 'Eat Everything',
+    plants: 'Mostly Plants',
+    vegan: 'Vegan',
+    surprise: 'Surprise Me',
+  };
+  return styleMap[style] || style.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
 };

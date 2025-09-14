@@ -4,9 +4,12 @@ export interface OnboardingData {
   dateOfBirth: string;
 
   // Cycle Info
+  knowsLastPeriod?: boolean;
   lastPeriodStart?: string;
   cycleRegularity?: 'regular' | 'irregular' | 'unknown';
+  cycleLength?: number;
   cycleSymptoms?: string[];
+  flowIntensity?: 'light' | 'moderate' | 'heavy' | 'varies';
 
   // Nutrition
   nutritionStyle?: 'all' | 'plants' | 'vegan' | 'surprise';
@@ -25,6 +28,7 @@ export interface OnboardingData {
   height: number;
   weight: number;
   weightGoal?: number;
+  hasGoalWeight?: boolean;
   units: 'metric' | 'imperial';
 
   // Preferences
@@ -45,4 +49,38 @@ export interface OnboardingStepContentProps {
   data: OnboardingData;
   updateData: (key: keyof OnboardingData, value: any) => void;
   openCalendar: (type: CalendarType) => void;
+}
+
+// Chat-based onboarding types
+export interface ChatOption {
+  label: string;
+  value: string;
+}
+
+export interface ChatQuestion {
+  id: string;
+  message: string;
+  type: 'text' | 'select' | 'multi-select' | 'date' | 'number';
+  options?: ChatOption[];
+  followUp?: string | { [key: string]: string };
+  placeholder?: string;
+  validation?: {
+    required?: boolean;
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
+}
+
+export interface ChatResponse {
+  questionId: string;
+  answer: string | string[] | number;
+  timestamp: number;
+}
+
+export interface ChatOnboardingState {
+  currentQuestionIndex: number;
+  responses: ChatResponse[];
+  isComplete: boolean;
+  data: Partial<OnboardingData>;
 }
