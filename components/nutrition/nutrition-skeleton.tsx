@@ -7,10 +7,14 @@ const { width } = Dimensions.get('window');
 // Calories Summary Card Skeleton
 export const CaloriesSummaryCardSkeleton = () => {
   const { isDark } = useTheme();
-  
+
   return (
     <View className="px-4 mb-6">
-      <View className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-3xl p-6 shadow-sm ${isDark ? 'border border-gray-700' : 'border border-gray-100'}`}>
+      <View
+        className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-3xl p-6 shadow-sm ${
+          isDark ? 'border border-gray-700' : 'border border-gray-100'
+        }`}
+      >
         {/* Main content */}
         <View className="flex-row items-center justify-between mb-4">
           {/* Left side - Large number and text */}
@@ -55,9 +59,13 @@ export const CaloriesSummaryCardSkeleton = () => {
 // Individual Macro Card Skeleton (matches new UI design)
 const IndividualMacroCardSkeleton = () => {
   const { isDark } = useTheme();
-  
+
   return (
-    <View className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-50'} rounded-2xl p-5 shadow-sm border mb-4`}>
+    <View
+      className={`${
+        isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-50'
+      } rounded-2xl p-5 shadow-sm border mb-4`}
+    >
       <View className="flex-row items-center justify-between">
         {/* Left side - Value and label */}
         <View className="flex-1">
@@ -94,10 +102,14 @@ export const MacroBreakdownSkeleton = () => (
 // Water Intake Card Skeleton
 export const WaterIntakeCardSkeleton = () => {
   const { isDark } = useTheme();
-  
+
   return (
     <View className="px-4 mb-6">
-      <View className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-50'} rounded-2xl p-5 shadow-sm border`}>
+      <View
+        className={`${
+          isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-50'
+        } rounded-2xl p-5 shadow-sm border`}
+      >
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">
             <Skeleton width={32} height={32} borderRadius={16} className="mr-3" />
@@ -120,9 +132,13 @@ export const WaterIntakeCardSkeleton = () => {
 // Meal Card Skeleton
 const MealCardSkeleton = ({ isAnalyzing = false }: { isAnalyzing?: boolean }) => {
   const { isDark } = useTheme();
-  
+
   return (
-    <View className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-50'} rounded-2xl p-4 mb-3 shadow-sm border`}>
+    <View
+      className={`${
+        isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-50'
+      } rounded-2xl p-4 mb-3 shadow-sm border`}
+    >
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center flex-1">
           <Skeleton width={48} height={48} borderRadius={12} className="mr-3" />
@@ -141,7 +157,11 @@ const MealCardSkeleton = ({ isAnalyzing = false }: { isAnalyzing?: boolean }) =>
       </View>
 
       {/* Nutrition breakdown - always show for regular meals */}
-      <View className={`flex-row justify-between items-center pt-3 border-t ${isDark ? 'border-gray-700' : 'border-gray-50'}`}>
+      <View
+        className={`flex-row justify-between items-center pt-3 border-t ${
+          isDark ? 'border-gray-700' : 'border-gray-50'
+        }`}
+      >
         {Array.from({ length: 4 }).map((_, index) => (
           <View key={index} className="items-center">
             <Skeleton width={35} height={12} borderRadius={4} className="mb-1" />
@@ -152,7 +172,11 @@ const MealCardSkeleton = ({ isAnalyzing = false }: { isAnalyzing?: boolean }) =>
 
       {/* Analyzing state banner */}
       {isAnalyzing && (
-        <View className={`mt-3 ${isDark ? 'bg-blue-900/30 border-blue-700' : 'bg-blue-50 border-blue-200'} rounded-xl p-3 border`}>
+        <View
+          className={`mt-3 ${
+            isDark ? 'bg-blue-900/30 border-blue-700' : 'bg-blue-50 border-blue-200'
+          } rounded-xl p-3 border`}
+        >
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center flex-1">
               <Skeleton width={16} height={16} borderRadius={8} className="mr-2" />
@@ -184,10 +208,14 @@ export const MealsSectionSkeleton = () => (
 // Weekly Calendar Skeleton
 export const WeeklyCalendarSkeleton = () => {
   const { isDark } = useTheme();
-  
+
   return (
     <View className="mx-4 mb-8">
-      <View className={`${isDark ? 'bg-gray-800/80 border-gray-600/60' : 'bg-white/95 border-gray-300/70'} rounded-2xl px-5 py-4 shadow-sm border`}>
+      <View
+        className={`${
+          isDark ? 'bg-gray-800/80 border-gray-600/60' : 'bg-white/95 border-gray-300/70'
+        } rounded-2xl px-5 py-4 shadow-sm border`}
+      >
         <View className="flex-row justify-between">
           {Array.from({ length: 7 }).map((_, index) => (
             <View key={index} className="items-center flex-1">
@@ -196,7 +224,11 @@ export const WeeklyCalendarSkeleton = () => {
 
               {/* Date container */}
               <View className="relative">
-                <View className={`w-12 h-12 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-gray-50'} items-center justify-center`}>
+                <View
+                  className={`w-12 h-12 rounded-xl ${
+                    isDark ? 'bg-gray-700' : 'bg-gray-50'
+                  } items-center justify-center`}
+                >
                   <Skeleton width={16} height={16} borderRadius={4} />
                 </View>
 
@@ -229,7 +261,7 @@ export const StreakDisplaySkeleton = () => (
 // Full Page Skeleton
 export const NutritionPageSkeleton = () => (
   <View className="flex-1">
-    <WeeklyCalendarSkeleton />
+    {/* <WeeklyCalendarSkeleton /> */}
     <CaloriesSummaryCardSkeleton />
     <MacroBreakdownSkeleton />
     <WaterIntakeCardSkeleton />

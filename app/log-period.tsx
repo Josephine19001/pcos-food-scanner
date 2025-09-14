@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import SubPageLayout from '@/components/layouts/sub-page';
-import { MonthlyCalendar } from '@/components/cycle/MonthlyCalendar';
-import { PeriodActionButtons } from '@/components/cycle/PeriodActionButtons';
+import { ElegantPeriodCalendar } from '@/components/cycle/ElegantPeriodCalendar';
+import { PeriodEditingModal } from '@/components/cycle/PeriodEditingModal';
+import { Edit3 } from 'lucide-react-native';
+import { useTheme } from '@/context/theme-provider';
 import { getLocalDateString } from '@/lib/utils/date-helpers';
 import {
   useCurrentCycleInfo,
@@ -18,6 +20,8 @@ export default function LogPeriodScreen() {
   const { date } = useLocalSearchParams<{ date?: string }>();
   const initialDate = date ? new Date(date) : new Date();
   const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const { isDark } = useTheme();
 
   const {
     data: currentCycleInfo,
@@ -176,42 +180,46 @@ export default function LogPeriodScreen() {
     });
   };
 
+  const handleEditPeriodDates = (newPeriodDates: string[]) => {
+    // TODO: Implement period dates editing logic
+    // This would typically involve updating the backend with the new period dates
+    console.log('New period dates:', newPeriodDates);
+  };
+
   return (
     <SubPageLayout
       title="Log Period"
       onBack={() => router.back()}
+      rightElement={
+        <TouchableOpacity
+          onPress={() => setShowEditModal(true)}
+          className={`w-10 h-10 items-center justify-center rounded-full ${
+            isDark ? 'bg-gray-700 border border-gray-600' : 'bg-pink-50 border border-pink-200'
+          }`}
+        >
+          <Edit3 size={18} color={isDark ? '#ffffff' : '#EC4899'} />
+        </TouchableOpacity>
+      }
     >
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      >
-        <View className="px-4 pt-6">
-          {/* Calendar Content */}
-          <View className="mb-8">
-            <MonthlyCalendar
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-              loggedDates={getAllPeriodDatesForCalendar()}
-              startDates={periodCycles.map((cycle: PeriodCycle) => cycle.start_date)}
-              endDates={periodCycles
-                .map((cycle: PeriodCycle) => cycle.end_date)
-                .filter((date: string | null): date is string => date !== null)}
-              predictedDates={getPredictedPeriodDates()}
-              onDatePress={handleDateSelect}
-            />
-          </View>
+      <View className="flex-1">
+        {/* New Elegant Calendar */}
+        <ElegantPeriodCalendar
+          selectedDate={selectedDate}
+          onDateSelect={handleDateSelect}
+          periodDates={getAllPeriodDatesForCalendar()}
+          predictedDates={getPredictedPeriodDates()}
+        />
 
-          {/* Action Buttons */}
-          <PeriodActionButtons
-            selectedDate={selectedDate}
-            hasOngoingPeriod={hasOngoingPeriod()}
-            currentCycleInfo={currentCycleInfo}
-            onStartPeriod={handleStartPeriod}
-            onEndPeriod={handleEndPeriod}
-          />
-        </View>
-      </ScrollView>
+      </View>
+
+      {/* Period Editing Modal */}
+      <PeriodEditingModal
+        visible={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        initialPeriodDates={getAllPeriodDatesForCalendar()}
+        onSave={handleEditPeriodDates}
+        title="Edit Period Dates"
+      />
     </SubPageLayout>
   );
 }

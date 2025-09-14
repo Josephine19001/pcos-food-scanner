@@ -3,6 +3,26 @@ import { Text } from '@/components/ui/text';
 import { router } from 'expo-router';
 import { useRef } from 'react';
 import { useTheme } from '@/context/theme-provider';
+
+// Helper function to get the appropriate background class based on icon color
+function getIconBackgroundClass(iconColor: string, isDark: boolean): string {
+  const colorMap: { [key: string]: { light: string; dark: string } } = {
+    '#F59E0B': { light: 'bg-orange-100', dark: 'bg-orange-900/30' }, // Orange
+    '#3B82F6': { light: 'bg-blue-100', dark: 'bg-blue-900/30' }, // Blue
+    '#06B6D4': { light: 'bg-cyan-100', dark: 'bg-cyan-900/30' }, // Cyan
+    '#8B5CF6': { light: 'bg-purple-100', dark: 'bg-purple-900/30' }, // Purple
+    '#EC4899': { light: 'bg-pink-100', dark: 'bg-pink-900/30' }, // Pink
+    '#10B981': { light: 'bg-green-100', dark: 'bg-green-900/30' }, // Green
+  };
+  
+  const colors = colorMap[iconColor];
+  if (!colors) {
+    // Fallback for unknown colors
+    return isDark ? 'bg-gray-700' : 'bg-gray-100';
+  }
+  
+  return isDark ? colors.dark : colors.light;
+}
 import {
   Activity,
   Camera,
@@ -94,7 +114,7 @@ export function LoggerModal({ visible, onClose }: LoggerModalProps) {
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-      <Pressable className="flex-1 bg-black/30" onPress={handleClose} style={{ flex: 1 }}>
+      <Pressable className="flex-1 bg-black/60" onPress={handleClose} style={{ flex: 1 }}>
         <View className="flex-1 justify-end">
           <Animated.View
             style={{
@@ -104,9 +124,18 @@ export function LoggerModal({ visible, onClose }: LoggerModalProps) {
           >
             <Pressable onPress={(e) => e.stopPropagation()}>
               {/* Logger Content */}
-              <View className={`rounded-t-3xl px-4 pt-6 pb-8 mx-4 mb-4 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+              <View 
+                className={`rounded-t-3xl px-4 pt-6 pb-8 ${isDark ? 'bg-gray-900' : 'bg-white'}`}
+                style={{ 
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: -4 },
+                  shadowOpacity: isDark ? 0.5 : 0.15,
+                  shadowRadius: 20,
+                  elevation: 20
+                }}
+              >
                 {/* Close Handle */}
-                <View className={`w-12 h-1 rounded-full self-center mb-6 ${isDark ? 'bg-gray-600' : 'bg-gray-300'}`} />
+                <View className={`w-12 h-1 rounded-full self-center mb-6 ${isDark ? 'bg-white/30' : 'bg-gray-400/50'}`} />
 
                 {/* Quick Actions Grid - Responsive layout */}
                 <View className="gap-4">
@@ -261,15 +290,23 @@ function LoggerCard({
 }) {
   return (
     <TouchableOpacity onPress={onPress} className="flex-1 mx-1">
-      <View className={`rounded-2xl p-4 shadow-sm border min-h-[100px] items-center justify-center ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-100'}`}>
+      <View 
+        className={`rounded-2xl p-4 min-h-[100px] items-center justify-center ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}
+        style={{ 
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: isDark ? 0.3 : 0.08,
+          shadowRadius: 8,
+          elevation: 4
+        }}
+      >
         <View
-          className="w-12 h-12 rounded-xl items-center justify-center mb-2"
-          style={{ backgroundColor: bgColor }}
+          className={`w-12 h-12 rounded-xl items-center justify-center mb-2 ${getIconBackgroundClass(iconColor, isDark)}`}
         >
           <Icon size={20} color={iconColor} />
         </View>
         <Text
-          className={`text-sm font-medium text-center leading-tight ${isDark ? 'text-white' : 'text-black'}`}
+          className={`text-sm font-medium text-center leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}
           numberOfLines={2}
         >
           {title}

@@ -3,20 +3,28 @@ export interface OnboardingData {
   name: string;
   dateOfBirth: string;
 
+  // Cycle Info
+  lastPeriodStart?: string;
+  cycleRegularity?: 'regular' | 'irregular' | 'unknown';
+  cycleSymptoms?: string[];
+
+  // Nutrition
+  nutritionStyle?: 'all' | 'plants' | 'vegan' | 'surprise';
+  nutritionGoal: string;
+  activityLevel: string;
+  nutritionExperience?: string;
+
   // Fitness Goals
   fitnessGoal: string;
   fitnessFrequency: string;
-  fitnessExperience: string;
-
-  // Nutrition Goals
-  nutritionGoal: string;
-  activityLevel: string;
-  nutritionExperience: string;
+  fitnessExperience?: string;
+  fitnessStyles?: string[];
+  fitnessLocation?: 'home' | 'gym' | 'outdoors' | 'none';
 
   // Body Metrics
   height: number;
   weight: number;
-  weightGoal: number;
+  weightGoal?: number;
   units: 'metric' | 'imperial';
 
   // Preferences

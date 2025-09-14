@@ -10,6 +10,8 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { Eye, EyeOff } from 'lucide-react-native';
 import { OnboardingStorage } from '@/lib/utils/onboarding-storage';
 import { useRevenueCat } from '@/context/revenuecat-provider';
+import { useTheme } from '@/context/theme-provider';
+import { CosmicBackground } from '@/components/ui/cosmic-background';
 
 export default function AuthScreen() {
   const { signInWithEmail, signInWithApple, signUpWithOnboarding, signUpWithAppleOnboarding } =
@@ -28,6 +30,7 @@ export default function AuthScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [hasOnboardingData, setHasOnboardingData] = useState(false);
   const { shouldShowPaywall } = useRevenueCat();
+  const { isDark } = useTheme();
 
   const canSignUp = mode === 'signup';
 
@@ -137,12 +140,12 @@ export default function AuthScreen() {
     }
   };
 
-  return (
-    <View className="flex-1 bg-white px-6">
+  const authContent = (
+    <View className="flex-1 px-6">
       <View className="flex-1 justify-center">
         {/* Header */}
         <View className="mb-12">
-          <Text className="text-3xl font-bold text-black text-center mb-3">
+          <Text className={`text-3xl font-bold text-center mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
             {hasOnboardingData
               ? 'Complete Your Setup'
               : isSignUp
@@ -197,9 +200,9 @@ export default function AuthScreen() {
               disabled={isSubmitting}
             >
               {showPassword ? (
-                <EyeOff size={20} color="#9CA3AF" />
+                <EyeOff size={20} color={isDark ? "#64748B" : "#9CA3AF"} />
               ) : (
-                <Eye size={20} color="#9CA3AF" />
+                <Eye size={20} color={isDark ? "#64748B" : "#9CA3AF"} />
               )}
             </Pressable>
           </View>
@@ -217,9 +220,9 @@ export default function AuthScreen() {
           {Platform.OS === 'ios' && (
             <>
               <View className="flex-row items-center mb-4">
-                <View className="flex-1 h-px bg-slate-300" />
-                <Text className="mx-4 text-slate-500">or</Text>
-                <View className="flex-1 h-px bg-slate-300" />
+                <View className={`flex-1 h-px ${isDark ? 'bg-slate-600' : 'bg-slate-300'}`} />
+                <Text className={`mx-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>or</Text>
+                <View className={`flex-1 h-px ${isDark ? 'bg-slate-600' : 'bg-slate-300'}`} />
               </View>
 
               <AppleAuthentication.AppleAuthenticationButton
@@ -228,7 +231,7 @@ export default function AuthScreen() {
                     ? AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP
                     : AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
                 }
-                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                buttonStyle={isDark ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
                 cornerRadius={100}
                 style={{
                   width: '100%',
@@ -243,7 +246,7 @@ export default function AuthScreen() {
 
           {(isSignUp || canSignUp) && (
             <Pressable onPress={toggleAuthMode} disabled={isSubmitting}>
-              <Text className="text-center text-slate-600 text-lg">
+              <Text className={`text-center text-lg ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 {isSignUp ? 'Already have an account? ' : 'Need an account? '}
                 <Text className="text-pink-500 font-semibold">
                   {isSignUp ? 'Sign In' : 'Get Started'}
@@ -254,7 +257,7 @@ export default function AuthScreen() {
 
           {!isSignUp && !canSignUp && (
             <Pressable onPress={toggleAuthMode} disabled={isSubmitting}>
-              <Text className="text-center text-slate-600 text-lg">
+              <Text className={`text-center text-lg ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
                 Need an account? <Text className="text-pink-500 font-semibold">Get Started</Text>
               </Text>
             </Pressable>
@@ -263,7 +266,7 @@ export default function AuthScreen() {
 
         {/* Footer */}
         <View className="mt-4">
-          <Text className="text-sm text-slate-500 text-center leading-relaxed">
+          <Text className={`text-sm text-center leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
             By continuing, you agree to our{' '}
             <Text
               className="text-pink-500 underline"
@@ -281,6 +284,16 @@ export default function AuthScreen() {
           </Text>
         </View>
       </View>
+    </View>
+  );
+
+  return isDark ? (
+    <CosmicBackground theme="settings" isDark={isDark}>
+      {authContent}
+    </CosmicBackground>
+  ) : (
+    <View className="flex-1 bg-white">
+      {authContent}
     </View>
   );
 }
