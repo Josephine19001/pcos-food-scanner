@@ -8,6 +8,8 @@ import { useFavoriteFoods } from '@/lib/hooks/use-favorite-foods';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner-native';
+import { useRevenueCat } from '@/context/revenuecat-provider';
+import { useRouter } from 'expo-router';
 import CuisineSelection from './meal-planner/cuisine-selection';
 import PlanDurationSection from './meal-planner/plan-duration-section';
 import BudgetInputSection from './meal-planner/budget-input-section';
@@ -37,6 +39,8 @@ export default function MealPlannerModal({
 }: MealPlannerModalProps) {
   const themed = useThemedStyles();
   const { isDark } = useTheme();
+  const { requiresSubscriptionForFeature } = useRevenueCat();
+  const router = useRouter();
   const { data: favoriteFoods = [] } = useFavoriteFoods();
 
   // Form state
@@ -74,6 +78,18 @@ export default function MealPlannerModal({
   };
 
   const handleGenerateMealPlan = async () => {
+    // Check subscription first
+    if (requiresSubscriptionForFeature('meal-plan-generation')) {
+      onClose(); // Close modal first
+      try {
+        router.push('/paywall');
+      } catch (error) {
+        console.error('Navigation error:', error);
+        toast.error('Please upgrade to premium to generate meal plans');
+      }
+      return;
+    }
+
     const favoriteFoodNames = selectedFavoriteFoods
       .map((id) => favoriteFoods.find((food) => food.id === id)?.food_name || '')
       .filter(Boolean);

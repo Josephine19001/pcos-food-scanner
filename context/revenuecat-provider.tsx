@@ -30,7 +30,7 @@ interface SubscriptionContextValue extends SubscriptionState {
   // Core RevenueCat functionality
   purchasePackage: (pack: PurchasesPackage) => Promise<{ success: boolean; error?: string }>;
   // Feature-specific paywall checks
-  requiresSubscriptionForFeature: (feature: 'workout-generation' | 'scan-food' | 'meal-plan-generation') => boolean;
+  requiresSubscriptionForFeature: (feature: 'workout-generation' | 'scan-food' | 'meal-plan-generation' | 'progress-filters') => boolean;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(undefined);
@@ -209,14 +209,14 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const requiresSubscriptionForFeature = (feature: 'workout-generation' | 'scan-food' | 'meal-plan-generation'): boolean => {
+  const requiresSubscriptionForFeature = (feature: 'workout-generation' | 'scan-food' | 'meal-plan-generation' | 'progress-filters'): boolean => {
     // If user has active subscription or is in grace period, allow all features
     if (state.isSubscribed || state.isInGracePeriod) {
       return false;
     }
     
-    // Only require subscription for workout generation and scan food
-    return feature === 'workout-generation' || feature === 'scan-food';
+    // Only require subscription for workout generation, scan food, meal plan generation, and progress filters
+    return feature === 'workout-generation' || feature === 'scan-food' || feature === 'meal-plan-generation' || feature === 'progress-filters';
   };
 
   const value: SubscriptionContextValue = {

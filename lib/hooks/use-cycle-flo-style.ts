@@ -97,7 +97,7 @@ export function useCurrentCycleInfo(selectedDate?: string) {
       return result;
     },
     staleTime: 0, // Always fresh for debugging
-    cacheTime: 0, // Don't cache for debugging
+    gcTime: 0, // Don't cache for debugging
   });
 }
 
@@ -143,7 +143,7 @@ export function useStartPeriod() {
         method: 'POST',
         body: JSON.stringify(periodData),
       }),
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Invalidate all cycle queries
       queryClient.invalidateQueries({ queryKey: floStyleQueryKeys.all });
     },
@@ -170,7 +170,7 @@ export function useUpdateCycleDates() {
         method: 'POST',
         body: JSON.stringify(updateData),
       }),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: floStyleQueryKeys.all });
     },
     onError: (error: Error) => {
@@ -264,8 +264,8 @@ export function useCurrentCycleForEditing() {
   const { data: cycleInfo } = useCurrentCycleInfo();
 
   return {
-    currentCycle: cycleInfo?.current_cycle,
-    canEdit: cycleInfo?.has_active_cycle && cycleInfo?.current_cycle,
+    currentCycle: (cycleInfo as CurrentCycleInfo)?.current_cycle,
+    canEdit: (cycleInfo as CurrentCycleInfo)?.has_active_cycle && (cycleInfo as CurrentCycleInfo)?.current_cycle,
     updateDates: useUpdateCycleDates(),
     endPeriod: useEndPeriod(),
   };
@@ -276,10 +276,10 @@ export function usePeriodPredictions() {
   const { data: cycleInfo } = useCurrentCycleInfo();
 
   return {
-    nextPeriod: cycleInfo?.next_period_prediction,
-    hasActiveCycle: cycleInfo?.has_active_cycle,
-    cycleDay: cycleInfo?.day_in_cycle,
-    currentPhase: cycleInfo?.phase,
+    nextPeriod: (cycleInfo as CurrentCycleInfo)?.next_period_prediction,
+    hasActiveCycle: (cycleInfo as CurrentCycleInfo)?.has_active_cycle,
+    cycleDay: (cycleInfo as CurrentCycleInfo)?.day_in_cycle,
+    currentPhase: (cycleInfo as CurrentCycleInfo)?.phase,
   };
 }
 
@@ -325,8 +325,32 @@ export function useFlowForDate(date: string) {
   return useQuery({
     queryKey: [...floStyleQueryKeys.all, 'flow', date],
     queryFn: async () => {
-      const result = await callFloStyleCycleFunction(`flow-for-date?date=${date}`);
-      return result.flow_data; // Extract the flow_data from the response
+      // Bypass the edge function and query directly since it's using wrong column name
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      const { data: periodLog, error } = await supabase
+        .from('period_logs')
+        .select('flow_intensity, notes')
+        .eq('user_id', session.user.id)
+        .eq('date', date)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error(`[ERROR] Failed to get flow data:`, error);
+        throw new Error(`Failed to get flow data: ${error.message}`);
+      }
+
+      // Return flow data or null if no data exists
+      return periodLog ? {
+        flow_intensity: periodLog.flow_intensity,
+        notes: periodLog.notes
+      } : null;
     },
     staleTime: 5 * 60 * 1000,
     enabled: !!date,
@@ -340,13 +364,22 @@ export function useSaveFlow() {
   return useMutation({
     mutationFn: (flowData: {
       date: string;
-      flow_level: 'light' | 'moderate' | 'heavy' | 'spotting';
+      flow_intensity: 'light' | 'moderate' | 'heavy' | 'spotting';
       notes?: string;
-    }) =>
-      callFloStyleCycleFunction('save-flow', {
+    }) => {
+      // Map flow_intensity to flow_intensity for database compatibility
+      // and handle spotting by mapping it to light since DB only has light/moderate/heavy
+      const mappedData = {
+        date: flowData.date,
+        flow_intensity: flowData.flow_intensity === 'spotting' ? 'light' : flowData.flow_intensity,
+        notes: flowData.notes,
+      };
+
+      return callFloStyleCycleFunction('save-flow', {
         method: 'POST',
-        body: JSON.stringify(flowData),
-      }),
+        body: JSON.stringify(mappedData),
+      });
+    },
     onSuccess: (data, variables) => {
       // Invalidate flow data for the specific date
       queryClient.invalidateQueries({

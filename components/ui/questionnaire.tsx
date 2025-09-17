@@ -1,9 +1,9 @@
-import { View, ScrollView, Pressable, Modal, SafeAreaView, TextInput } from 'react-native';
+import { View, ScrollView, Pressable, Modal, SafeAreaView, TextInput, Animated, Dimensions } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, Calendar } from 'lucide-react-native';
+import { ArrowLeft, Check } from 'lucide-react-native';
 import { useTheme } from '@/context/theme-provider';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export type QuestionnaireStep = {
   key: string;
@@ -34,7 +34,6 @@ export type QuestionnaireProps = {
   progress: number;
   isGenerating: boolean;
   accentColor?: string;
-  onOpenDatePicker?: (stepKey: string) => void;
 };
 
 export default function Questionnaire({
@@ -49,13 +48,34 @@ export default function Questionnaire({
   progress,
   isGenerating,
   accentColor = '#ec4899', // default pink-500
-  onOpenDatePicker,
 }: QuestionnaireProps) {
   const [textInputs, setTextInputs] = useState<Record<string, string>>({});
   const currentStep = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
   const isComplete = currentStepIndex >= steps.length;
   const { theme } = useTheme();
+
+  // Animation setup for slide from right
+  const screenWidth = Dimensions.get('window').width;
+  const slideAnim = useRef(new Animated.Value(screenWidth)).current;
+
+  useEffect(() => {
+    if (visible) {
+      // Slide in from right
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Reset to right position when not visible - use timing to avoid reading during render
+      Animated.timing(slideAnim, {
+        toValue: screenWidth,
+        duration: 0,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible, slideAnim, screenWidth]);
 
 
   const handleNext = () => {
@@ -127,6 +147,25 @@ export default function Questionnaire({
     );
   };
 
+  const formatDateInput = (text: string, stepKey: string) => {
+    // Only format for birthday and cycle-start-date fields
+    if (stepKey !== 'birthday' && stepKey !== 'cycle-start-date') {
+      return text;
+    }
+
+    // Remove all non-numeric characters
+    const cleaned = text.replace(/\D/g, '');
+    
+    // Apply MM/DD/YYYY formatting
+    if (cleaned.length >= 5) {
+      return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+    } else if (cleaned.length >= 3) {
+      return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    } else {
+      return cleaned;
+    }
+  };
+
   const renderInputField = (step: QuestionnaireStep) => {
     if (step.inputType === 'text') {
       return (
@@ -139,40 +178,31 @@ export default function Questionnaire({
           placeholder={step.placeholder}
           value={textInputs[step.key] || ''}
           onChangeText={(text) => {
-            setTextInputs(prev => ({ ...prev, [step.key]: text }));
-            onSelectValue(step.key, text);
+            const formattedText = formatDateInput(text, step.key);
+            setTextInputs(prev => ({ ...prev, [step.key]: formattedText }));
+            onSelectValue(step.key, formattedText);
           }}
           placeholderTextColor={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+          keyboardType={(step.key === 'birthday' || step.key === 'cycle-start-date' || step.key === 'body-height' || step.key === 'body-weight' || step.key === 'body-goal-weight-input') ? 'numeric' : 'default'}
+          maxLength={(step.key === 'birthday' || step.key === 'cycle-start-date') ? 10 : undefined}
         />
       );
     }
 
-    if (step.inputType === 'date') {
-      return (
-        <Pressable
-          onPress={() => onOpenDatePicker?.(step.key)}
-          className={`p-6 rounded-2xl mb-4 flex-row items-center ${
-            theme === 'dark' ? 'bg-gray-700' : 'bg-white'
-          }`}
-        >
-          <Calendar size={24} color={theme === 'dark' ? '#9CA3AF' : '#6B7280'} />
-          <Text className={`ml-4 text-xl ${
-            selectedValues[step.key] 
-              ? theme === 'dark' ? 'text-white' : 'text-gray-900'
-              : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-          }`}>
-            {selectedValues[step.key] || step.placeholder || 'Select date'}
-          </Text>
-        </Pressable>
-      );
-    }
 
     return null;
   };
 
   return (
-    <Modal visible={visible} animationType="slide">
-      <SafeAreaView className={`flex-1 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <Modal visible={visible} animationType="none">
+      <View className={`flex-1 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Animated.View 
+          style={{
+            flex: 1,
+            transform: [{ translateX: slideAnim }],
+          }}
+        >
+          <SafeAreaView className={`flex-1 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
         {/* Header with Back Button and Progress */}
         <View className="px-4 py-4">
           <View className="flex-row items-center mb-4">
@@ -261,7 +291,9 @@ export default function Questionnaire({
             />
           </View>
         )}
-      </SafeAreaView>
+        </SafeAreaView>
+        </Animated.View>
+      </View>
     </Modal>
   );
 }

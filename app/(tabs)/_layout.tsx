@@ -30,6 +30,7 @@ const HIDDEN_ROUTES = [
   '/log-mood',
   '/log-water',
   '/log-meal',
+  '/log-flow',
   '/log-supplements',
   '/period-tracker',
   '/scan-food',

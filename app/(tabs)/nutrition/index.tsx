@@ -41,6 +41,8 @@ import SimpleMealModal from '@/components/nutrition/simple-meal-modal';
 import { useThemedStyles } from '@/lib/utils/theme';
 import { useCurrentCyclePhase, useTodaysPeriodLog } from '@/lib/hooks/use-cycle-data';
 import { useGenerateMealPlan } from '@/lib/hooks/use-meal-plan-generator';
+import { useRevenueCat } from '@/context/revenuecat-provider';
+import { toast } from 'sonner-native';
 
 export default function NutritionScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -54,6 +56,7 @@ export default function NutritionScreen() {
   const [selectedMealType, setSelectedMealType] = useState<string>('');
 
   const themed = useThemedStyles();
+  const { requiresSubscriptionForFeature } = useRevenueCat();
 
   const { startDate, endDate } = useDateRange();
   const {
@@ -153,6 +156,21 @@ export default function NutritionScreen() {
     setShowMealPlanViewer(true);
   };
 
+  const handleShowMealPlanner = () => {
+    if (requiresSubscriptionForFeature('meal-plan-generation')) {
+      try {
+        router.push('/paywall');
+      } catch (error) {
+        console.error('Navigation error:', error);
+        toast.error('Please upgrade to premium to generate meal plans');
+      }
+      return;
+    }
+
+    // Proceed with showing meal planner if user has access
+    setShowMealPlanner(true);
+  };
+
   return (
     <PageLayout
       title="Nutrition"
@@ -234,7 +252,7 @@ export default function NutritionScreen() {
                   setSelectedMealType(mealType);
                   setShowSimpleMealModal(true);
                 }}
-                onGeneratePlan={() => setShowMealPlanner(true)}
+                onGeneratePlan={handleShowMealPlanner}
                 isGeneratingPlan={generateMealPlan.isPending}
                 selectedDate={dateString}
               />
@@ -301,7 +319,7 @@ export default function NutritionScreen() {
           setGeneratedMealPlan(null);
         }}
         mealPlan={selectedMealPlan || generatedMealPlan}
-        onRegeneratePlan={() => setShowMealPlanner(true)}
+        onRegeneratePlan={handleShowMealPlanner}
       />
 
       <SimpleMealModal

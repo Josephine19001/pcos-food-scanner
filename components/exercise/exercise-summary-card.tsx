@@ -91,7 +91,7 @@ export function ExerciseSummaryCard({ dailySummary, isLoading }: ExerciseSummary
         <View
           className={themed(
             'flex-row justify-between pt-4 border-t border-gray-100',
-            'flex-row justify-between pt-4 border-t '
+            'flex-row justify-between pt-4 border-t border-gray-700'
           )}
         >
           <View className="items-center">

@@ -41,6 +41,7 @@ export default function Layout() {
 
           <Stack.Screen name="log-mood" options={{ headerShown: false }} />
           <Stack.Screen name="log-period" options={{ headerShown: false }} />
+          <Stack.Screen name="log-flow" options={{ headerShown: false }} />
           <Stack.Screen name="log-symptoms" options={{ headerShown: false }} />
           <Stack.Screen name="log-supplements" options={{ headerShown: false }} />
 

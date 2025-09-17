@@ -8,6 +8,8 @@ import {
   useLatestMealPlan,
   useGenerateMealPlan,
 } from '@/lib/hooks/use-meal-plans';
+import { useRevenueCat } from '@/context/revenuecat-provider';
+import { useRouter } from 'expo-router';
 import { toast } from 'sonner-native';
 
 interface MealPlansSectionProps {
@@ -22,6 +24,8 @@ export default function MealPlansSection({
   onMealPlanGenerated,
 }: MealPlansSectionProps) {
   const themed = useThemedStyles();
+  const { requiresSubscriptionForFeature } = useRevenueCat();
+  const router = useRouter();
   const { data: currentMealPlan, isLoading: isCurrentMealPlanLoading } = useCurrentMealPlan();
   const { data: latestMealPlan } = useLatestMealPlan();
   const generateMealPlan = useGenerateMealPlan();
@@ -54,6 +58,21 @@ export default function MealPlansSection({
   const isLoadingMealPlan =
     generateMealPlan.isPending || (generateMealPlan.isSuccess && isCurrentMealPlanLoading);
 
+  const handleShowPlanModal = () => {
+    if (requiresSubscriptionForFeature('meal-plan-generation')) {
+      try {
+        router.push('/paywall');
+      } catch (error) {
+        console.error('Navigation error:', error);
+        toast.error('Please upgrade to premium to generate meal plans');
+      }
+      return;
+    }
+
+    // Proceed with showing modal if user has access
+    onShowPlanModal();
+  };
+
   if (currentMealPlan) {
     return (
       <View className="flex-row gap-3">
@@ -74,7 +93,7 @@ export default function MealPlansSection({
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={onShowPlanModal}
+          onPress={handleShowPlanModal}
           className={themed(
             'bg-green-500 rounded-xl p-4 flex-row items-center justify-center',
             'bg-green-600 rounded-xl p-4 flex-row items-center justify-center'
@@ -91,7 +110,7 @@ export default function MealPlansSection({
   // No current meal plan - show generate button
   return (
     <TouchableOpacity
-      onPress={onShowPlanModal}
+      onPress={handleShowPlanModal}
       disabled={isLoadingMealPlan}
       className="rounded-2xl p-4"
       style={{

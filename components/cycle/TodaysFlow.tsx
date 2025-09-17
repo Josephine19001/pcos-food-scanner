@@ -1,14 +1,14 @@
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { Droplets, Plus } from 'lucide-react-native';
+import { Droplets, Plus, Droplet } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useTheme } from '@/context/theme-provider';
-import { FlowIcon, FlowLevels, type FlowLevel } from '@/components/icons/flow-icons';
+import { FlowLevels, type FlowLevel } from '@/components/icons/flow-icons';
 
 interface TodaysFlowProps {
   selectedDate: Date;
   flowData?: {
-    flow_level: FlowLevel;
+    flow_intensity: FlowLevel;
     notes?: string;
   };
   isLoading?: boolean;
@@ -24,6 +24,21 @@ export function TodaysFlow({
   const { isDark } = useTheme();
   const isToday = selectedDate.toDateString() === new Date().toDateString();
   const isFuture = selectedDate > new Date() && !isToday;
+
+  const getDropletCount = (level: FlowLevel): number => {
+    switch (level) {
+      case 'spotting':
+        return 1;
+      case 'light':
+        return 2;
+      case 'moderate':
+        return 3;
+      case 'heavy':
+        return 4;
+      default:
+        return 1;
+    }
+  };
 
   // Only show flow tracking if user is on their period
   if (!isOnPeriod) {
@@ -93,7 +108,7 @@ export function TodaysFlow({
           )}
         </View>
 
-        {flowData?.flow_level ? (
+        {flowData?.flow_intensity ? (
           <View className="flex">
             {/* Flow Level Card */}
             <View
@@ -109,7 +124,17 @@ export function TodaysFlow({
               <View className="flex flex-col items-center">
                 {/* Flow Icon */}
                 <View className="rounded-2xl items-center justify-center my-8">
-                  <FlowIcon level={flowData.flow_level} size={40} />
+                  <View className="flex-row">
+                    {Array.from({ length: getDropletCount(flowData.flow_intensity) }).map((_, index) => (
+                      <Droplet
+                        key={index}
+                        size={32}
+                        color={isDark ? '#EC4899' : '#DC2626'}
+                        fill={isDark ? '#EC4899' : '#DC2626'}
+                        className={index > 0 ? 'ml-2' : ''}
+                      />
+                    ))}
+                  </View>
                 </View>
 
                 {/* Flow Info */}
@@ -119,7 +144,7 @@ export function TodaysFlow({
                       isDark ? 'text-gray-100' : 'text-gray-900'
                     } text-2xl font-bold text-center`}
                   >
-                    {FlowLevels[flowData.flow_level]} Flow
+                    {FlowLevels[flowData.flow_intensity]} Flow
                   </Text>
                 </View>
               </View>

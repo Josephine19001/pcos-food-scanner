@@ -59,6 +59,7 @@ export function useAppNavigation() {
       currentPath.includes('/log-symptoms') ||
       currentPath.includes('/period-tracker') ||
       currentPath.includes('/edit-period') ||
+      currentPath.includes('/log-flow') ||
       currentPath.includes('/cycle-history') ||
       currentPath.includes('/scan-beauty') ||
       currentPath.includes('cycle')

@@ -276,7 +276,7 @@ export default function PaywallScreen() {
                   <View
                     key={feature.title}
                     className={`${isTablet ? 'w-full' : 'w-[48%]'} p-6 rounded-2xl border mb-3 ${
-                      isDark ? 'bg-gray-800 ' : 'bg-gray-50 border-gray-100'
+                      isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-100'
                     }`}
                   >
                     <View
