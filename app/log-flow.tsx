@@ -11,11 +11,11 @@ export default function LogFlowScreen() {
   const { date } = useLocalSearchParams<{ date?: string }>();
   const selectedDate = date ? new Date(date) : new Date();
   const dateString = selectedDate.toISOString().split('T')[0];
-  
+
   const { isDark } = useTheme();
   const { data: existingFlowData, isLoading } = useFlowForDate(dateString);
   const saveFlowMutation = useSaveFlow();
-  
+
   const [selectedFlow, setSelectedFlow] = useState<FlowLevel | null>(
     existingFlowData?.flow_level || null
   );
@@ -53,10 +53,10 @@ export default function LogFlowScreen() {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     if (date.toDateString() === today.toDateString()) return 'Today';
     if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    
+
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       month: 'long',
@@ -66,14 +66,9 @@ export default function LogFlowScreen() {
 
   if (isLoading) {
     return (
-      <SubPageLayout
-        title="Log Flow"
-        onBack={() => router.back()}
-      >
+      <SubPageLayout title="Log Flow" onBack={() => router.back()}>
         <View className="flex-1 justify-center items-center">
-          <Text className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Loading...
-          </Text>
+          <Text className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</Text>
         </View>
       </SubPageLayout>
     );
@@ -127,7 +122,7 @@ export default function LogFlowScreen() {
           <Text className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Flow Level
           </Text>
-          
+
           <View className="space-y-3">
             {flowOptions.map((level) => (
               <TouchableOpacity
@@ -139,14 +134,14 @@ export default function LogFlowScreen() {
                       ? 'bg-pink-900/30 border-pink-600'
                       : 'bg-pink-50 border-pink-500'
                     : isDark
-                    ? 'bg-gray-800 border-gray-700'
+                    ? 'bg-gray-800 '
                     : 'bg-white border-gray-200'
                 }`}
               >
                 <View className="mr-4">
                   <FlowIcon level={level} size={24} />
                 </View>
-                
+
                 <View className="flex-1">
                   <Text
                     className={`text-base font-medium ${
@@ -162,7 +157,7 @@ export default function LogFlowScreen() {
                     {FlowLevels[level]}
                   </Text>
                 </View>
-                
+
                 {selectedFlow === level && (
                   <View
                     className={`w-6 h-6 rounded-full items-center justify-center ${
@@ -182,7 +177,7 @@ export default function LogFlowScreen() {
           <Text className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Notes (Optional)
           </Text>
-          
+
           <TextInput
             value={notes}
             onChangeText={setNotes}
@@ -191,9 +186,7 @@ export default function LogFlowScreen() {
             multiline
             numberOfLines={4}
             className={`p-4 rounded-xl border text-base ${
-              isDark
-                ? 'bg-gray-800 border-gray-700 text-gray-100'
-                : 'bg-white border-gray-200 text-gray-900'
+              isDark ? 'bg-gray-800  text-gray-100' : 'bg-white border-gray-200 text-gray-900'
             }`}
             style={{ textAlignVertical: 'top' }}
           />

@@ -26,8 +26,8 @@ export function CycleAverages({ averageData, isLoading }: CycleAveragesProps) {
       <View className="px-4 mb-6">
         <View
           className={`${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-          } rounded-2xl p-4 border`}
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'
+          } rounded-2xl p-4`}
         >
           <View className="flex-row items-center mb-4">
             <View
@@ -58,8 +58,8 @@ export function CycleAverages({ averageData, isLoading }: CycleAveragesProps) {
         {/* Average Cycle Length */}
         <View
           className={`flex-1 ${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-          } rounded-2xl p-4 border`}
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'
+          } rounded-2xl p-4`}
           style={{
             shadowColor: isDark ? '#EC4899' : '#3B82F6',
             shadowOffset: { width: 0, height: 1 },
@@ -91,8 +91,8 @@ export function CycleAverages({ averageData, isLoading }: CycleAveragesProps) {
         {/* Average Period Length */}
         <View
           className={`flex-1 ${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-          } rounded-2xl p-4 border`}
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'
+          } rounded-2xl p-4`}
           style={{
             shadowColor: isDark ? '#EC4899' : '#DC2626',
             shadowOffset: { width: 0, height: 1 },

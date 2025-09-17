@@ -77,7 +77,7 @@ export default function DayMealsModal({ isVisible, onClose, day }: DayMealsModal
         key={mealType}
         className={themed(
           'bg-white rounded-xl p-4 mb-3 border border-gray-100',
-          'bg-gray-800 rounded-xl p-4 mb-3 border border-gray-700'
+          'bg-gray-800 rounded-xl p-4 mb-3 '
         )}
       >
         <View className="flex-row items-center justify-between mb-3">
@@ -197,7 +197,7 @@ export default function DayMealsModal({ isVisible, onClose, day }: DayMealsModal
         <View
           className={themed(
             'bg-white border-b border-gray-200 pt-12 pb-4 px-4',
-            'bg-gray-900 border-b border-gray-700 pt-12 pb-4 px-4'
+            'bg-gray-900 border-b  pt-12 pb-4 px-4'
           )}
         >
           <View className="flex-row items-center justify-between">

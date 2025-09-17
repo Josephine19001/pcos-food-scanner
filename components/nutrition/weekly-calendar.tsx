@@ -39,9 +39,7 @@ export default function WeeklyCalendar({
   const themeColors = {
     nutrition: {
       selected: isDark ? 'bg-green-600 shadow-lg' : 'bg-green-500 shadow-md',
-      todayBg: isDark
-        ? 'bg-green-900 border border-gray-700'
-        : 'bg-green-50 border border-green-200',
+      todayBg: isDark ? 'bg-green-900 ' : 'bg-green-50 border border-green-200',
       selectedText: 'text-white',
       todayText: isDark ? 'text-green-300' : 'text-green-600',
       gradientColors: ['#10B981', '#059669', '#047857'], // Green gradient
@@ -57,7 +55,7 @@ export default function WeeklyCalendar({
     },
     cycle: {
       selected: isDark ? 'bg-pink-600 shadow-lg' : 'bg-pink-500 shadow-md',
-      todayBg: isDark ? 'bg-pink-900 border border-gray-700' : 'bg-pink-50 border border-pink-200',
+      todayBg: isDark ? 'bg-pink-900 ' : 'bg-pink-50 border border-pink-200',
       selectedText: 'text-white',
       todayText: isDark ? 'text-pink-300' : 'text-pink-600',
       gradientColors: ['#EC4899', '#DB2777', '#BE185D'], // Pink gradient
@@ -235,7 +233,7 @@ export default function WeeklyCalendar({
                           : hasLogs
                           ? theme === 'cycle'
                             ? isDark
-                              ? 'bg-pink-900 border border-gray-700'
+                              ? 'bg-pink-900 '
                               : 'bg-pink-50 border border-pink-200'
                             : isDark
                             ? 'bg-orange-900 border border-orange-700'

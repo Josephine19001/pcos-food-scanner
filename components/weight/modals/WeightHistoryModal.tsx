@@ -17,9 +17,13 @@ export function WeightHistoryModal({ visible, weightHistory, onClose }: WeightHi
     <Modal visible={visible} animationType="slide">
       <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
         {/* Header */}
-        <View className={`px-4 py-4 border-b ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
+        <View
+          className={`px-4 py-4 border-b ${isDark ? 'bg-gray-800 ' : 'bg-white border-gray-100'}`}
+        >
           <View className="flex-row items-center justify-between">
-            <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Weight History</Text>
+            <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Weight History
+            </Text>
             <Pressable onPress={onClose} className="p-2">
               <X size={24} color={isDark ? '#9ca3af' : '#6b7280'} />
             </Pressable>
@@ -43,10 +47,19 @@ export function WeightHistoryModal({ visible, weightHistory, onClose }: WeightHi
                 const change = prevEntry ? entry.weight - prevEntry.weight : 0;
 
                 return (
-                  <View key={entry.id} className={`rounded-xl p-4 mb-3 shadow-sm ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+                  <View
+                    key={entry.id}
+                    className={`rounded-xl p-4 mb-3 shadow-sm ${
+                      isDark ? 'bg-gray-800' : 'bg-white'
+                    }`}
+                  >
                     <View className="flex-row justify-between items-start">
                       <View className="flex-1">
-                        <Text className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        <Text
+                          className={`text-lg font-semibold ${
+                            isDark ? 'text-white' : 'text-gray-900'
+                          }`}
+                        >
                           {entry.weight} {entry.units}
                         </Text>
                         <Text className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -58,7 +71,11 @@ export function WeightHistoryModal({ visible, weightHistory, onClose }: WeightHi
                           })}
                         </Text>
                         {entry.note && (
-                          <Text className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{entry.note}</Text>
+                          <Text
+                            className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
+                          >
+                            {entry.note}
+                          </Text>
                         )}
                       </View>
 
@@ -74,9 +91,13 @@ export function WeightHistoryModal({ visible, weightHistory, onClose }: WeightHi
                           </Text>
                           <View
                             className={`p-1 rounded-full ${
-                              change < 0 
-                                ? (isDark ? 'bg-green-900' : 'bg-green-100') 
-                                : (isDark ? 'bg-red-900' : 'bg-red-100')
+                              change < 0
+                                ? isDark
+                                  ? 'bg-green-900'
+                                  : 'bg-green-100'
+                                : isDark
+                                ? 'bg-red-900'
+                                : 'bg-red-100'
                             }`}
                           >
                             {change < 0 ? (
@@ -93,7 +114,9 @@ export function WeightHistoryModal({ visible, weightHistory, onClose }: WeightHi
               })
           ) : (
             <View className="py-8">
-              <Text className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>No weight entries found</Text>
+              <Text className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                No weight entries found
+              </Text>
             </View>
           )}
         </ScrollView>

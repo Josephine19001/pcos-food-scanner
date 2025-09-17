@@ -3,7 +3,11 @@ import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { useThemedStyles } from '@/lib/utils/theme';
 import { ChefHat, Sparkles, TrendingUp, Timer } from 'lucide-react-native';
-import { useCurrentMealPlan, useLatestMealPlan, useGenerateMealPlan } from '@/lib/hooks/use-meal-plans';
+import {
+  useCurrentMealPlan,
+  useLatestMealPlan,
+  useGenerateMealPlan,
+} from '@/lib/hooks/use-meal-plans';
 import { toast } from 'sonner-native';
 
 interface MealPlansSectionProps {
@@ -39,16 +43,16 @@ export default function MealPlansSection({
           },
         });
         setHasShownNewPlanToast(true);
-        
+
         // Auto-trigger callback when meal plan is ready
         onMealPlanGenerated(latestMealPlan);
       }
     }
   }, [latestMealPlan, hasShownNewPlanToast, onMealPlanGenerated]);
 
-
   // Show loading state when generating or loading current plan after generation
-  const isLoadingMealPlan = generateMealPlan.isPending || (generateMealPlan.isSuccess && isCurrentMealPlanLoading);
+  const isLoadingMealPlan =
+    generateMealPlan.isPending || (generateMealPlan.isSuccess && isCurrentMealPlanLoading);
 
   if (currentMealPlan) {
     return (
@@ -57,12 +61,14 @@ export default function MealPlansSection({
           onPress={() => onShowMealPlan(currentMealPlan)}
           className={themed(
             'flex-1 bg-white rounded-xl p-4 border border-gray-100 flex-row items-center justify-center',
-            'flex-1 bg-gray-800 rounded-xl p-4 border border-gray-700 flex-row items-center justify-center'
+            'flex-1 bg-gray-800 rounded-xl p-4  flex-row items-center justify-center'
           )}
           activeOpacity={0.8}
         >
           <ChefHat size={18} color="#10B981" />
-          <Text className={themed('font-semibold text-gray-900 ml-2', 'font-semibold text-white ml-2')}>
+          <Text
+            className={themed('font-semibold text-gray-900 ml-2', 'font-semibold text-white ml-2')}
+          >
             View All Meal Plans
           </Text>
         </TouchableOpacity>
@@ -76,9 +82,7 @@ export default function MealPlansSection({
           activeOpacity={0.8}
         >
           <Sparkles size={18} color="white" />
-          <Text className="font-semibold text-white ml-2">
-            New Plan
-          </Text>
+          <Text className="font-semibold text-white ml-2">New Plan</Text>
         </TouchableOpacity>
       </View>
     );
@@ -105,9 +109,7 @@ export default function MealPlansSection({
           <View className="flex-row items-center mb-2">
             <Sparkles size={20} color="white" />
             <Text className="text-lg font-bold ml-3" style={{ color: '#FFFFFF' }}>
-              {isLoadingMealPlan
-                ? 'Creating Your Plan...'
-                : 'Generate Meal Plan'}
+              {isLoadingMealPlan ? 'Creating Your Plan...' : 'Generate Meal Plan'}
             </Text>
           </View>
 

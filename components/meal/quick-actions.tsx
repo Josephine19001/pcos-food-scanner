@@ -31,7 +31,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         <TouchableOpacity
           onPress={onScanFood}
           className={`flex-1 rounded-2xl p-4 items-center border ${
-            isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            isDark ? 'bg-gray-800 ' : 'bg-white border-gray-200'
           }`}
         >
           <Camera size={24} color="#10B981" />
@@ -46,7 +46,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         <TouchableOpacity
           onPress={onSearch}
           className={`flex-1 rounded-2xl p-4 items-center border ${
-            isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            isDark ? 'bg-gray-800 ' : 'bg-white border-gray-200'
           }`}
         >
           <Search size={24} color="#10B981" />
@@ -63,7 +63,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         <TouchableOpacity
           onPress={onSavedFood}
           className={`flex-1 rounded-2xl p-4 items-center border ${
-            isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            isDark ? 'bg-gray-800 ' : 'bg-white border-gray-200'
           }`}
         >
           <Heart size={24} color="#EC4899" />
@@ -78,7 +78,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         <TouchableOpacity
           onPress={onAddCustomFood}
           className={`flex-1 rounded-2xl p-4 items-center border ${
-            isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            isDark ? 'bg-gray-800 ' : 'bg-white border-gray-200'
           }`}
         >
           <Plus size={24} color="#3B82F6" />

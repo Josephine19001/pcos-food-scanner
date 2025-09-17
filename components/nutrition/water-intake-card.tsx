@@ -29,7 +29,7 @@ export default function WaterIntakeCard({
       <View
         className={themed(
           'bg-white rounded-xl p-3 border border-gray-100',
-          'bg-gray-900 rounded-xl p-3 border border-gray-700'
+          'bg-gray-900 rounded-xl p-3 '
         )}
       >
         <View className="flex-row items-center justify-between">

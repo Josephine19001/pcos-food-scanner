@@ -10,7 +10,7 @@ export const EmptyMealsState = ({ onAddMealPress }: { onAddMealPress?: () => voi
     <View
       className={themed(
         'bg-white rounded-2xl p-8 items-center border border-gray-100',
-        'bg-gray-900 rounded-2xl p-8 items-center border border-gray-700'
+        'bg-gray-900 rounded-2xl p-8 items-center '
       )}
     >
       <View

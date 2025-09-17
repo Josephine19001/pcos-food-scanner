@@ -37,7 +37,7 @@ export default function PlannedMealCard({
     <View
       className={themed(
         'bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm',
-        'bg-gray-900 rounded-2xl p-4 mb-3 border border-gray-700 shadow-sm'
+        'bg-gray-900 rounded-2xl p-4 mb-3  shadow-sm'
       )}
     >
       <View className="flex-row">
@@ -84,9 +84,7 @@ export default function PlannedMealCard({
           {meal.prep_time && (
             <View className="flex-row items-center mb-2">
               <Clock size={12} color={isDark ? '#9CA3AF' : '#6B7280'} />
-              <Text
-                className={themed('text-xs text-gray-500 ml-1', 'text-xs text-gray-400 ml-1')}
-              >
+              <Text className={themed('text-xs text-gray-500 ml-1', 'text-xs text-gray-400 ml-1')}>
                 {meal.prep_time}
               </Text>
             </View>

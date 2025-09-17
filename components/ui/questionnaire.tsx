@@ -66,10 +66,7 @@ export default function Questionnaire({
       <Pressable
         key={option.value}
         onPress={() => onSelectValue(stepKey, option.value)}
-        className={themed(
-          `p-6 rounded-2xl mb-4 border border-pink-100`,
-          `p-6 rounded-2xl mb-4 border border-gray-700`
-        )}
+        className={themed(`p-6 rounded-2xl mb-4 border border-pink-100`, `p-6 rounded-2xl mb-4 `)}
         style={{
           backgroundColor: isSelected ? accentColor : colors.card,
         }}

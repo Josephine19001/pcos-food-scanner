@@ -78,7 +78,7 @@ export default function SimpleMealModal({
         <View
           className={themed(
             'bg-white border-b border-gray-200 pt-12 pb-4 px-4',
-            'bg-gray-900 border-b border-gray-700 pt-12 pb-4 px-4'
+            'bg-gray-900 border-b  pt-12 pb-4 px-4'
           )}
         >
           <View className="flex-row items-center justify-between">
@@ -121,7 +121,7 @@ export default function SimpleMealModal({
           <View
             className={themed(
               'bg-white rounded-2xl p-4 mb-6 border border-gray-100 shadow-sm',
-              'bg-gray-900 rounded-2xl p-4 mb-6 border border-gray-700 shadow-sm'
+              'bg-gray-900 rounded-2xl p-4 mb-6  shadow-sm'
             )}
           >
             {/* Single row with all nutrition info */}
@@ -225,7 +225,7 @@ export default function SimpleMealModal({
             <View
               className={themed(
                 'bg-white rounded-2xl p-4 mb-6 border border-gray-100 shadow-sm',
-                'bg-gray-800 rounded-2xl p-4 mb-6 border border-gray-700 shadow-sm'
+                'bg-gray-800 rounded-2xl p-4 mb-6  shadow-sm'
               )}
             >
               <Text
@@ -247,7 +247,7 @@ export default function SimpleMealModal({
         </ScrollView>
 
         {/* Action Button */}
-        <View className={themed('p-4 border-t border-gray-200', 'p-4 border-t border-gray-700')}>
+        <View className={themed('p-4 border-t border-gray-200', 'p-4 border-t ')}>
           <TouchableOpacity
             onPress={handleAddToLog}
             disabled={createMealEntry.isPending}

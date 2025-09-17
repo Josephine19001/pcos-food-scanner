@@ -410,7 +410,7 @@ export default function PlannedMealsSection({
           <View
             className={themed(
               'bg-white rounded-2xl p-6 shadow-sm border border-gray-100',
-              'bg-gray-900 rounded-2xl p-6 border border-gray-700'
+              'bg-gray-900 rounded-2xl p-6 '
             )}
           >
             <View className="items-center py-8">

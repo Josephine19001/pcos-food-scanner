@@ -31,7 +31,9 @@ export default function MealPlanGenerator({ onClose, userContext }: MealPlanGene
       role: 'assistant',
       content: `Hi! I'm here to help create a personalized meal plan for you. 
 
-Based on your current cycle phase (${userContext?.cyclePhase || 'unknown'}), I can suggest foods that support your energy levels and help with any symptoms you're experiencing.
+Based on your current cycle phase (${
+        userContext?.cyclePhase || 'unknown'
+      }), I can suggest foods that support your energy levels and help with any symptoms you're experiencing.
 
 What are you in the mood for this week? Any specific cravings or dietary goals?`,
       timestamp: new Date(),
@@ -51,7 +53,7 @@ What are you in the mood for this week? Any specific cravings or dietary goals?`
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputText('');
     setIsGenerating(true);
 
@@ -63,9 +65,9 @@ What are you in the mood for this week? Any specific cravings or dietary goals?`
         content: generateMealPlanResponse(inputText, userContext),
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
       setIsGenerating(false);
-      
+
       // Scroll to bottom after adding message
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -94,7 +96,7 @@ What are you in the mood for this week? Any specific cravings or dietary goals?`
 🐟 Dinner: Grilled chicken with roasted Brussels sprouts and brown rice
 
 These meals include foods that can help with energy and mood during your cycle. Would you like me to adjust anything?`,
-      
+
       `Perfect! Since you're feeling ${context?.mood}, I'll focus on comfort foods that still support your nutritional needs:
 
 **Comfort Meal Plan:**
@@ -110,32 +112,42 @@ What specific comfort foods are you craving?`,
   };
 
   const quickSuggestions = [
-    { text: "I want comfort foods", icon: Heart },
-    { text: "Energy-boosting meals", icon: Sparkles },
-    { text: "Quick 15-min recipes", icon: Calendar },
-    { text: "Foods for my symptoms", icon: Brain },
+    { text: 'I want comfort foods', icon: Heart },
+    { text: 'Energy-boosting meals', icon: Sparkles },
+    { text: 'Quick 15-min recipes', icon: Calendar },
+    { text: 'Foods for my symptoms', icon: Brain },
   ];
 
   return (
-    <View className={themed("flex-1 bg-white", "flex-1 bg-gray-900")}>
+    <View className={themed('flex-1 bg-white', 'flex-1 bg-gray-900')}>
       {/* Header */}
-      <View className={themed("bg-white border-b border-gray-200 px-4 py-4", "bg-gray-900 border-b border-gray-700 px-4 py-4")}>
+      <View
+        className={themed(
+          'bg-white border-b border-gray-200 px-4 py-4',
+          'bg-gray-900 border-b  px-4 py-4'
+        )}
+      >
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-3">
               <ChefHat size={20} color="#F59E0B" />
             </View>
             <View>
-              <Text className={themed("text-lg font-bold text-gray-900", "text-lg font-bold text-white")}>
+              <Text
+                className={themed(
+                  'text-lg font-bold text-gray-900',
+                  'text-lg font-bold text-white'
+                )}
+              >
                 AI Meal Planner
               </Text>
-              <Text className={themed("text-sm text-gray-600", "text-sm text-gray-400")}>
+              <Text className={themed('text-sm text-gray-600', 'text-sm text-gray-400')}>
                 Personalized for your cycle
               </Text>
             </View>
           </View>
           <TouchableOpacity onPress={onClose}>
-            <Text className={themed("text-blue-600 font-medium", "text-blue-400 font-medium")}>
+            <Text className={themed('text-blue-600 font-medium', 'text-blue-400 font-medium')}>
               Done
             </Text>
           </TouchableOpacity>
@@ -143,31 +155,30 @@ What specific comfort foods are you craving?`,
       </View>
 
       {/* Chat Messages */}
-      <ScrollView 
+      <ScrollView
         ref={scrollViewRef}
         className="flex-1 px-4 py-4"
         showsVerticalScrollIndicator={false}
       >
         {messages.map((message) => (
-          <View key={message.id} className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+          <View
+            key={message.id}
+            className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
+          >
             <View
               className={`max-w-[80%] p-3 rounded-2xl ${
-                message.role === 'user'
-                  ? 'bg-blue-500'
-                  : themed("bg-gray-100", "bg-gray-800")
+                message.role === 'user' ? 'bg-blue-500' : themed('bg-gray-100', 'bg-gray-800')
               }`}
             >
               <Text
                 className={`${
-                  message.role === 'user' 
-                    ? 'text-white' 
-                    : themed("text-gray-900", "text-white")
+                  message.role === 'user' ? 'text-white' : themed('text-gray-900', 'text-white')
                 }`}
               >
                 {message.content}
               </Text>
             </View>
-            <Text className={themed("text-xs text-gray-500 mt-1", "text-xs text-gray-400 mt-1")}>
+            <Text className={themed('text-xs text-gray-500 mt-1', 'text-xs text-gray-400 mt-1')}>
               {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Text>
           </View>
@@ -175,8 +186,8 @@ What specific comfort foods are you craving?`,
 
         {isGenerating && (
           <View className="items-start mb-4">
-            <View className={themed("bg-gray-100 p-3 rounded-2xl", "bg-gray-800 p-3 rounded-2xl")}>
-              <Text className={themed("text-gray-600", "text-gray-300")}>AI is thinking...</Text>
+            <View className={themed('bg-gray-100 p-3 rounded-2xl', 'bg-gray-800 p-3 rounded-2xl')}>
+              <Text className={themed('text-gray-600', 'text-gray-300')}>AI is thinking...</Text>
             </View>
           </View>
         )}
@@ -184,7 +195,7 @@ What specific comfort foods are you craving?`,
         {/* Quick Suggestions */}
         {messages.length === 1 && (
           <View className="mb-4">
-            <Text className={themed("text-sm text-gray-600 mb-3", "text-sm text-gray-400 mb-3")}>
+            <Text className={themed('text-sm text-gray-600 mb-3', 'text-sm text-gray-400 mb-3')}>
               Quick suggestions:
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -192,10 +203,15 @@ What specific comfort foods are you craving?`,
                 <TouchableOpacity
                   key={index}
                   onPress={() => setInputText(suggestion.text)}
-                  className={themed("bg-gray-50 border border-gray-200 rounded-full px-3 py-2 flex-row items-center", "bg-gray-800 border border-gray-600 rounded-full px-3 py-2 flex-row items-center")}
+                  className={themed(
+                    'bg-gray-50 border border-gray-200 rounded-full px-3 py-2 flex-row items-center',
+                    'bg-gray-800 border border-gray-600 rounded-full px-3 py-2 flex-row items-center'
+                  )}
                 >
                   <suggestion.icon size={14} color={isDark ? '#9CA3AF' : '#6B7280'} />
-                  <Text className={themed("text-sm text-gray-700 ml-2", "text-sm text-gray-300 ml-2")}>
+                  <Text
+                    className={themed('text-sm text-gray-700 ml-2', 'text-sm text-gray-300 ml-2')}
+                  >
                     {suggestion.text}
                   </Text>
                 </TouchableOpacity>
@@ -206,14 +222,17 @@ What specific comfort foods are you craving?`,
       </ScrollView>
 
       {/* Input Area */}
-      <View className={themed("border-t border-gray-200 p-4", "border-t border-gray-700 p-4")}>
+      <View className={themed('border-t border-gray-200 p-4', 'border-t  p-4')}>
         <View className="flex-row items-center space-x-3">
           <TextInput
             value={inputText}
             onChangeText={setInputText}
             placeholder="Ask about meal plans, recipes, or food suggestions..."
             placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
-            className={themed("flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 py-3 text-gray-900", "flex-1 bg-gray-800 border border-gray-600 rounded-full px-4 py-3 text-white")}
+            className={themed(
+              'flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 py-3 text-gray-900',
+              'flex-1 bg-gray-800 border border-gray-600 rounded-full px-4 py-3 text-white'
+            )}
             multiline
             maxLength={500}
             onSubmitEditing={sendMessage}
@@ -223,7 +242,9 @@ What specific comfort foods are you craving?`,
             onPress={sendMessage}
             disabled={!inputText.trim() || isGenerating}
             className={`w-12 h-12 rounded-full items-center justify-center ${
-              inputText.trim() && !isGenerating ? 'bg-blue-500' : themed("bg-gray-300", "bg-gray-600")
+              inputText.trim() && !isGenerating
+                ? 'bg-blue-500'
+                : themed('bg-gray-300', 'bg-gray-600')
             }`}
           >
             <Send size={20} color="white" />

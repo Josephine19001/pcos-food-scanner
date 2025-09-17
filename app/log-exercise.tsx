@@ -5,6 +5,8 @@ import { useAppNavigation } from '@/lib/hooks/use-navigation';
 import { getLocalDateString, getLocalTimeString } from '@/lib/utils/date-helpers';
 import { useState } from 'react';
 import { toast } from 'sonner-native';
+import { useThemedStyles } from '@/lib/utils/theme';
+import { useTheme } from '@/context/theme-provider';
 import SubPageLayout from '@/components/layouts/sub-page';
 import { Plus, Search } from 'lucide-react-native';
 import { Exercise } from '@/data/exercisesData';
@@ -32,6 +34,8 @@ export default function LogExerciseScreen() {
   const [customExercises, setCustomExercises] = useState<Exercise[]>([]);
 
   const createExerciseEntry = useCreateExerciseEntry();
+  const themed = useThemedStyles();
+  const { isDark } = useTheme();
 
   // Optimized exercise search
   const { searchQuery, setSearchQuery, hasActiveSearch } = useSearchState();
@@ -94,7 +98,10 @@ export default function LogExerciseScreen() {
       rightElement={
         <TouchableOpacity
           onPress={() => setShowAddModal(true)}
-          className="bg-pink-500 px-4 py-2 rounded-xl flex-row items-center"
+          className={themed(
+            'bg-pink-500 px-4 py-2 rounded-xl flex-row items-center',
+            'bg-purple-600 px-4 py-2 rounded-xl flex-row items-center'
+          )}
         >
           <Text className="text-white font-medium ml-1">Create</Text>
         </TouchableOpacity>

@@ -21,7 +21,7 @@ export function Tabs({ tabs, activeTab, onChangeTab }: TabsProps) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      className={themed("border-b border-gray-200 px-4", "border-b border-gray-700 px-4")}
+      className={themed('border-b border-gray-200 px-4', 'border-b  px-4')}
     >
       {tabs.map((tab) => (
         <Pressable
@@ -31,7 +31,15 @@ export function Tabs({ tabs, activeTab, onChangeTab }: TabsProps) {
             activeTab === tab.id ? themed('border-black', 'border-white') : 'border-transparent'
           }`}
         >
-          <Text className={activeTab === tab.id ? themed('text-black', 'text-white') : themed('text-gray-500', 'text-gray-400')}>{tab.label}</Text>
+          <Text
+            className={
+              activeTab === tab.id
+                ? themed('text-black', 'text-white')
+                : themed('text-gray-500', 'text-gray-400')
+            }
+          >
+            {tab.label}
+          </Text>
         </Pressable>
       ))}
     </ScrollView>

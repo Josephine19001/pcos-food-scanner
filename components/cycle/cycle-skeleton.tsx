@@ -34,9 +34,7 @@ export const CyclePhaseSkeleton = () => {
   return (
     <View className="px-4 mb-6">
       <View
-        className={`${
-          isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-        } rounded-3xl p-6 border`}
+        className={`${isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'} rounded-3xl p-6`}
       >
         {/* Circular Progress Section */}
         <View className="items-center mb-8">
@@ -83,9 +81,7 @@ export const TodaysMoodSkeleton = () => {
   return (
     <View className="px-4 mb-6">
       <View
-        className={`${
-          isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-        } rounded-2xl p-4 border`}
+        className={`${isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100'} rounded-2xl p-4 border`}
       >
         {/* Header */}
         <View className="flex-row items-center justify-between mb-4">
@@ -157,9 +153,7 @@ export const TodaysSymptomsSkeleton = () => {
   return (
     <View className="px-4 mb-6">
       <View
-        className={`${
-          isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-        } rounded-2xl p-4 border`}
+        className={`${isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100'} rounded-2xl p-4 border`}
       >
         {/* Header */}
         <View className="flex-row items-center justify-between mb-4">
@@ -220,7 +214,7 @@ export const CycleAveragesSkeleton = () => {
         {/* First Column - Cycle Length */}
         <View
           className={`flex-1 ${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100'
           } rounded-2xl p-4 border`}
         >
           <View className="items-center">
@@ -234,7 +228,7 @@ export const CycleAveragesSkeleton = () => {
         {/* Second Column - Period Length */}
         <View
           className={`flex-1 ${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100'
           } rounded-2xl p-4 border`}
         >
           <View className="items-center">
@@ -256,9 +250,7 @@ export const TodaysFlowSkeleton = () => {
   return (
     <View className="px-4 mb-6">
       <View
-        className={`${
-          isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-        } rounded-2xl p-4 border`}
+        className={`${isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100'} rounded-2xl p-4 border`}
       >
         {/* Header */}
         <View className="flex-row items-center justify-between mb-4">

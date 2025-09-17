@@ -6,7 +6,7 @@ import { useTheme } from '@/context/theme-provider';
 // Cycle-Aware Plan Skeleton
 export const CycleAwarePlanSkeleton = () => {
   const { isDark } = useTheme();
-  
+
   return (
     <View className="mx-4 mb-6">
       <View className={`rounded-3xl p-6 shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
@@ -26,7 +26,12 @@ export const CycleAwarePlanSkeleton = () => {
         {/* Exercise recommendations */}
         <View className="flex-row gap-3">
           {Array.from({ length: 3 }).map((_, index) => (
-            <View key={index} className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-2xl px-4 py-3 flex-1 items-center`}>
+            <View
+              key={index}
+              className={`${
+                isDark ? 'bg-gray-700' : 'bg-gray-50'
+              } rounded-2xl px-4 py-3 flex-1 items-center`}
+            >
               <Skeleton width={32} height={32} borderRadius={16} className="mb-1" />
               <Skeleton width={60} height={14} borderRadius={4} />
             </View>
@@ -40,7 +45,7 @@ export const CycleAwarePlanSkeleton = () => {
 // Weekly Plan Section Skeleton
 export const WeeklyPlanSectionSkeleton = () => {
   const { isDark } = useTheme();
-  
+
   return (
     <View className="mx-4 mb-6">
       {/* Current Plan Display */}
@@ -80,7 +85,11 @@ export const WeeklyPlanSectionSkeleton = () => {
       </View>
 
       {/* Generate new plan section */}
-      <View className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-50'} rounded-2xl p-6 shadow-sm border`}>
+      <View
+        className={`${
+          isDark ? 'bg-gray-800 ' : 'bg-white border-gray-50'
+        } rounded-2xl p-6 shadow-sm border`}
+      >
         <View className="flex-row items-center mb-4">
           <Skeleton width={32} height={32} borderRadius={16} className="mr-3" />
           <View className="flex-1">

@@ -36,7 +36,9 @@ export function Accordion({ title, children, defaultOpen = false }: AccordionPro
   });
 
   return (
-    <View className={themed("border-b border-gray-100 last:border-b-0", "border-b border-gray-700 last:border-b-0")}>
+    <View
+      className={themed('border-b border-gray-100 last:border-b-0', 'border-b  last:border-b-0')}
+    >
       <Pressable onPress={toggleAccordion} className="flex-row justify-between items-center p-4">
         <Text className="text-base font-medium flex-1 mr-2">{title}</Text>
         <Animated.View style={iconStyle}>

@@ -3,6 +3,8 @@ import { View, ScrollView, TouchableOpacity, Modal, Image } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react-native';
+import { useThemedStyles } from '@/lib/utils/theme';
+import { useTheme } from '@/context/theme-provider';
 
 export interface FocusArea {
   id: string;
@@ -131,6 +133,9 @@ export function WorkoutFocusSelector({
   const [selectedFocusAreas, setSelectedFocusAreas] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
 
+  const themed = useThemedStyles();
+  const { isDark } = useTheme();
+
   const handleFocusAreaToggle = (focusAreaId: string) => {
     setSelectedFocusAreas((prev) => {
       if (prev.includes(focusAreaId)) {
@@ -178,57 +183,86 @@ export function WorkoutFocusSelector({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white rounded-t-3xl" style={{ height: '90%' }}>
+        <View
+          className={themed('bg-white rounded-t-3xl', 'bg-gray-900 rounded-t-3xl')}
+          style={{ height: '90%' }}
+        >
           {/* Header */}
-          <View className="flex-row items-center justify-between p-6 border-b border-gray-100">
+          <View
+            className={themed(
+              'flex-row items-center justify-between p-6 border-b border-gray-100',
+              'flex-row items-center justify-between p-6 border-b '
+            )}
+          >
             <View className="flex-1">
-              <Text className="text-2xl font-bold text-gray-900">
+              <Text
+                className={themed(
+                  'text-2xl font-bold text-gray-900',
+                  'text-2xl font-bold text-white'
+                )}
+              >
                 {currentStep === 1 ? 'Choose Your Focus Areas' : 'Choose Workout Locations'}
               </Text>
-              <Text className="text-sm text-gray-600 mt-1">
+              <Text className={themed('text-sm text-gray-600 mt-1', 'text-sm text-gray-400 mt-1')}>
                 {currentStep === 1
                   ? 'Select up to 3 areas you want to target (tap to select)'
                   : 'Select where you prefer to workout (multiple locations allowed)'}
               </Text>
             </View>
             <TouchableOpacity onPress={handleBack} className="w-8 h-8 items-center justify-center">
-              <X size={20} color="#6B7280" />
+              <X size={20} color={isDark ? '#9CA3AF' : '#6B7280'} />
             </TouchableOpacity>
           </View>
 
           {/* Progress & Selection Counter */}
           <View className="px-6 py-3">
             <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-xs text-gray-500">Step {currentStep} of 2</Text>
+              <Text className={themed('text-xs text-gray-500', 'text-xs text-gray-400')}>
+                Step {currentStep} of 2
+              </Text>
               <View className="flex-row gap-2">
                 <View
                   className={`w-2 h-2 rounded-full ${
-                    currentStep >= 1 ? 'bg-pink-500' : 'bg-gray-300'
+                    currentStep >= 1 ? 'bg-purple-500' : isDark ? 'bg-gray-600' : 'bg-gray-300'
                   }`}
                 />
                 <View
                   className={`w-2 h-2 rounded-full ${
-                    currentStep >= 2 ? 'bg-pink-500' : 'bg-gray-300'
+                    currentStep >= 2 ? 'bg-purple-500' : isDark ? 'bg-gray-600' : 'bg-gray-300'
                   }`}
                 />
               </View>
             </View>
             <View className="flex-row items-center justify-center">
-              <View className="flex-row items-center bg-gray-100 px-3 py-1.5 rounded-full">
+              <View
+                className={themed(
+                  'flex-row items-center bg-gray-100 px-3 py-1.5 rounded-full',
+                  'flex-row items-center bg-gray-800 px-3 py-1.5 rounded-full'
+                )}
+              >
                 <View
                   className="w-2 h-2 rounded-full mr-2"
                   style={{
                     backgroundColor:
                       currentStep === 1
                         ? selectedFocusAreas.length > 0
-                          ? '#EC4899'
+                          ? '#8B5CF6'
+                          : isDark
+                          ? '#6B7280'
                           : '#D1D5DB'
                         : selectedLocations.length > 0
-                        ? '#EC4899'
+                        ? '#8B5CF6'
+                        : isDark
+                        ? '#6B7280'
                         : '#D1D5DB',
                   }}
                 />
-                <Text className="text-sm font-medium text-gray-700">
+                <Text
+                  className={themed(
+                    'text-sm font-medium text-gray-700',
+                    'text-sm font-medium text-gray-300'
+                  )}
+                >
                   {currentStep === 1
                     ? `${selectedFocusAreas.length}/3 areas selected`
                     : `${selectedLocations.length} locations selected`}
@@ -257,8 +291,14 @@ export function WorkoutFocusSelector({
                           isSelected ? 'border-2' : 'border border-gray-200'
                         }`}
                         style={{
-                          borderColor: isSelected ? '#EC4899' : '#E5E7EB',
-                          backgroundColor: isSelected ? '#EC489910' : '#FFFFFF',
+                          borderColor: isSelected ? '#8B5CF6' : isDark ? '#4B5563' : '#E5E7EB',
+                          backgroundColor: isSelected
+                            ? isDark
+                              ? '#8B5CF620'
+                              : '#8B5CF610'
+                            : isDark
+                            ? '#1F2937'
+                            : '#FFFFFF',
                         }}
                       >
                         {/* Visual indicator with image */}
@@ -276,14 +316,21 @@ export function WorkoutFocusSelector({
                         <View className="mb-1">
                           <Text
                             className="font-bold text-base"
-                            style={{ color: isSelected ? '#EC4899' : '#1F2937' }}
+                            style={{
+                              color: isSelected ? '#8B5CF6' : isDark ? '#FFFFFF' : '#1F2937',
+                            }}
                           >
                             {area.label}
                           </Text>
                         </View>
 
                         <View className="flex-1 justify-start">
-                          <Text className="text-xs text-gray-600 leading-4">
+                          <Text
+                            className={themed(
+                              'text-xs text-gray-600 leading-4',
+                              'text-xs text-gray-400 leading-4'
+                            )}
+                          >
                             {area.description}
                           </Text>
                         </View>
@@ -310,14 +357,20 @@ export function WorkoutFocusSelector({
                           isSelected ? 'border-2' : 'border border-gray-200'
                         }`}
                         style={{
-                          borderColor: isSelected ? '#EC4899' : '#E5E7EB',
-                          backgroundColor: isSelected ? '#EC489910' : '#FFFFFF',
+                          borderColor: isSelected ? '#8B5CF6' : isDark ? '#4B5563' : '#E5E7EB',
+                          backgroundColor: isSelected
+                            ? isDark
+                              ? '#8B5CF620'
+                              : '#8B5CF610'
+                            : isDark
+                            ? '#1F2937'
+                            : '#FFFFFF',
                         }}
                       >
                         {/* Location Image */}
                         <View
                           className="w-full h-32 rounded-xl mb-3 overflow-hidden"
-                          style={{ backgroundColor: `#EC489910` }}
+                          style={{ backgroundColor: isDark ? '#8B5CF620' : '#8B5CF610' }}
                         >
                           <Image
                             source={{ uri: location.image }}
@@ -329,7 +382,9 @@ export function WorkoutFocusSelector({
                         <View className="mb-1">
                           <Text
                             className="font-bold text-base"
-                            style={{ color: isSelected ? '#EC4899' : '#1F2937' }}
+                            style={{
+                              color: isSelected ? '#8B5CF6' : isDark ? '#FFFFFF' : '#1F2937',
+                            }}
                           >
                             {location.label}
                           </Text>
@@ -343,7 +398,7 @@ export function WorkoutFocusSelector({
           </ScrollView>
 
           {/* Bottom Action */}
-          <View className="p-6 pb-8 border-t border-gray-100">
+          <View className={themed('p-6 pb-8 border-t border-gray-100', 'p-6 pb-8 border-t ')}>
             {currentStep === 1 ? (
               <Button
                 title="Next: Choose Locations"
@@ -351,7 +406,7 @@ export function WorkoutFocusSelector({
                 disabled={selectedFocusAreas.length === 0}
                 className="w-full"
                 style={{
-                  backgroundColor: selectedFocusAreas.length > 0 ? '#EC4899' : '#9CA3AF',
+                  backgroundColor: selectedFocusAreas.length > 0 ? '#8B5CF6' : '#9CA3AF',
                 }}
               />
             ) : (
@@ -362,11 +417,16 @@ export function WorkoutFocusSelector({
                 className="w-full"
                 style={{
                   backgroundColor:
-                    selectedLocations.length > 0 && !isGenerating ? '#EC4899' : '#9CA3AF',
+                    selectedLocations.length > 0 && !isGenerating ? '#8B5CF6' : '#9CA3AF',
                 }}
               />
             )}
-            <Text className="text-center text-xs text-gray-500 mt-2">
+            <Text
+              className={themed(
+                'text-center text-xs text-gray-500 mt-2',
+                'text-center text-xs text-gray-400 mt-2'
+              )}
+            >
               {currentStep === 1
                 ? 'Select areas you want to focus on, then choose workout locations'
                 : 'Your workout plan will be personalized for your selected areas and locations'}

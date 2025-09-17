@@ -173,7 +173,7 @@ export const MealCard = ({
     <TouchableOpacity
       className={themed(
         'bg-white rounded-2xl p-4 mb-3 border border-gray-100 relative',
-        'bg-gray-900 rounded-2xl p-4 mb-3 border border-gray-700 relative'
+        'bg-gray-900 rounded-2xl p-4 mb-3  relative'
       )}
       onPress={handlePress}
       disabled={isAnalyzing}

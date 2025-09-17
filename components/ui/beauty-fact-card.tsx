@@ -26,7 +26,7 @@ interface BeautyFactWrapperProps {
 const getCategoryColors = (themed: (light: string, dark: string) => string) => ({
   ingredient: {
     bg: themed('bg-green-50', 'bg-green-900/20'),
-    border: themed('border-green-200', 'border-gray-700'),
+    border: themed('border-green-200', ''),
     text: themed('text-green-700', 'text-green-400'),
   },
   science: {
@@ -211,12 +211,7 @@ function BeautyFactCardInner({
       </View>
 
       {/* Footer */}
-      <View
-        className={themed(
-          'mt-4 pt-4 border-t border-gray-200',
-          'mt-4 pt-4 border-t border-gray-700'
-        )}
-      >
+      <View className={themed('mt-4 pt-4 border-t border-gray-200', 'mt-4 pt-4 border-t ')}>
         <Text
           className={themed(
             'text-xs text-gray-500 text-center',

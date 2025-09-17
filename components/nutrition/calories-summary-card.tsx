@@ -68,7 +68,7 @@ export default function CaloriesSummaryCard({
       <View
         className={themed(
           'bg-white rounded-2xl p-4 border border-gray-100',
-          'bg-gray-900 rounded-2xl p-4 border border-gray-700'
+          'bg-gray-900 rounded-2xl p-4 '
         )}
       >
         <View className="flex-row items-center justify-between mb-4">
@@ -130,7 +130,7 @@ export default function CaloriesSummaryCard({
         </View>
 
         {/* Meal Breakdown */}
-        <View className={themed('border-t border-gray-100 pt-4', 'border-t border-gray-700 pt-4')}>
+        <View className={themed('border-t border-gray-100 pt-4', 'border-t  pt-4')}>
           <View className="flex-row justify-between">
             {mealBreakdown.map((meal) => {
               return (

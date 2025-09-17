@@ -4,6 +4,8 @@ import { Text } from '@/components/ui/text';
 import { CheckCircle, Edit3, Eye, X, Save, Clock, Flame } from 'lucide-react-native';
 import { useCreateExerciseEntry } from '@/lib/hooks/use-exercise-tracking';
 import { getLocalDateString, getLocalTimeString } from '@/lib/utils/date-helpers';
+import { useThemedStyles } from '@/lib/utils/theme';
+import { useTheme } from '@/context/theme-provider';
 
 interface PlannedExerciseItemProps {
   exercise: any;
@@ -21,6 +23,8 @@ export function PlannedExerciseItem({ exercise, planId, selectedDate }: PlannedE
   });
 
   const createExerciseEntry = useCreateExerciseEntry();
+  const themed = useThemedStyles();
+  const { isDark } = useTheme();
 
   // Update completion state when exercise data changes
   useEffect(() => {
@@ -79,9 +83,14 @@ export function PlannedExerciseItem({ exercise, planId, selectedDate }: PlannedE
   return (
     <>
       <View
-        className={`rounded-2xl border shadow-sm ${
-          isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100'
-        }`}
+        className={themed(
+          `rounded-2xl border shadow-sm ${
+            isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-100'
+          }`,
+          `rounded-2xl border shadow-sm ${
+            isCompleted ? 'bg-green-900/20 border-green-700' : 'bg-gray-900 '
+          }`
+        )}
       >
         {/* Exercise Info */}
         <View className="p-4">
@@ -89,14 +98,23 @@ export function PlannedExerciseItem({ exercise, planId, selectedDate }: PlannedE
           <View className="flex-row items-start justify-between mb-3">
             <View style={{ flex: 1, marginRight: 16 }}>
               <Text
-                className={`text-lg font-bold ${
-                  isCompleted ? 'text-green-800 line-through' : 'text-gray-900'
-                }`}
+                className={themed(
+                  `text-lg font-bold ${
+                    isCompleted ? 'text-green-800 line-through' : 'text-gray-900'
+                  }`,
+                  `text-lg font-bold ${isCompleted ? 'text-green-400 line-through' : 'text-white'}`
+                )}
                 numberOfLines={1}
               >
                 {exercise.name}
               </Text>
-              <Text className="text-purple-600 text-sm font-medium" numberOfLines={1}>
+              <Text
+                className={themed(
+                  'text-purple-600 text-sm font-medium',
+                  'text-purple-400 text-sm font-medium'
+                )}
+                numberOfLines={1}
+              >
                 {exercise.category || 'Exercise'}
               </Text>
             </View>
@@ -108,26 +126,37 @@ export function PlannedExerciseItem({ exercise, planId, selectedDate }: PlannedE
                   {/* View Details Icon */}
                   <TouchableOpacity
                     onPress={() => setShowViewModal(true)}
-                    className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center"
+                    className={themed(
+                      'w-8 h-8 bg-gray-100 rounded-full items-center justify-center',
+                      'w-8 h-8 bg-gray-700 rounded-full items-center justify-center'
+                    )}
                   >
-                    <Eye size={16} color="#6B7280" />
+                    <Eye size={16} color={isDark ? '#9CA3AF' : '#6B7280'} />
                   </TouchableOpacity>
 
                   {/* Edit Icon */}
                   <TouchableOpacity
                     onPress={() => setShowEditModal(true)}
-                    className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center"
+                    className={themed(
+                      'w-8 h-8 bg-blue-50 rounded-full items-center justify-center',
+                      'w-8 h-8 bg-purple-900/30 rounded-full items-center justify-center'
+                    )}
                   >
-                    <Edit3 size={16} color="#3B82F6" />
+                    <Edit3 size={16} color={isDark ? '#A855F7' : '#3B82F6'} />
                   </TouchableOpacity>
 
                   {/* Mark Done Icon */}
                   <TouchableOpacity
                     onPress={handleMarkDone}
                     disabled={createExerciseEntry.isPending}
-                    className={`w-8 h-8 rounded-full items-center justify-center ${
-                      createExerciseEntry.isPending ? 'bg-gray-400' : 'bg-purple-500'
-                    }`}
+                    className={themed(
+                      `w-8 h-8 rounded-full items-center justify-center ${
+                        createExerciseEntry.isPending ? 'bg-gray-400' : 'bg-purple-500'
+                      }`,
+                      `w-8 h-8 rounded-full items-center justify-center ${
+                        createExerciseEntry.isPending ? 'bg-gray-600' : 'bg-purple-600'
+                      }`
+                    )}
                   >
                     <CheckCircle size={16} color="white" />
                   </TouchableOpacity>
@@ -135,7 +164,12 @@ export function PlannedExerciseItem({ exercise, planId, selectedDate }: PlannedE
               )}
 
               {isCompleted && (
-                <View className="w-8 h-8 bg-green-100 rounded-full items-center justify-center">
+                <View
+                  className={themed(
+                    'w-8 h-8 bg-green-100 rounded-full items-center justify-center',
+                    'w-8 h-8 bg-green-900/30 rounded-full items-center justify-center'
+                  )}
+                >
                   <CheckCircle size={16} color="#10B981" />
                 </View>
               )}
@@ -146,14 +180,24 @@ export function PlannedExerciseItem({ exercise, planId, selectedDate }: PlannedE
           <View className="flex-row items-center" style={{ gap: 16 }}>
             <View className="flex-row items-center">
               <Clock size={14} color="#8B5CF6" />
-              <Text className="text-gray-700 text-sm font-medium ml-1">
+              <Text
+                className={themed(
+                  'text-gray-700 text-sm font-medium ml-1',
+                  'text-gray-300 text-sm font-medium ml-1'
+                )}
+              >
                 {exercise.duration_minutes} min
               </Text>
             </View>
             {exercise.calories_estimate > 0 && (
               <View className="flex-row items-center">
                 <Flame size={14} color="#F59E0B" />
-                <Text className="text-gray-700 text-sm font-medium ml-1">
+                <Text
+                  className={themed(
+                    'text-gray-700 text-sm font-medium ml-1',
+                    'text-gray-300 text-sm font-medium ml-1'
+                  )}
+                >
                   {exercise.calories_estimate} cal
                 </Text>
               </View>
@@ -165,39 +209,117 @@ export function PlannedExerciseItem({ exercise, planId, selectedDate }: PlannedE
       {/* View Details Modal */}
       <Modal visible={showViewModal} animationType="slide" transparent>
         <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-3xl p-6 max-h-[80%]">
+          <View
+            className={themed(
+              'bg-white rounded-t-3xl p-6 max-h-[80%]',
+              'bg-gray-900 rounded-t-3xl p-6 max-h-[80%]'
+            )}
+          >
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-xl font-bold text-gray-900">Exercise Details</Text>
+              <Text
+                className={themed(
+                  'text-xl font-bold text-gray-900',
+                  'text-xl font-bold text-white'
+                )}
+              >
+                Exercise Details
+              </Text>
               <TouchableOpacity onPress={() => setShowViewModal(false)}>
-                <X size={24} color="#6B7280" />
+                <X size={24} color={isDark ? '#9CA3AF' : '#6B7280'} />
               </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              <View className="bg-purple-50 rounded-2xl p-4 mb-4">
-                <Text className="text-purple-900 text-lg font-bold">{exercise.name}</Text>
-                <Text className="text-purple-700 text-sm mt-1">{exercise.category}</Text>
+              <View
+                className={themed(
+                  'bg-purple-50 rounded-2xl p-4 mb-4',
+                  'bg-purple-900/30 rounded-2xl p-4 mb-4'
+                )}
+              >
+                <Text
+                  className={themed(
+                    'text-purple-900 text-lg font-bold',
+                    'text-purple-300 text-lg font-bold'
+                  )}
+                >
+                  {exercise.name}
+                </Text>
+                <Text
+                  className={themed('text-purple-700 text-sm mt-1', 'text-purple-400 text-sm mt-1')}
+                >
+                  {exercise.category}
+                </Text>
               </View>
 
               <View className="flex-row gap-4 mb-4">
-                <View className="flex-1 bg-gray-50 rounded-xl p-3">
-                  <Text className="text-gray-500 text-xs uppercase tracking-wide">Duration</Text>
-                  <Text className="text-gray-900 text-lg font-bold">
+                <View
+                  className={themed(
+                    'flex-1 bg-gray-50 rounded-xl p-3',
+                    'flex-1 bg-gray-800 rounded-xl p-3'
+                  )}
+                >
+                  <Text
+                    className={themed(
+                      'text-gray-500 text-xs uppercase tracking-wide',
+                      'text-gray-400 text-xs uppercase tracking-wide'
+                    )}
+                  >
+                    Duration
+                  </Text>
+                  <Text
+                    className={themed(
+                      'text-gray-900 text-lg font-bold',
+                      'text-white text-lg font-bold'
+                    )}
+                  >
                     {exercise.duration_minutes} min
                   </Text>
                 </View>
-                <View className="flex-1 bg-gray-50 rounded-xl p-3">
-                  <Text className="text-gray-500 text-xs uppercase tracking-wide">Calories</Text>
-                  <Text className="text-gray-900 text-lg font-bold">
+                <View
+                  className={themed(
+                    'flex-1 bg-gray-50 rounded-xl p-3',
+                    'flex-1 bg-gray-800 rounded-xl p-3'
+                  )}
+                >
+                  <Text
+                    className={themed(
+                      'text-gray-500 text-xs uppercase tracking-wide',
+                      'text-gray-400 text-xs uppercase tracking-wide'
+                    )}
+                  >
+                    Calories
+                  </Text>
+                  <Text
+                    className={themed(
+                      'text-gray-900 text-lg font-bold',
+                      'text-white text-lg font-bold'
+                    )}
+                  >
                     {exercise.calories_estimate || 0}
                   </Text>
                 </View>
               </View>
 
               {exercise.instructions && (
-                <View className="bg-blue-50 rounded-xl p-4">
-                  <Text className="text-blue-900 font-semibold mb-2">Instructions</Text>
-                  <Text className="text-blue-800 leading-relaxed">{exercise.instructions}</Text>
+                <View
+                  className={themed('bg-blue-50 rounded-xl p-4', 'bg-purple-900/30 rounded-xl p-4')}
+                >
+                  <Text
+                    className={themed(
+                      'text-blue-900 font-semibold mb-2',
+                      'text-purple-300 font-semibold mb-2'
+                    )}
+                  >
+                    Instructions
+                  </Text>
+                  <Text
+                    className={themed(
+                      'text-blue-800 leading-relaxed',
+                      'text-purple-200 leading-relaxed'
+                    )}
+                  >
+                    {exercise.instructions}
+                  </Text>
                 </View>
               )}
             </ScrollView>
@@ -208,46 +330,88 @@ export function PlannedExerciseItem({ exercise, planId, selectedDate }: PlannedE
       {/* Edit Modal */}
       <Modal visible={showEditModal} animationType="slide" transparent>
         <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-3xl p-6">
+          <View className={themed('bg-white rounded-t-3xl p-6', 'bg-gray-900 rounded-t-3xl p-6')}>
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-xl font-bold text-gray-900">Edit Exercise</Text>
+              <Text
+                className={themed(
+                  'text-xl font-bold text-gray-900',
+                  'text-xl font-bold text-white'
+                )}
+              >
+                Edit Exercise
+              </Text>
               <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                <X size={24} color="#6B7280" />
+                <X size={24} color={isDark ? '#9CA3AF' : '#6B7280'} />
               </TouchableOpacity>
             </View>
 
             <View className="mb-4">
-              <Text className="text-gray-700 font-medium mb-2">Duration (minutes)</Text>
+              <Text
+                className={themed(
+                  'text-gray-700 font-medium mb-2',
+                  'text-gray-300 font-medium mb-2'
+                )}
+              >
+                Duration (minutes)
+              </Text>
               <TextInput
                 value={editData.duration_minutes}
                 onChangeText={(text) => setEditData({ ...editData, duration_minutes: text })}
                 placeholder="Enter duration"
+                placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
                 keyboardType="numeric"
-                className="bg-gray-50 rounded-xl p-4 text-gray-900 text-lg"
+                className={themed(
+                  'bg-gray-50 rounded-xl p-4 text-gray-900 text-lg',
+                  'bg-gray-800 rounded-xl p-4 text-white text-lg'
+                )}
               />
             </View>
 
             <View className="mb-6">
-              <Text className="text-gray-700 font-medium mb-2">Estimated Calories</Text>
+              <Text
+                className={themed(
+                  'text-gray-700 font-medium mb-2',
+                  'text-gray-300 font-medium mb-2'
+                )}
+              >
+                Estimated Calories
+              </Text>
               <TextInput
                 value={editData.calories_estimate}
                 onChangeText={(text) => setEditData({ ...editData, calories_estimate: text })}
                 placeholder="Enter calories"
+                placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
                 keyboardType="numeric"
-                className="bg-gray-50 rounded-xl p-4 text-gray-900 text-lg"
+                className={themed(
+                  'bg-gray-50 rounded-xl p-4 text-gray-900 text-lg',
+                  'bg-gray-800 rounded-xl p-4 text-white text-lg'
+                )}
               />
             </View>
 
             <View className="flex-row gap-3">
               <TouchableOpacity
                 onPress={() => setShowEditModal(false)}
-                className="flex-1 bg-gray-100 py-4 rounded-xl"
+                className={themed(
+                  'flex-1 bg-gray-100 py-4 rounded-xl',
+                  'flex-1 bg-gray-700 py-4 rounded-xl'
+                )}
               >
-                <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
+                <Text
+                  className={themed(
+                    'text-gray-700 font-semibold text-center',
+                    'text-gray-300 font-semibold text-center'
+                  )}
+                >
+                  Cancel
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSaveEdit}
-                className="flex-1 bg-purple-500 py-4 rounded-xl flex-row items-center justify-center"
+                className={themed(
+                  'flex-1 bg-purple-500 py-4 rounded-xl flex-row items-center justify-center',
+                  'flex-1 bg-purple-600 py-4 rounded-xl flex-row items-center justify-center'
+                )}
               >
                 <Save size={16} color="white" />
                 <Text className="text-white font-semibold ml-2">Save</Text>

@@ -75,8 +75,8 @@ export function TodaysSymptoms({ selectedDate, symptomData, isLoading }: TodaysS
       <View className="px-4 mb-6">
         <View
           className={`${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-          } rounded-2xl p-4 border`}
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'
+          } rounded-2xl p-4`}
         >
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center">
@@ -104,9 +104,7 @@ export function TodaysSymptoms({ selectedDate, symptomData, isLoading }: TodaysS
   return (
     <View className="px-4 mb-6">
       <View
-        className={`${
-          isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-        } rounded-2xl p-4 border`}
+        className={`${isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'} rounded-2xl p-4`}
       >
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">

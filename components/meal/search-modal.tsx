@@ -75,26 +75,30 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                       (category) => {
                         const categoryValue = category === 'All' ? null : category.toLowerCase();
                         const isSelected = activeCategory === categoryValue;
-                        
+
                         return (
                           <TouchableOpacity
                             key={category}
                             onPress={() => onCategoryChange(categoryValue)}
                             className={`px-3 py-1.5 rounded-full border ${
                               isSelected
-                                ? isDark 
-                                  ? 'bg-green-900/30 border-green-600' 
+                                ? isDark
+                                  ? 'bg-green-900/30 border-green-600'
                                   : 'bg-green-100 border-green-200'
-                                : isDark 
-                                  ? 'bg-gray-700 border-gray-600' 
-                                  : 'bg-slate-100 border-slate-200'
+                                : isDark
+                                ? 'bg-gray-700 border-gray-600'
+                                : 'bg-slate-100 border-slate-200'
                             }`}
                           >
                             <Text
                               className={`text-sm font-medium ${
                                 isSelected
-                                  ? isDark ? 'text-green-300' : 'text-green-700'
-                                  : isDark ? 'text-gray-300' : 'text-gray-600'
+                                  ? isDark
+                                    ? 'text-green-300'
+                                    : 'text-green-700'
+                                  : isDark
+                                  ? 'text-gray-300'
+                                  : 'text-gray-600'
                               }`}
                             >
                               {category}
@@ -111,7 +115,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({
 
           {mode === 'saved' && foods.length === 0 && !isLoading && (
             <View className="mt-4">
-              <Text className={`text-base ${isDark ? 'text-gray-300' : 'text-gray-600'} text-center py-4`}>
+              <Text
+                className={`text-base ${
+                  isDark ? 'text-gray-300' : 'text-gray-600'
+                } text-center py-4`}
+              >
                 No saved foods yet. Save foods from your meal plans to see them here.
               </Text>
             </View>
@@ -123,15 +131,31 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           renderItem={({ item: food }) => (
             <TouchableOpacity
               onPress={() => onAddFood(food)}
-              className={`rounded-xl p-4 mb-2 border mx-4 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}
+              className={`rounded-xl p-4 mb-2 border mx-4 ${
+                isDark ? 'bg-gray-800 ' : 'bg-white border-gray-100'
+              }`}
             >
               <View className="flex-row items-center justify-between">
                 <View className="flex-1">
                   <View className="flex-row items-center mb-1">
-                    <Text className={`font-semibold flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{food.name}</Text>
+                    <Text
+                      className={`font-semibold flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}
+                    >
+                      {food.name}
+                    </Text>
                     {food.category && (
-                      <View className={`px-2 py-1 rounded-full ml-2 ${isDark ? 'bg-green-900/30' : 'bg-green-100'}`}>
-                        <Text className={`text-xs font-medium ${isDark ? 'text-green-300' : 'text-green-700'}`}>{food.category}</Text>
+                      <View
+                        className={`px-2 py-1 rounded-full ml-2 ${
+                          isDark ? 'bg-green-900/30' : 'bg-green-100'
+                        }`}
+                      >
+                        <Text
+                          className={`text-xs font-medium ${
+                            isDark ? 'text-green-300' : 'text-green-700'
+                          }`}
+                        >
+                          {food.category}
+                        </Text>
                       </View>
                     )}
                   </View>

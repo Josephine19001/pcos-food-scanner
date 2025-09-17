@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, ScrollView, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Clock, Heart, X, Save, RotateCcw, MessageSquare } from 'lucide-react-native';
+import { useTheme } from '@/context/theme-provider';
 
 interface WeeklyPlanProps {
   plan: {
@@ -42,6 +43,7 @@ interface WeeklyPlanProps {
 export function WeeklyPlanDisplay({ plan, onClose, onSave, onRegenerate }: WeeklyPlanProps) {
   const [showRegenerateModal, setShowRegenerateModal] = useState(false);
   const [regenerateContext, setRegenerateContext] = useState('');
+  const { isDark } = useTheme();
 
   const handleDayPress = (day: any) => {
     if (day.is_rest_day) {
@@ -84,15 +86,21 @@ export function WeeklyPlanDisplay({ plan, onClose, onSave, onRegenerate }: Weekl
   return (
     <Modal visible={true} animationType="slide" transparent>
       <View className="flex-1 bg-black/50 justify-end">
-        <View className="bg-white rounded-t-3xl flex-1 max-h-[90%]">
+        <View className={`${isDark ? 'bg-gray-900' : 'bg-white'} rounded-t-3xl flex-1 max-h-[90%]`}>
           {/* Header */}
-          <View className="flex-row items-center justify-between p-6 border-b border-gray-100">
+          <View
+            className={`flex-row items-center justify-between p-6 border-b ${
+              isDark ? '' : 'border-gray-100'
+            }`}
+          >
             <View className="flex-1">
-              <Text className="text-xl font-bold text-gray-900">{plan.plan_name}</Text>
+              <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {plan.plan_name}
+              </Text>
               <Text className="text-purple-600 text-sm mt-1">7-Day Plan</Text>
             </View>
             <TouchableOpacity onPress={onClose} className="p-2">
-              <X size={24} color="#6B7280" />
+              <X size={24} color={isDark ? '#9CA3AF' : '#6B7280'} />
             </TouchableOpacity>
           </View>
 
@@ -102,23 +110,58 @@ export function WeeklyPlanDisplay({ plan, onClose, onSave, onRegenerate }: Weekl
             contentContainerStyle={{ paddingBottom: 20 }}
           >
             {/* Weekly Summary */}
-            <View className="my-6 p-4 bg-purple-50 rounded-2xl">
+            <View
+              className={`my-6 p-4 ${isDark ? 'bg-purple-900/30' : 'bg-purple-50'} rounded-2xl`}
+            >
               <View className="flex-row justify-between">
                 <View className="items-center">
-                  <Text className="text-purple-600 text-xs uppercase font-medium">Workouts</Text>
-                  <Text className="text-purple-900 text-base font-bold" numberOfLines={1}>
+                  <Text
+                    className={`${
+                      isDark ? 'text-purple-400' : 'text-purple-600'
+                    } text-xs uppercase font-medium`}
+                  >
+                    Workouts
+                  </Text>
+                  <Text
+                    className={`${
+                      isDark ? 'text-purple-200' : 'text-purple-900'
+                    } text-base font-bold`}
+                    numberOfLines={1}
+                  >
                     {plan.weekly_goals.total_workouts}
                   </Text>
                 </View>
                 <View className="items-center">
-                  <Text className="text-purple-600 text-xs uppercase font-medium">Duration</Text>
-                  <Text className="text-purple-900 text-base font-bold" numberOfLines={1}>
+                  <Text
+                    className={`${
+                      isDark ? 'text-purple-400' : 'text-purple-600'
+                    } text-xs uppercase font-medium`}
+                  >
+                    Duration
+                  </Text>
+                  <Text
+                    className={`${
+                      isDark ? 'text-purple-200' : 'text-purple-900'
+                    } text-base font-bold`}
+                    numberOfLines={1}
+                  >
                     {plan.weekly_goals.total_minutes}min
                   </Text>
                 </View>
                 <View className="items-center">
-                  <Text className="text-purple-600 text-xs uppercase font-medium">Calories</Text>
-                  <Text className="text-purple-900 text-base font-bold" numberOfLines={1}>
+                  <Text
+                    className={`${
+                      isDark ? 'text-purple-400' : 'text-purple-600'
+                    } text-xs uppercase font-medium`}
+                  >
+                    Calories
+                  </Text>
+                  <Text
+                    className={`${
+                      isDark ? 'text-purple-200' : 'text-purple-900'
+                    } text-base font-bold`}
+                    numberOfLines={1}
+                  >
                     {plan.weekly_goals.estimated_calories}
                   </Text>
                 </View>
@@ -130,12 +173,14 @@ export function WeeklyPlanDisplay({ plan, onClose, onSave, onRegenerate }: Weekl
               <TouchableOpacity
                 key={index}
                 onPress={() => handleDayPress(day)}
-                className="mb-3 p-4 bg-gray-50 rounded-2xl"
+                className={`mb-3 p-4 ${isDark ? 'bg-gray-800' : 'bg-gray-50'} rounded-2xl`}
               >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1">
-                    <Text className="text-gray-900 font-bold">{day.day_name}</Text>
-                    <Text className="text-gray-600 text-sm">
+                    <Text className={`${isDark ? 'text-white' : 'text-gray-900'} font-bold`}>
+                      {day.day_name}
+                    </Text>
+                    <Text className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
                       {new Date(day.date).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -147,25 +192,41 @@ export function WeeklyPlanDisplay({ plan, onClose, onSave, onRegenerate }: Weekl
                     {day.is_rest_day ? (
                       <>
                         <Heart size={16} color="#10B981" />
-                        <Text className="text-green-700 text-sm ml-1">Rest</Text>
+                        <Text
+                          className={`${isDark ? 'text-green-400' : 'text-green-700'} text-sm ml-1`}
+                        >
+                          Rest
+                        </Text>
                       </>
                     ) : day.exercises.length > 0 ? (
                       <View className="items-end">
                         <View className="flex-row items-center">
-                          <Clock size={16} color="#8B5CF6" />
-                          <Text className="text-purple-700 text-sm ml-1 font-medium">
+                          <Clock size={16} color={isDark ? '#A78BFA' : '#8B5CF6'} />
+                          <Text
+                            className={`${
+                              isDark ? 'text-purple-400' : 'text-purple-700'
+                            } text-sm ml-1 font-medium`}
+                          >
                             {day.duration_minutes}min
                           </Text>
                         </View>
-                        <Text className="text-gray-600 text-sm mt-1">{day.workout_type}</Text>
+                        <Text
+                          className={`${isDark ? 'text-gray-400' : 'text-gray-600'} text-sm mt-1`}
+                        >
+                          {day.workout_type}
+                        </Text>
                         {day.exercises.length > 0 && (
-                          <Text className="text-gray-500 text-xs mt-1">
+                          <Text
+                            className={`${isDark ? 'text-gray-500' : 'text-gray-500'} text-xs mt-1`}
+                          >
                             {day.exercises[0].name}
                           </Text>
                         )}
                       </View>
                     ) : (
-                      <Text className="text-gray-400 text-sm">Free day</Text>
+                      <Text className={`${isDark ? 'text-gray-500' : 'text-gray-400'} text-sm`}>
+                        Free day
+                      </Text>
                     )}
                   </View>
                 </View>
@@ -174,7 +235,9 @@ export function WeeklyPlanDisplay({ plan, onClose, onSave, onRegenerate }: Weekl
           </ScrollView>
 
           {/* Action Buttons */}
-          <View className="p-6 pt-4 border-t border-gray-100 bg-white">
+          <View
+            className={`p-6 pt-4 border-t ${isDark ? ' bg-gray-900' : 'border-gray-100 bg-white'}`}
+          >
             <View className="flex-row gap-3">
               {/* <TouchableOpacity
                 onPress={() => setShowRegenerateModal(true)}

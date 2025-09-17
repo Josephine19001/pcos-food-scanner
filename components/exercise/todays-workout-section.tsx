@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Modal, TextInput, Alert } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTheme } from '@/context/theme-provider';
+import { useThemedStyles } from '@/lib/utils/theme';
 import { router } from 'expo-router';
 import { getLocalDateString } from '@/lib/utils/date-helpers';
 import {
@@ -105,6 +106,8 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
 
   const deleteExerciseEntry = useDeleteExerciseEntry();
   const updateExerciseEntry = useUpdateExerciseEntry();
+  const themed = useThemedStyles();
+  const { isDark } = useTheme();
 
   const handleDeleteExercise = (exerciseId: string) => {
     Alert.alert('Delete Exercise', 'Are you sure you want to delete this exercise?', [
@@ -130,10 +133,10 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
   return (
     <>
       <View
-        className="rounded-xl p-4 border"
+        className={themed('rounded-xl p-4 border', 'rounded-xl p-4 border')}
         style={{
-          backgroundColor: '#DCFCE7',
-          borderColor: '#BBF7D0',
+          backgroundColor: isDark ? '#065F4620' : '#DCFCE7',
+          borderColor: isDark ? '#065F46' : '#BBF7D0',
         }}
       >
         <View className="flex-row justify-between items-start mb-3">
@@ -146,39 +149,76 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
                 <ExerciseIcon size={18} color={exerciseColor} />
               </View>
               <View className="flex-1">
-                <Text className="text-gray-900 font-semibold text-base">
+                <Text
+                  className={themed(
+                    'text-gray-900 font-semibold text-base',
+                    'text-white font-semibold text-base'
+                  )}
+                >
                   {exercise.exercise_name}
                 </Text>
-                <View className="px-2 py-1 rounded-full self-start mt-1 bg-green-100">
-                  <Text className="text-xs font-medium text-green-700">Completed</Text>
+                <View
+                  className={themed(
+                    'px-2 py-1 rounded-full self-start mt-1 bg-green-100',
+                    'px-2 py-1 rounded-full self-start mt-1 bg-green-900/30'
+                  )}
+                >
+                  <Text
+                    className={themed(
+                      'text-xs font-medium text-green-700',
+                      'text-xs font-medium text-green-400'
+                    )}
+                  >
+                    Completed
+                  </Text>
                 </View>
               </View>
             </View>
 
-            <Text className="text-gray-600 text-sm capitalize mb-2">
+            <Text
+              className={themed(
+                'text-gray-600 text-sm capitalize mb-2',
+                'text-gray-400 text-sm capitalize mb-2'
+              )}
+            >
               {exercise.exercise_type}
               {exercise.intensity && ` • ${exercise.intensity} intensity`}
             </Text>
 
             <View className="flex-row" style={{ gap: 16 }}>
               <View className="flex-row items-center">
-                <Clock size={14} color="#6B7280" />
-                <Text className="text-gray-600 text-sm ml-1">{exercise.duration_minutes} min</Text>
+                <Clock size={14} color={isDark ? '#9CA3AF' : '#6B7280'} />
+                <Text
+                  className={themed('text-gray-600 text-sm ml-1', 'text-gray-400 text-sm ml-1')}
+                >
+                  {exercise.duration_minutes} min
+                </Text>
               </View>
               <View className="flex-row items-center">
-                <Flame size={14} color="#6B7280" />
-                <Text className="text-gray-600 text-sm ml-1">{exercise.calories_burned} cal</Text>
+                <Flame size={14} color={isDark ? '#9CA3AF' : '#6B7280'} />
+                <Text
+                  className={themed('text-gray-600 text-sm ml-1', 'text-gray-400 text-sm ml-1')}
+                >
+                  {exercise.calories_burned} cal
+                </Text>
               </View>
             </View>
 
             {exercise.notes && (
-              <Text className="text-gray-500 text-sm mt-2 italic">{exercise.notes}</Text>
+              <Text
+                className={themed(
+                  'text-gray-500 text-sm mt-2 italic',
+                  'text-gray-400 text-sm mt-2 italic'
+                )}
+              >
+                {exercise.notes}
+              </Text>
             )}
           </View>
 
           {/* Time/Action */}
           <View className="items-end">
-            <Text className="text-xs text-gray-400 mb-2">
+            <Text className={themed('text-xs text-gray-400 mb-2', 'text-xs text-gray-500 mb-2')}>
               {exercise.logged_time
                 ? new Date(`1970-01-01T${exercise.logged_time}`).toLocaleTimeString('en-US', {
                     hour: '2-digit',
@@ -189,13 +229,19 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
             <View className="flex-row" style={{ gap: 8 }}>
               <TouchableOpacity
                 onPress={() => handleEditExercise(exercise)}
-                className="bg-blue-500 px-2 py-1 rounded-lg"
+                className={themed(
+                  'bg-blue-500 px-2 py-1 rounded-lg',
+                  'bg-purple-600 px-2 py-1 rounded-lg'
+                )}
               >
                 <Edit3 size={12} color="white" />
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => handleDeleteExercise(exercise.id)}
-                className="bg-red-500 px-2 py-1 rounded-lg"
+                className={themed(
+                  'bg-red-500 px-2 py-1 rounded-lg',
+                  'bg-red-600 px-2 py-1 rounded-lg'
+                )}
               >
                 <X size={12} color="white" />
               </TouchableOpacity>
@@ -207,19 +253,43 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
       {/* Edit Exercise Modal */}
       <Modal visible={showEditModal} transparent animationType="slide">
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white rounded-2xl p-6 m-4 w-80">
-            <Text className="text-lg font-bold text-gray-900 mb-4">Edit Exercise</Text>
+          <View
+            className={themed(
+              'bg-white rounded-2xl p-6 m-4 w-80',
+              'bg-gray-900 rounded-2xl p-6 m-4 w-80'
+            )}
+          >
+            <Text
+              className={themed(
+                'text-lg font-bold text-gray-900 mb-4',
+                'text-lg font-bold text-white mb-4'
+              )}
+            >
+              Edit Exercise
+            </Text>
 
             {editingExercise && (
               <View>
-                <Text className="text-base font-semibold text-gray-900 mb-2">
+                <Text
+                  className={themed(
+                    'text-base font-semibold text-gray-900 mb-2',
+                    'text-base font-semibold text-white mb-2'
+                  )}
+                >
                   {editingExercise.exercise_name}
                 </Text>
 
                 <View className="mb-4">
-                  <Text className="text-sm text-gray-600 mb-2">Duration (minutes)</Text>
+                  <Text
+                    className={themed('text-sm text-gray-600 mb-2', 'text-sm text-gray-400 mb-2')}
+                  >
+                    Duration (minutes)
+                  </Text>
                   <TextInput
-                    className="border border-gray-300 rounded-lg px-3 py-2"
+                    className={themed(
+                      'border border-gray-300 rounded-lg px-3 py-2',
+                      'border border-gray-600 rounded-lg px-3 py-2 bg-gray-800 text-white'
+                    )}
                     value={editingExercise.duration_minutes?.toString()}
                     onChangeText={(text) =>
                       setEditingExercise({
@@ -229,13 +299,21 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
                     }
                     keyboardType="numeric"
                     placeholder="Duration in minutes"
+                    placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
                   />
                 </View>
 
                 <View className="mb-4">
-                  <Text className="text-sm text-gray-600 mb-2">Calories Burned</Text>
+                  <Text
+                    className={themed('text-sm text-gray-600 mb-2', 'text-sm text-gray-400 mb-2')}
+                  >
+                    Calories Burned
+                  </Text>
                   <TextInput
-                    className="border border-gray-300 rounded-lg px-3 py-2"
+                    className={themed(
+                      'border border-gray-300 rounded-lg px-3 py-2',
+                      'border border-gray-600 rounded-lg px-3 py-2 bg-gray-800 text-white'
+                    )}
                     value={editingExercise.calories_burned?.toString()}
                     onChangeText={(text) =>
                       setEditingExercise({
@@ -245,13 +323,21 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
                     }
                     keyboardType="numeric"
                     placeholder="Calories burned"
+                    placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
                   />
                 </View>
 
                 <View className="mb-4">
-                  <Text className="text-sm text-gray-600 mb-2">Notes</Text>
+                  <Text
+                    className={themed('text-sm text-gray-600 mb-2', 'text-sm text-gray-400 mb-2')}
+                  >
+                    Notes
+                  </Text>
                   <TextInput
-                    className="border border-gray-300 rounded-lg px-3 py-2"
+                    className={themed(
+                      'border border-gray-300 rounded-lg px-3 py-2',
+                      'border border-gray-600 rounded-lg px-3 py-2 bg-gray-800 text-white'
+                    )}
                     value={editingExercise.notes || ''}
                     onChangeText={(text) =>
                       setEditingExercise({
@@ -260,6 +346,7 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
                       })
                     }
                     placeholder="Add notes..."
+                    placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
                     multiline
                     numberOfLines={3}
                   />
@@ -271,7 +358,10 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
                       setShowEditModal(false);
                       setEditingExercise(null);
                     }}
-                    className="flex-1 bg-gray-500 py-3 rounded-lg"
+                    className={themed(
+                      'flex-1 bg-gray-500 py-3 rounded-lg',
+                      'flex-1 bg-gray-700 py-3 rounded-lg'
+                    )}
                   >
                     <Text className="text-white font-semibold text-center">Cancel</Text>
                   </TouchableOpacity>
@@ -289,7 +379,10 @@ function LoggedExerciseItem({ exercise }: { exercise: any }) {
                       setShowEditModal(false);
                       setEditingExercise(null);
                     }}
-                    className="flex-1 bg-purple-500 py-3 rounded-lg"
+                    className={themed(
+                      'flex-1 bg-purple-500 py-3 rounded-lg',
+                      'flex-1 bg-purple-600 py-3 rounded-lg'
+                    )}
                   >
                     <Text className="text-white font-semibold text-center">Save</Text>
                   </TouchableOpacity>
@@ -324,12 +417,17 @@ export function TodaysWorkoutSection({
 
   const todaysPlannedWorkout = getTodaysWorkoutFromPlan();
   const { isDark } = useTheme();
+  const themed = useThemedStyles();
 
   if (isLoading) {
     return (
       <View className="mx-4 mb-6">
         <Skeleton width={160} height={24} borderRadius={6} className="mb-4" />
-        <View className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-50'} rounded-2xl p-6 shadow-sm border`}>
+        <View
+          className={`${
+            isDark ? 'bg-gray-800 ' : 'bg-white border-gray-50'
+          } rounded-2xl p-6 shadow-sm border`}
+        >
           {/* Workout header skeleton */}
           <View className={`${isDark ? 'bg-gray-700' : 'bg-gray-100'} rounded-2xl p-4 mb-4`}>
             <Skeleton width={128} height={24} borderRadius={4} className="mb-2" />
@@ -339,7 +437,10 @@ export function TodaysWorkoutSection({
           {/* Exercise items skeleton */}
           <View className="gap-2 mb-4">
             {Array.from({ length: 3 }).map((_, index) => (
-              <View key={index} className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl p-3`}>
+              <View
+                key={index}
+                className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl p-3`}
+              >
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1">
                     <Skeleton width={96} height={16} borderRadius={4} className="mb-1" />
@@ -360,32 +461,69 @@ export function TodaysWorkoutSection({
 
   return (
     <View className="mx-4 mb-6">
-      <Text className="text-xl font-bold text-gray-900 mb-4">
+      <Text
+        className={themed(
+          'text-xl font-bold text-gray-900 mb-4',
+          'text-xl font-bold text-white mb-4'
+        )}
+      >
         {selectedDate.toDateString() === new Date().toDateString()
           ? 'Planned Workout'
-          : `${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} Workout`}
+          : `${selectedDate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })} Workout`}
       </Text>
 
       {todaysPlannedWorkout ? (
-        <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-50 w-full">
+        <View
+          className={themed(
+            'bg-white rounded-2xl p-6 shadow-sm border border-gray-50 w-full',
+            'bg-gray-900 rounded-2xl p-6 shadow-sm  w-full'
+          )}
+        >
           {todaysPlannedWorkout.is_rest_day ? (
             <View className="items-center">
-              <View className="w-12 h-12 bg-green-100 rounded-full items-center justify-center mb-3">
+              <View
+                className={themed(
+                  'w-12 h-12 bg-green-100 rounded-full items-center justify-center mb-3',
+                  'w-12 h-12 bg-green-900/30 rounded-full items-center justify-center mb-3'
+                )}
+              >
                 <Heart size={24} color="#10B981" />
               </View>
-              <Text className="text-green-700 text-lg font-semibold mb-2">Rest Day</Text>
-              <Text className="text-gray-600 text-center">
+              <Text
+                className={themed(
+                  'text-green-700 text-lg font-semibold mb-2',
+                  'text-green-400 text-lg font-semibold mb-2'
+                )}
+              >
+                Rest Day
+              </Text>
+              <Text className={themed('text-gray-600 text-center', 'text-gray-400 text-center')}>
                 Take a break and let your body recover
               </Text>
             </View>
           ) : (
             <View className="w-full">
               {/* Today's Time Display */}
-              <View className="bg-purple-50 rounded-2xl p-4 mb-4 w-full">
-                <Text className="text-purple-900 text-xl font-bold">
+              <View
+                className={themed(
+                  'bg-purple-50 rounded-2xl p-4 mb-4 w-full',
+                  'bg-purple-900/30 rounded-2xl p-4 mb-4 w-full'
+                )}
+              >
+                <Text
+                  className={themed(
+                    'text-purple-900 text-xl font-bold',
+                    'text-purple-300 text-xl font-bold'
+                  )}
+                >
                   {todaysPlannedWorkout.workout_type}
                 </Text>
-                <Text className="text-purple-700 text-sm mt-1">
+                <Text
+                  className={themed('text-purple-700 text-sm mt-1', 'text-purple-400 text-sm mt-1')}
+                >
                   {todaysPlannedWorkout.exercises?.length || 0} exercises •{' '}
                   {todaysPlannedWorkout.duration_minutes} min total
                 </Text>
@@ -409,7 +547,12 @@ export function TodaysWorkoutSection({
                 {/* Logged Exercises */}
                 {exerciseEntries && exerciseEntries.length > 0 && (
                   <View style={{ gap: 8, marginBottom: 16 }}>
-                    <Text className="text-lg font-semibold text-gray-800 mb-2">
+                    <Text
+                      className={themed(
+                        'text-lg font-semibold text-gray-800 mb-2',
+                        'text-lg font-semibold text-white mb-2'
+                      )}
+                    >
                       Logged Exercises
                     </Text>
                     {exerciseEntries.map((exercise: any) => (
@@ -420,8 +563,13 @@ export function TodaysWorkoutSection({
 
                 {/* Add More Workout Button */}
                 <TouchableOpacity
-                  onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
-                  className="bg-purple-500 py-4 rounded-2xl w-full"
+                  onPress={() =>
+                    router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)
+                  }
+                  className={themed(
+                    'bg-purple-500 py-4 rounded-2xl w-full',
+                    'bg-purple-600 py-4 rounded-2xl w-full'
+                  )}
                 >
                   <Text className="text-white font-semibold text-center">Log Exercise</Text>
                 </TouchableOpacity>
@@ -431,12 +579,31 @@ export function TodaysWorkoutSection({
         </View>
       ) : (
         /* No planned workout, but show logged exercises if any */
-        <View className="bg-white rounded-2xl p-6 shadow-sm border border-gray-50 w-full">
+        <View
+          className={themed(
+            'bg-white rounded-2xl p-6 shadow-sm border border-gray-50 w-full',
+            'bg-gray-900 rounded-2xl p-6 shadow-sm  w-full'
+          )}
+        >
           {exerciseEntries && exerciseEntries.length > 0 ? (
             <View className="w-full">
-              <View className="bg-purple-50 rounded-2xl p-4 mb-4 w-full">
-                <Text className="text-purple-900 text-xl font-bold">Logged Exercises</Text>
-                <Text className="text-purple-700 text-sm mt-1">
+              <View
+                className={themed(
+                  'bg-purple-50 rounded-2xl p-4 mb-4 w-full',
+                  'bg-purple-900/30 rounded-2xl p-4 mb-4 w-full'
+                )}
+              >
+                <Text
+                  className={themed(
+                    'text-purple-900 text-xl font-bold',
+                    'text-purple-300 text-xl font-bold'
+                  )}
+                >
+                  Logged Exercises
+                </Text>
+                <Text
+                  className={themed('text-purple-700 text-sm mt-1', 'text-purple-400 text-sm mt-1')}
+                >
                   {exerciseEntries.length} exercise{exerciseEntries.length > 1 ? 's' : ''} completed
                 </Text>
               </View>
@@ -449,8 +616,13 @@ export function TodaysWorkoutSection({
                 </View>
 
                 <TouchableOpacity
-                  onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
-                  className="bg-purple-500 py-4 rounded-2xl w-full"
+                  onPress={() =>
+                    router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)
+                  }
+                  className={themed(
+                    'bg-purple-500 py-4 rounded-2xl w-full',
+                    'bg-purple-600 py-4 rounded-2xl w-full'
+                  )}
                 >
                   <Text className="text-white font-semibold text-center">Log Another Exercise</Text>
                 </TouchableOpacity>
@@ -458,16 +630,31 @@ export function TodaysWorkoutSection({
             </View>
           ) : (
             <View className="items-center py-8">
-              <View className="w-16 h-16 rounded-2xl bg-purple-50 items-center justify-center mb-3">
+              <View
+                className={themed(
+                  'w-16 h-16 rounded-2xl bg-purple-50 items-center justify-center mb-3',
+                  'w-16 h-16 rounded-2xl bg-purple-900/30 items-center justify-center mb-3'
+                )}
+              >
                 <Dumbbell size={24} color="#F97316" />
               </View>
-              <Text className="text-gray-600 text-center mb-3">
+              <Text
+                className={themed(
+                  'text-gray-600 text-center mb-3',
+                  'text-gray-400 text-center mb-3'
+                )}
+              >
                 No planned workout for this day
               </Text>
 
               <TouchableOpacity
-                onPress={() => router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)}
-                className="bg-purple-500 px-4 py-2 rounded-xl"
+                onPress={() =>
+                  router.push(`/log-exercise?date=${getLocalDateString(selectedDate)}`)
+                }
+                className={themed(
+                  'bg-purple-500 px-4 py-2 rounded-xl',
+                  'bg-purple-600 px-4 py-2 rounded-xl'
+                )}
               >
                 <Text className="text-white font-medium">Add Workout</Text>
               </TouchableOpacity>

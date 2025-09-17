@@ -209,8 +209,8 @@ export function CyclePhase({
       <View className="px-4 mb-6">
         <View
           className={`${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-          } rounded-3xl p-6 border items-center`}
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'
+          } rounded-3xl p-6 items-center`}
         >
           <View
             className={`w-32 h-32 rounded-full ${
@@ -230,8 +230,8 @@ export function CyclePhase({
       <View className="px-4 mb-6">
         <View
           className={`${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-          } rounded-3xl p-6 border items-center`}
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'
+          } rounded-3xl p-6 items-center`}
         >
           <View
             className={`w-32 h-32 rounded-full border-4 border-dashed ${
@@ -274,9 +274,7 @@ export function CyclePhase({
   return (
     <View className="px-4 mb-6">
       <View
-        className={`${
-          isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-        } rounded-3xl p-6 border`}
+        className={`${isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'} rounded-3xl p-6`}
       >
         {/* Circular Progress Section */}
         <View className="items-center mb-8">

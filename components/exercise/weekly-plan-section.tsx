@@ -7,6 +7,7 @@ import { WorkoutFocusSelector } from './workout-focus-selector';
 import { useState } from 'react';
 import { useRevenueCat } from '@/context/revenuecat-provider';
 import { useRouter } from 'expo-router';
+import { useTheme } from '@/context/theme-provider';
 
 export function WeeklyPlanSection({
   currentWeeklyPlan,
@@ -27,6 +28,7 @@ export function WeeklyPlanSection({
   const [showFocusSelector, setShowFocusSelector] = useState(false);
   const { requiresSubscriptionForFeature } = useRevenueCat();
   const router = useRouter();
+  const { isDark } = useTheme();
 
   // Check if we should show the generate button (only on day before plan ends)
   const shouldShowGenerateButton = () => {
@@ -57,7 +59,7 @@ export function WeeklyPlanSection({
       router.push('/paywall');
       return;
     }
-    
+
     setShowFocusSelector(true);
   };
 
@@ -95,7 +97,9 @@ export function WeeklyPlanSection({
         onError: (error) => {
           console.error('Failed to generate weekly plan:', error);
           alert(
-            `❌ Failed to generate weekly plan\n\n${error instanceof Error ? error.message : 'Please try again later'}`
+            `❌ Failed to generate weekly plan\n\n${
+              error instanceof Error ? error.message : 'Please try again later'
+            }`
           );
         },
       }
@@ -105,6 +109,9 @@ export function WeeklyPlanSection({
   const handleViewCurrentPlan = () => {
     if (currentWeeklyPlan?.plan_data) {
       onShowPlan(currentWeeklyPlan.plan_data);
+    } else if (currentWeeklyPlan) {
+      // Fallback: if plan_data doesn't exist, use the full plan object
+      onShowPlan(currentWeeklyPlan);
     }
   };
 
@@ -112,17 +119,7 @@ export function WeeklyPlanSection({
     <View className="mx-4 mb-6">
       {/* Current Plan Display */}
       {currentWeeklyPlan && (
-        <View
-          className="rounded-3xl p-6 mb-4"
-          style={{
-            backgroundColor: 'white',
-            shadowColor: '#8B5CF6',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.15,
-            shadowRadius: 20,
-            elevation: 8,
-          }}
-        >
+        <View className={`rounded-3xl p-6 mb-4 shadow-lg ${isDark ? 'bg-slate-900' : 'bg-white'}`}>
           {/* Header with gradient background */}
           <View
             className="rounded-2xl p-4 mb-4"
@@ -163,44 +160,87 @@ export function WeeklyPlanSection({
 
           {/* Enhanced Stats Grid */}
           <View className="flex-row justify-between">
-            <View className="flex-1 bg-purple-50 rounded-2xl p-4 mr-2">
+            <View
+              className={`flex-1 ${
+                isDark ? 'bg-purple-900/20' : 'bg-purple-50'
+              } rounded-2xl p-4 mr-2`}
+            >
               <View className="flex-row items-center mb-2">
-                <View className="w-8 h-8 bg-purple-100 rounded-full items-center justify-center">
+                <View
+                  className={`w-8 h-8 ${
+                    isDark ? 'bg-purple-800/40' : 'bg-purple-100'
+                  } rounded-full items-center justify-center`}
+                >
                   <Dumbbell size={16} color="#8B5CF6" />
                 </View>
               </View>
-              <Text className="text-purple-600 text-xs font-semibold uppercase tracking-wide mb-1">
+              <Text
+                className={`${
+                  isDark ? 'text-purple-400' : 'text-purple-600'
+                } text-xs font-semibold uppercase tracking-wide mb-1`}
+              >
                 Workouts
               </Text>
-              <Text className="text-purple-900 text-lg font-bold" numberOfLines={1}>
+              <Text
+                className={`${isDark ? 'text-purple-200' : 'text-purple-900'} text-lg font-bold`}
+                numberOfLines={1}
+              >
                 {currentWeeklyPlan.plan_data?.weekly_goals?.total_workouts || 0}
               </Text>
             </View>
 
-            <View className="flex-1 bg-blue-50 rounded-2xl p-4 mx-1">
+            <View
+              className={`flex-1 ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'} rounded-2xl p-4 mx-1`}
+            >
               <View className="flex-row items-center mb-2">
-                <View className="w-8 h-8 bg-blue-100 rounded-full items-center justify-center">
+                <View
+                  className={`w-8 h-8 ${
+                    isDark ? 'bg-blue-800/40' : 'bg-blue-100'
+                  } rounded-full items-center justify-center`}
+                >
                   <Timer size={16} color="#3B82F6" />
                 </View>
               </View>
-              <Text className="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">
+              <Text
+                className={`${
+                  isDark ? 'text-blue-400' : 'text-blue-600'
+                } text-xs font-semibold uppercase tracking-wide mb-1`}
+              >
                 Duration
               </Text>
-              <Text className="text-blue-900 text-lg font-bold" numberOfLines={1}>
+              <Text
+                className={`${isDark ? 'text-blue-200' : 'text-blue-900'} text-lg font-bold`}
+                numberOfLines={1}
+              >
                 {currentWeeklyPlan.total_duration_minutes}min
               </Text>
             </View>
 
-            <View className="flex-1 bg-orange-50 rounded-2xl p-4 ml-2">
+            <View
+              className={`flex-1 ${
+                isDark ? 'bg-orange-900/20' : 'bg-orange-50'
+              } rounded-2xl p-4 ml-2`}
+            >
               <View className="flex-row items-center mb-2">
-                <View className="w-8 h-8 bg-orange-100 rounded-full items-center justify-center">
+                <View
+                  className={`w-8 h-8 ${
+                    isDark ? 'bg-orange-800/40' : 'bg-orange-100'
+                  } rounded-full items-center justify-center`}
+                >
                   <Flame size={16} color="#F59E0B" />
                 </View>
               </View>
-              <Text className="text-orange-600 text-xs font-semibold uppercase tracking-wide mb-1">
+              <Text
+                className={`${
+                  isDark ? 'text-orange-400' : 'text-orange-600'
+                } text-xs font-semibold uppercase tracking-wide mb-1`}
+              >
                 Calories
               </Text>
-              <Text className="text-orange-900 text-lg font-bold" numberOfLines={1}>
+              <Text
+                className={`${isDark ? 'text-orange-200' : 'text-orange-900'} text-lg font-bold`}
+                numberOfLines={1}
+              >
                 {currentWeeklyPlan.estimated_calories}
               </Text>
             </View>

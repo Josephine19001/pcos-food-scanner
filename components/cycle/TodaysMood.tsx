@@ -65,8 +65,8 @@ export function TodaysMood({ selectedDate, moodData, isLoading }: TodaysMoodProp
       <View className="px-4 mb-6">
         <View
           className={`${
-            isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-          } rounded-2xl p-4 border`}
+            isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'
+          } rounded-2xl p-4`}
         >
           <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center">
@@ -94,9 +94,7 @@ export function TodaysMood({ selectedDate, moodData, isLoading }: TodaysMoodProp
   return (
     <View className="px-4 mb-6">
       <View
-        className={`${
-          isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-        } rounded-2xl p-5 border`}
+        className={`${isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100 border'} rounded-2xl p-5`}
       >
         <View className="flex-row items-center justify-between mb-5">
           <View className="flex-row items-center">

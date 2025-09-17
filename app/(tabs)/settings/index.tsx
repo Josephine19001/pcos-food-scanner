@@ -34,7 +34,7 @@ import { PremiumGradientBackground } from '@/components/ui/animated-gradient';
 
 function SettingsPageSkeleton() {
   const { isDark } = useTheme();
-  
+
   return (
     <>
       {/* User Profile Card Skeleton */}
@@ -234,24 +234,32 @@ export default function SettingsScreen() {
             <>
               {/* User Profile Card */}
               <TouchableOpacity
-                className={`${isDark ? 'bg-card-dark' : 'bg-white'} ${isTablet ? 'mx-8' : 'mx-4'} rounded-2xl shadow mb-4 ${
-                  isTablet ? 'p-6' : 'p-4'
-                }`}
+                className={`${isDark ? 'bg-card-dark' : 'bg-white'} ${
+                  isTablet ? 'mx-8' : 'mx-4'
+                } rounded-2xl shadow mb-4 ${isTablet ? 'p-6' : 'p-4'}`}
                 onPress={() => router.push('/settings/personal-details')}
               >
                 <View className="flex-row items-center">
                   <AvatarUpload size={60} showActions={true} showIcon={!avatarUrl} />
                   <View className="ml-4 flex-1">
-                    <Text className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-black'}`}>{getUserDisplayData().name}</Text>
-                    <Text className={`${isDark ? 'text-gray-300' : 'text-gray-500'}`}>{getUserDisplayData().ageText}</Text>
+                    <Text
+                      className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-black'}`}
+                    >
+                      {getUserDisplayData().name}
+                    </Text>
+                    <Text className={`${isDark ? 'text-gray-300' : 'text-gray-500'}`}>
+                      {getUserDisplayData().ageText}
+                    </Text>
                   </View>
                 </View>
               </TouchableOpacity>
 
               {/* Subscription Section */}
               {!isSubscribed && !isInGracePeriod && (
-                <PremiumGradientBackground 
-                  className={`${isTablet ? 'mx-8' : 'mx-4'} rounded-2xl shadow mb-4 overflow-hidden`}
+                <PremiumGradientBackground
+                  className={`${
+                    isTablet ? 'mx-8' : 'mx-4'
+                  } rounded-2xl shadow mb-4 overflow-hidden`}
                 >
                   <TouchableOpacity
                     className={`${isTablet ? 'p-6' : 'p-4'}`}
@@ -269,8 +277,12 @@ export default function SettingsScreen() {
                         <Crown size={26} color="white" />
                       </View>
                       <View className="flex-1">
-                        <Text className="text-white text-xl font-bold mb-1">Upgrade to Premium</Text>
-                        <Text className="text-white/90 text-sm">Unlock all features & get personalized insights</Text>
+                        <Text className="text-white text-xl font-bold mb-1">
+                          Upgrade to Premium
+                        </Text>
+                        <Text className="text-white/90 text-sm">
+                          Unlock all features & get personalized insights
+                        </Text>
                       </View>
                       <View className="items-center">
                         <Sparkles size={24} color="white" className="mb-1" />
@@ -285,26 +297,30 @@ export default function SettingsScreen() {
               {(isSubscribed || isInGracePeriod) && (
                 <View
                   className={`${
-                    isDark 
-                      ? 'bg-emerald-900/30 border border-emerald-700/50' 
+                    isDark
+                      ? 'bg-emerald-900/30 border border-emerald-700/50'
                       : 'bg-emerald-50 border border-emerald-200'
-                  } ${
-                    isTablet ? 'mx-8' : 'mx-4'
-                  } rounded-2xl mb-4 ${isTablet ? 'p-6' : 'p-4'}`}
+                  } ${isTablet ? 'mx-8' : 'mx-4'} rounded-2xl mb-4 ${isTablet ? 'p-6' : 'p-4'}`}
                 >
                   <View className="flex-row items-center">
-                    <View className={`w-14 h-14 rounded-full items-center justify-center mr-4 ${
-                      isDark ? 'bg-emerald-800/50' : 'bg-emerald-100'
-                    }`}>
+                    <View
+                      className={`w-14 h-14 rounded-full items-center justify-center mr-4 ${
+                        isDark ? 'bg-emerald-800/50' : 'bg-emerald-100'
+                      }`}
+                    >
                       <Crown size={26} color={isDark ? '#10B981' : '#059669'} />
                     </View>
                     <View className="flex-1">
-                      <Text className={`text-xl font-bold mb-1 ${
-                        isDark ? 'text-emerald-200' : 'text-emerald-800'
-                      }`}>Premium Active</Text>
-                      <Text className={`text-sm ${
-                        isDark ? 'text-emerald-300' : 'text-emerald-600'
-                      }`}>
+                      <Text
+                        className={`text-xl font-bold mb-1 ${
+                          isDark ? 'text-emerald-200' : 'text-emerald-800'
+                        }`}
+                      >
+                        Premium Active
+                      </Text>
+                      <Text
+                        className={`text-sm ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}
+                      >
                         {isInGracePeriod
                           ? 'Grace period - enjoy all features'
                           : 'All features unlocked'}
@@ -359,7 +375,11 @@ export default function SettingsScreen() {
               {/* <View className="mx-4 mt-3">
                 <Text className="text-lg font-semibold text-black mb-3">Wellness</Text>
               </View> */}
-              <View className={`${isDark ? 'bg-card-dark' : 'bg-white'} ${isTablet ? 'mx-8' : 'mx-4'} rounded-2xl shadow mb-4`}>
+              <View
+                className={`${isDark ? 'bg-card-dark' : 'bg-white'} ${
+                  isTablet ? 'mx-8' : 'mx-4'
+                } rounded-2xl shadow mb-4`}
+              >
                 <SettingsItem
                   icon={Target}
                   label="Fitness goals"
@@ -379,7 +399,11 @@ export default function SettingsScreen() {
               </View>
 
               {/* Support Section */}
-              <View className={`${isDark ? 'bg-card-dark' : 'bg-white'} ${isTablet ? 'mx-8' : 'mx-4'} rounded-2xl shadow mb-4`}>
+              <View
+                className={`${isDark ? 'bg-card-dark' : 'bg-white'} ${
+                  isTablet ? 'mx-8' : 'mx-4'
+                } rounded-2xl shadow mb-4`}
+              >
                 <SettingsItem
                   icon={Brain}
                   label="How Luna works"
@@ -427,7 +451,11 @@ export default function SettingsScreen() {
               {/* <View className="mx-4 mt-3 mb-8">
                 <Text className="text-lg font-semibold text-black mb-3">Legal & Account</Text>
               </View> */}
-              <View className={`${isDark ? 'bg-card-dark' : 'bg-white'} ${isTablet ? 'mx-8' : 'mx-4'} rounded-2xl shadow`}>
+              <View
+                className={`${isDark ? 'bg-card-dark' : 'bg-white'} ${
+                  isTablet ? 'mx-8' : 'mx-4'
+                } rounded-2xl shadow`}
+              >
                 <SettingsItem
                   icon={FileText}
                   label="Terms"
@@ -481,12 +509,18 @@ function SettingsItem({
   return (
     <Pressable
       className={`flex-row items-center ${isTablet ? 'p-6' : 'p-4'} ${
-        !isLast && `border-b ${isDark ? 'border-gray-700' : 'border-gray-100'}`
+        !isLast && `border-b ${isDark ? '' : 'border-gray-100'}`
       }`}
       onPress={onPress}
     >
       <Icon size={isTablet ? 24 : 20} color={isDark ? '#F9FAFB' : 'black'} />
-      <Text className={`${isTablet ? 'text-xl' : 'text-lg'} ${isDark ? 'text-white' : 'text-black'} ${textClassName} ml-2`}>{label}</Text>
+      <Text
+        className={`${isTablet ? 'text-xl' : 'text-lg'} ${
+          isDark ? 'text-white' : 'text-black'
+        } ${textClassName} ml-2`}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }

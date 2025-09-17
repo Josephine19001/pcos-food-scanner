@@ -8,6 +8,8 @@ import { supabase } from '@/lib/supabase/client';
 import { Exercise } from '@/data/exercisesData';
 import { Dropdown, DropdownOption } from '@/components/ui/dropdown';
 import { IconDropdown } from '@/components/ui/icon-dropdown';
+import { useThemedStyles } from '@/lib/utils/theme';
+import { useTheme } from '@/context/theme-provider';
 import {
   MUSCLE_GROUPS,
   EQUIPMENT_OPTIONS,
@@ -36,6 +38,9 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
   const [newExerciseCaloriesPerMinute, setNewExerciseCaloriesPerMinute] = useState('5');
   const [newExerciseInstructions, setNewExerciseInstructions] = useState('');
   const [shareWithCommunity, setShareWithCommunity] = useState(false);
+
+  const themed = useThemedStyles();
+  const { isDark } = useTheme();
 
   // Convert constants to dropdown options
   const categoryOptions: DropdownOption[] = EXERCISE_CATEGORIES.map((cat) => ({
@@ -83,7 +88,7 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
         name: newExerciseName.trim(),
         category: newExerciseType.trim(),
         icon: newExerciseIcon,
-        color: '#EC4899',
+        color: '#8B5CF6',
         metrics: {
           primary: 'time',
           units: {
@@ -149,26 +154,45 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
 
   return (
     <Modal visible={visible} transparent={false} animationType="slide" onRequestClose={handleClose}>
-      <View className="flex-1 bg-white">
+      <View className={themed('flex-1 bg-white', 'flex-1 bg-gray-900')}>
         <View className="flex-1 p-6 pt-16">
           <View className="flex-row items-center justify-between mb-6">
-            <Text className="text-xl font-semibold text-black">Create New Exercise</Text>
+            <Text
+              className={themed(
+                'text-xl font-semibold text-black',
+                'text-xl font-semibold text-white'
+              )}
+            >
+              Create New Exercise
+            </Text>
             <TouchableOpacity onPress={handleClose}>
-              <X size={24} color="#6B7280" />
+              <X size={24} color={isDark ? '#9CA3AF' : '#6B7280'} />
             </TouchableOpacity>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
             {/* Exercise Name */}
             <View className="mb-4">
-              <Text className="text-base font-medium text-black mb-2">Exercise Name *</Text>
-              <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <Text
+                className={themed(
+                  'text-base font-medium text-black mb-2',
+                  'text-base font-medium text-white mb-2'
+                )}
+              >
+                Exercise Name *
+              </Text>
+              <View
+                className={themed(
+                  'bg-gray-50 rounded-xl p-4 border border-gray-200',
+                  'bg-gray-800 rounded-xl p-4 border border-gray-600'
+                )}
+              >
                 <TextInput
                   value={newExerciseName}
                   onChangeText={setNewExerciseName}
                   placeholder="e.g., Push-ups, Pilates, Boxing"
-                  className="text-base text-black"
-                  placeholderTextColor="#9CA3AF"
+                  className={themed('text-base text-black', 'text-base text-white')}
+                  placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
                 />
               </View>
             </View>
@@ -217,15 +241,30 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
               </View>
 
               <View className="flex-1">
-                <Text className="text-base font-medium text-black mb-2">Calories/Min</Text>
-                <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <Text
+                  className={themed(
+                    'text-base font-medium text-black mb-2',
+                    'text-base font-medium text-white mb-2'
+                  )}
+                >
+                  Calories/Min
+                </Text>
+                <View
+                  className={themed(
+                    'bg-gray-50 rounded-xl p-4 border border-gray-200',
+                    'bg-gray-800 rounded-xl p-4 border border-gray-600'
+                  )}
+                >
                   <TextInput
                     value={newExerciseCaloriesPerMinute}
                     onChangeText={setNewExerciseCaloriesPerMinute}
                     placeholder="5"
                     keyboardType="numeric"
-                    className="text-base text-black text-center"
-                    placeholderTextColor="#9CA3AF"
+                    className={themed(
+                      'text-base text-black text-center',
+                      'text-base text-white text-center'
+                    )}
+                    placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
                   />
                 </View>
               </View>
@@ -233,14 +272,26 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
 
             {/* Instructions */}
             <View className="mb-6">
-              <Text className="text-base font-medium text-black mb-2">Instructions (Optional)</Text>
-              <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <Text
+                className={themed(
+                  'text-base font-medium text-black mb-2',
+                  'text-base font-medium text-white mb-2'
+                )}
+              >
+                Instructions (Optional)
+              </Text>
+              <View
+                className={themed(
+                  'bg-gray-50 rounded-xl p-4 border border-gray-200',
+                  'bg-gray-800 rounded-xl p-4 border border-gray-600'
+                )}
+              >
                 <TextInput
                   value={newExerciseInstructions}
                   onChangeText={setNewExerciseInstructions}
                   placeholder="Describe how to perform this exercise..."
-                  className="text-base text-black"
-                  placeholderTextColor="#9CA3AF"
+                  className={themed('text-base text-black', 'text-base text-white')}
+                  placeholderTextColor={isDark ? '#6B7280' : '#9CA3AF'}
                   multiline
                   numberOfLines={3}
                   textAlignVertical="top"
@@ -250,20 +301,36 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
           </ScrollView>
 
           {/* Fixed Bottom Section */}
-          <View className="pt-4 border-t border-gray-100">
+          <View className={themed('pt-4 border-t border-gray-100', 'pt-4 border-t ')}>
             {/* Share with Community Option */}
             <TouchableOpacity
               onPress={() => setShareWithCommunity(!shareWithCommunity)}
-              className={`rounded-2xl p-4 border mb-4 ${
-                shareWithCommunity ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
-              }`}
+              className={themed(
+                `rounded-2xl p-4 border mb-4 ${
+                  shareWithCommunity ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
+                }`,
+                `rounded-2xl p-4 border mb-4 ${
+                  shareWithCommunity
+                    ? 'bg-purple-900/30 border-purple-600'
+                    : 'bg-gray-800 border-gray-600'
+                }`
+              )}
               activeOpacity={0.8}
             >
               <View className="flex-row items-center">
                 <View
-                  className={`w-6 h-6 rounded-full border mr-4 items-center justify-center ${
-                    shareWithCommunity ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'
-                  }`}
+                  className={themed(
+                    `w-6 h-6 rounded-full border mr-4 items-center justify-center ${
+                      shareWithCommunity
+                        ? 'bg-blue-500 border-blue-500'
+                        : 'bg-white border-gray-300'
+                    }`,
+                    `w-6 h-6 rounded-full border mr-4 items-center justify-center ${
+                      shareWithCommunity
+                        ? 'bg-purple-600 border-purple-600'
+                        : 'bg-gray-700 border-gray-500'
+                    }`
+                  )}
                 >
                   {shareWithCommunity && <Check size={14} color="white" />}
                 </View>
@@ -271,22 +338,42 @@ export const CreateExerciseModal: React.FC<CreateExerciseModalProps> = ({
                   <View className="flex-row items-center mb-1">
                     <Globe size={24} color="#10B981" />
                     <Text
-                      className={`text-base font-semibold ml-2 ${
-                        shareWithCommunity ? 'text-blue-900' : 'text-gray-900'
-                      }`}
+                      className={themed(
+                        `text-base font-semibold ml-2 ${
+                          shareWithCommunity ? 'text-blue-900' : 'text-gray-900'
+                        }`,
+                        `text-base font-semibold ml-2 ${
+                          shareWithCommunity ? 'text-purple-300' : 'text-white'
+                        }`
+                      )}
                     >
                       Share with Community
                     </Text>
                   </View>
                   <Text
-                    className={`text-sm ${shareWithCommunity ? 'text-blue-700' : 'text-gray-600'}`}
+                    className={themed(
+                      `text-sm ${shareWithCommunity ? 'text-blue-700' : 'text-gray-600'}`,
+                      `text-sm ${shareWithCommunity ? 'text-purple-400' : 'text-gray-400'}`
+                    )}
                   >
                     Contribute this exercise to our community database for everyone to use
                   </Text>
                 </View>
                 {shareWithCommunity && (
-                  <View className="bg-blue-100 px-3 py-1 rounded-full ml-2">
-                    <Text className="text-blue-800 text-xs font-medium">Active</Text>
+                  <View
+                    className={themed(
+                      'bg-blue-100 px-3 py-1 rounded-full ml-2',
+                      'bg-purple-900/30 px-3 py-1 rounded-full ml-2'
+                    )}
+                  >
+                    <Text
+                      className={themed(
+                        'text-blue-800 text-xs font-medium',
+                        'text-purple-300 text-xs font-medium'
+                      )}
+                    >
+                      Active
+                    </Text>
                   </View>
                 )}
               </View>

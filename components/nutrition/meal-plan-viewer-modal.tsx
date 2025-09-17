@@ -80,7 +80,7 @@ export default function MealPlanViewerModal({
             key={index}
             className={themed(
               'flex-row items-center justify-between py-2 border-b border-gray-200',
-              'flex-row items-center justify-between py-2 border-b border-gray-700'
+              'flex-row items-center justify-between py-2 border-b '
             )}
           >
             <View className="flex-1">
@@ -105,7 +105,7 @@ export default function MealPlanViewerModal({
         <View
           className={themed(
             'bg-white border-b border-gray-200 pt-12 pb-4 px-4',
-            'bg-gray-900 border-b border-gray-700 pt-12 pb-4 px-4'
+            'bg-gray-900 border-b  pt-12 pb-4 px-4'
           )}
         >
           <View className="flex-row items-center justify-between">
@@ -188,7 +188,7 @@ export default function MealPlanViewerModal({
                       onPress={() => toggleDay(dayIndex)}
                       className={themed(
                         'bg-white rounded-xl p-4 mb-2 border border-gray-100 shadow-sm',
-                        'bg-gray-800 rounded-xl p-4 mb-2 border border-gray-700 shadow-sm'
+                        'bg-gray-800 rounded-xl p-4 mb-2  shadow-sm'
                       )}
                       activeOpacity={0.7}
                     >
@@ -331,7 +331,7 @@ export default function MealPlanViewerModal({
 
         {/* Regenerate Button */}
         {onRegeneratePlan && (
-          <View className={themed('p-4 border-t border-gray-200', 'p-4 border-t border-gray-700')}>
+          <View className={themed('p-4 border-t border-gray-200', 'p-4 border-t ')}>
             <TouchableOpacity
               onPress={() => {
                 onRegeneratePlan();

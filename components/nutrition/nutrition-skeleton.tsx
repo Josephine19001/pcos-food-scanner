@@ -12,7 +12,7 @@ export const CaloriesSummaryCardSkeleton = () => {
     <View className="px-4 mb-6">
       <View
         className={`${isDark ? 'bg-gray-900' : 'bg-white'} rounded-2xl p-4 ${
-          isDark ? 'border border-gray-700' : 'border border-gray-100'
+          isDark ? '' : 'border border-gray-100'
         }`}
       >
         {/* Main content */}
@@ -40,7 +40,7 @@ export const CaloriesSummaryCardSkeleton = () => {
         </View>
 
         {/* Meal Breakdown */}
-        <View className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-100'} pt-4`}>
+        <View className={`border-t ${isDark ? '' : 'border-gray-100'} pt-4`}>
           <View className="flex-row justify-between">
             {Array.from({ length: 4 }).map((_, index) => (
               <View key={index} className="items-center">
@@ -63,7 +63,7 @@ const IndividualMacroCardSkeleton = () => {
   return (
     <View
       className={`${
-        isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
+        isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100'
       } rounded-2xl p-4 border mb-4`}
     >
       <View className="flex-row items-center justify-between">
@@ -106,9 +106,7 @@ export const WaterIntakeCardSkeleton = () => {
   return (
     <View className="px-4 mb-6">
       <View
-        className={`${
-          isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
-        } rounded-2xl p-4 border`}
+        className={`${isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100'} rounded-2xl p-4 border`}
       >
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">
@@ -136,7 +134,7 @@ const MealCardSkeleton = ({ isAnalyzing = false }: { isAnalyzing?: boolean }) =>
   return (
     <View
       className={`${
-        isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'
+        isDark ? 'bg-gray-900 ' : 'bg-white border-gray-100'
       } rounded-2xl p-4 mb-3 border`}
     >
       <View className="flex-row items-center justify-between mb-3">
@@ -159,7 +157,7 @@ const MealCardSkeleton = ({ isAnalyzing = false }: { isAnalyzing?: boolean }) =>
       {/* Nutrition breakdown - always show for regular meals */}
       <View
         className={`flex-row justify-between items-center pt-3 border-t ${
-          isDark ? 'border-gray-700' : 'border-gray-50'
+          isDark ? '' : 'border-gray-50'
         }`}
       >
         {Array.from({ length: 4 }).map((_, index) => (

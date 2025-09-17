@@ -60,18 +60,30 @@ export function IconDropdown({
 
   return (
     <View className="mb-4">
-      {label && <Text className={themed("text-base font-medium text-black mb-2", "text-base font-medium text-white mb-2")}>{label}</Text>}
+      {label && (
+        <Text
+          className={themed(
+            'text-base font-medium text-black mb-2',
+            'text-base font-medium text-white mb-2'
+          )}
+        >
+          {label}
+        </Text>
+      )}
 
       <TouchableOpacity
         onPress={() => !disabled && setIsOpen(true)}
         disabled={disabled}
-        className={themed(`
+        className={themed(
+          `
           bg-white rounded-2xl p-5 border border-gray-100 shadow-sm
           ${disabled ? 'opacity-50' : ''}
-        `, `
-          bg-gray-800 rounded-2xl p-5 border border-gray-700 shadow-sm
+        `,
+          `
+          bg-gray-800 rounded-2xl p-5  shadow-sm
           ${disabled ? 'opacity-50' : ''}
-        `)}
+        `
+        )}
         style={{
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
@@ -82,7 +94,14 @@ export function IconDropdown({
       >
         <View className="flex-row items-center">
           <SelectedIcon size={22} color={colors.isDark ? '#F472B6' : '#EC4899'} />
-          <Text className={themed("text-base text-black ml-3 font-medium", "text-base text-white ml-3 font-medium")}>{value}</Text>
+          <Text
+            className={themed(
+              'text-base text-black ml-3 font-medium',
+              'text-base text-white ml-3 font-medium'
+            )}
+          >
+            {value}
+          </Text>
         </View>
       </TouchableOpacity>
 
@@ -98,7 +117,10 @@ export function IconDropdown({
           onPress={() => setIsOpen(false)}
         >
           <View
-            className={themed("bg-white rounded-3xl mx-4 max-h-96 min-w-80", "bg-gray-800 rounded-3xl mx-4 max-h-96 min-w-80")}
+            className={themed(
+              'bg-white rounded-3xl mx-4 max-h-96 min-w-80',
+              'bg-gray-800 rounded-3xl mx-4 max-h-96 min-w-80'
+            )}
             style={{
               shadowColor: '#EC4899',
               shadowOffset: { width: 0, height: 8 },
@@ -107,8 +129,12 @@ export function IconDropdown({
               elevation: 12,
             }}
           >
-            <View className={themed("p-6 border-b border-gray-50", "p-6 border-b border-gray-700")}>
-              <Text className={themed("text-xl font-bold text-black", "text-xl font-bold text-white")}>Select Icon</Text>
+            <View className={themed('p-6 border-b border-gray-50', 'p-6 border-b ')}>
+              <Text
+                className={themed('text-xl font-bold text-black', 'text-xl font-bold text-white')}
+              >
+                Select Icon
+              </Text>
             </View>
 
             <FlatList
@@ -128,13 +154,16 @@ export function IconDropdown({
                       onSelect(item);
                       setIsOpen(false);
                     }}
-                    className={themed(`
+                    className={themed(
+                      `
                       flex-1 p-4 m-2 rounded-2xl items-center justify-center min-h-20
                       ${isSelected ? 'bg-pink-50 border-2 border-pink-300' : 'bg-gray-50'}
-                    `, `
+                    `,
+                      `
                       flex-1 p-4 m-2 rounded-2xl items-center justify-center min-h-20
                       ${isSelected ? 'bg-pink-900/20 border-2 border-pink-600' : 'bg-gray-700'}
-                    `)}
+                    `
+                    )}
                     style={{
                       shadowColor: isSelected ? '#EC4899' : '#000',
                       shadowOffset: { width: 0, height: 2 },
@@ -143,20 +172,33 @@ export function IconDropdown({
                       elevation: isSelected ? 4 : 1,
                     }}
                   >
-                    <IconComponent size={26} color={isSelected ? (colors.isDark ? '#F472B6' : '#EC4899') : colors.gray[500]} />
+                    <IconComponent
+                      size={26}
+                      color={
+                        isSelected ? (colors.isDark ? '#F472B6' : '#EC4899') : colors.gray[500]
+                      }
+                    />
                     <Text
-                      className={themed(`text-xs mt-2 text-center font-medium ${
-                        isSelected ? 'text-pink-600' : 'text-gray-600'
-                      }`, `text-xs mt-2 text-center font-medium ${
-                        isSelected ? 'text-pink-400' : 'text-gray-300'
-                      }`)}
+                      className={themed(
+                        `text-xs mt-2 text-center font-medium ${
+                          isSelected ? 'text-pink-600' : 'text-gray-600'
+                        }`,
+                        `text-xs mt-2 text-center font-medium ${
+                          isSelected ? 'text-pink-400' : 'text-gray-300'
+                        }`
+                      )}
                       numberOfLines={1}
                     >
                       {item}
                     </Text>
                     {isSelected && (
                       <View className="absolute -top-1 -right-1">
-                        <View className={themed("bg-pink-500 rounded-full w-5 h-5 items-center justify-center", "bg-pink-600 rounded-full w-5 h-5 items-center justify-center")}>
+                        <View
+                          className={themed(
+                            'bg-pink-500 rounded-full w-5 h-5 items-center justify-center',
+                            'bg-pink-600 rounded-full w-5 h-5 items-center justify-center'
+                          )}
+                        >
                           <Check size={12} color="#FFFFFF" />
                         </View>
                       </View>
@@ -169,7 +211,10 @@ export function IconDropdown({
             <View className="p-6">
               <TouchableOpacity
                 onPress={() => setIsOpen(false)}
-                className={themed("bg-pink-500 rounded-2xl p-4 items-center", "bg-pink-600 rounded-2xl p-4 items-center")}
+                className={themed(
+                  'bg-pink-500 rounded-2xl p-4 items-center',
+                  'bg-pink-600 rounded-2xl p-4 items-center'
+                )}
                 style={{
                   shadowColor: '#EC4899',
                   shadowOffset: { width: 0, height: 4 },

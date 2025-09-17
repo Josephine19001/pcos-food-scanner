@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import {  Beef, Wheat } from 'lucide-react-native';
+import { Beef, Wheat } from 'lucide-react-native';
 import { OliveOilIcon } from '@/components/icons/olive-oil-icon';
 import { MacroBreakdownSkeleton } from './nutrition-skeleton';
 import { useThemedStyles } from '@/lib/utils/theme';
@@ -38,7 +38,12 @@ const MacroCard = ({
   const remaining = target - consumed;
 
   return (
-    <View className={themed("bg-white rounded-2xl p-4 border border-gray-100", "bg-gray-900 rounded-2xl p-4 border border-gray-700")}>
+    <View
+      className={themed(
+        'bg-white rounded-2xl p-4 border border-gray-100',
+        'bg-gray-900 rounded-2xl p-4 '
+      )}
+    >
       {/* Top - Icon and progress circle */}
       <View className="items-center mb-3">
         <CircularProgress
@@ -54,10 +59,13 @@ const MacroCard = ({
         >
           <View
             className="w-7 h-7 rounded-full items-center justify-center"
-            style={{ 
-              backgroundColor: isDark 
-                ? `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.2)` 
-                : `${color}20` 
+            style={{
+              backgroundColor: isDark
+                ? `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(
+                    color.slice(3, 5),
+                    16
+                  )}, ${parseInt(color.slice(5, 7), 16)}, 0.2)`
+                : `${color}20`,
             }}
           >
             {icon === OliveOilIcon ? (
@@ -72,17 +80,29 @@ const MacroCard = ({
       {/* Bottom - Text content */}
       <View className="items-center">
         <View className="flex-row items-baseline mb-1">
-          <Text className={themed("text-xl font-bold text-gray-900", "text-xl font-bold text-white")}>
+          <Text
+            className={themed('text-xl font-bold text-gray-900', 'text-xl font-bold text-white')}
+          >
             {remaining}
           </Text>
-          <Text className={themed("text-sm font-medium text-gray-700", "text-sm font-medium text-gray-300")}>
+          <Text
+            className={themed(
+              'text-sm font-medium text-gray-700',
+              'text-sm font-medium text-gray-300'
+            )}
+          >
             {unit}
           </Text>
         </View>
-        <Text className={themed("text-xs text-gray-600 text-center", "text-xs text-gray-400 text-center")}>
+        <Text
+          className={themed(
+            'text-xs text-gray-600 text-center',
+            'text-xs text-gray-400 text-center'
+          )}
+        >
           {title} left
         </Text>
-        <Text className={themed("text-xs text-gray-500", "text-xs text-gray-400")}>
+        <Text className={themed('text-xs text-gray-500', 'text-xs text-gray-400')}>
           {Math.round((consumed / target) * 100)}%
         </Text>
       </View>

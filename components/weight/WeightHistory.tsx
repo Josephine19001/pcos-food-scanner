@@ -20,14 +20,20 @@ export function WeightHistory({
   return (
     <View className="px-4 mb-4">
       <View className="flex-row justify-between items-center mb-3">
-        <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Recent Entries</Text>
+        <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          Recent Entries
+        </Text>
         <View className="flex-row gap-2">
           <Pressable
             onPress={onShowAllEntries}
-            className={`flex-row items-center rounded-xl px-3 py-2 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+            className={`flex-row items-center rounded-xl px-3 py-2 ${
+              isDark ? 'bg-gray-700' : 'bg-gray-100'
+            }`}
           >
             <History size={14} color={isDark ? '#9ca3af' : '#6b7280'} />
-            <Text className={`font-medium ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>See All</Text>
+            <Text className={`font-medium ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              See All
+            </Text>
           </Pressable>
           <Pressable
             onPress={onShowAddEntry}
@@ -39,10 +45,15 @@ export function WeightHistory({
         </View>
       </View>
 
-      <View className={`rounded-2xl shadow-sm overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+      <View
+        className={`rounded-2xl shadow-sm overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+      >
         {weightHistory && weightHistory.length > 0 ? (
           weightHistory.slice(-4).map((entry, index) => (
-            <View key={entry.id} className={`p-4 ${index < 3 ? `border-b ${isDark ? 'border-gray-700' : 'border-gray-100'}` : ''}`}>
+            <View
+              key={entry.id}
+              className={`p-4 ${index < 3 ? `border-b ${isDark ? '' : 'border-gray-100'}` : ''}`}
+            >
               <View className="flex-row justify-between items-center">
                 <View className="flex-1">
                   <Text className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -51,13 +62,19 @@ export function WeightHistory({
                   <Text className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                     {new Date(entry.measured_at).toLocaleDateString()}
                   </Text>
-                  {entry.note && <Text className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{entry.note}</Text>}
+                  {entry.note && (
+                    <Text className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {entry.note}
+                    </Text>
+                  )}
                 </View>
 
                 {index < 3 && weightHistory.length > index + 1 && (
                   <View className="ml-4">
                     {entry.weight < weightHistory[index + 1].weight ? (
-                      <View className={`p-2 rounded-full ${isDark ? 'bg-green-900' : 'bg-green-100'}`}>
+                      <View
+                        className={`p-2 rounded-full ${isDark ? 'bg-green-900' : 'bg-green-100'}`}
+                      >
                         <TrendingDown size={14} color="#22c55e" />
                       </View>
                     ) : entry.weight > weightHistory[index + 1].weight ? (
@@ -65,8 +82,12 @@ export function WeightHistory({
                         <TrendingUp size={14} color="#ef4444" />
                       </View>
                     ) : (
-                      <View className={`p-2 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                        <View className={`w-3 h-0.5 rounded ${isDark ? 'bg-gray-500' : 'bg-gray-400'}`} />
+                      <View
+                        className={`p-2 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
+                      >
+                        <View
+                          className={`w-3 h-0.5 rounded ${isDark ? 'bg-gray-500' : 'bg-gray-400'}`}
+                        />
                       </View>
                     )}
                   </View>
@@ -76,8 +97,12 @@ export function WeightHistory({
           ))
         ) : (
           <View className="p-8">
-            <Text className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>No weight entries yet</Text>
-            <Text className={`text-sm text-center mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            <Text className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              No weight entries yet
+            </Text>
+            <Text
+              className={`text-sm text-center mt-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
+            >
               Add your first weight entry to start tracking
             </Text>
           </View>

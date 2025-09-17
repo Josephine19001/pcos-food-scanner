@@ -167,7 +167,7 @@ export default function ExerciseScreen() {
         />
       </ScrollView>
 
-      {generatedPlan && (
+      {showWeeklyPlan && generatedPlan && (
         <WeeklyPlanDisplay
           plan={generatedPlan}
           onClose={() => {

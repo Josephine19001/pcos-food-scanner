@@ -18,11 +18,11 @@ export default function EditPeriodScreen() {
   // Convert date strings to period dates array
   const initialPeriodDates = React.useMemo(() => {
     const dates: string[] = [];
-    
+
     if (startDateParam) {
       const startDate = new Date(startDateParam);
       const endDate = endDateParam ? new Date(endDateParam) : null;
-      
+
       // Generate all dates between start and end (inclusive)
       const current = new Date(startDate);
       while (endDate ? current <= endDate : current.toDateString() === startDate.toDateString()) {
@@ -31,7 +31,7 @@ export default function EditPeriodScreen() {
         current.setDate(current.getDate() + 1);
       }
     }
-    
+
     return dates;
   }, [startDateParam, endDateParam]);
 
@@ -43,11 +43,11 @@ export default function EditPeriodScreen() {
 
   const handleDateToggle = React.useCallback((date: Date, isPeriodDate: boolean) => {
     const dateString = getLocalDateString(date);
-    
-    setPeriodDates(currentDates => {
+
+    setPeriodDates((currentDates) => {
       if (isPeriodDate) {
         // Remove date from period dates
-        return currentDates.filter(d => d !== dateString);
+        return currentDates.filter((d) => d !== dateString);
       } else {
         // Add date to period dates
         return [...currentDates, dateString].sort();
@@ -75,7 +75,7 @@ export default function EditPeriodScreen() {
       for (let i = 0; i < periodDates.length; i++) {
         const dateString = periodDates[i];
         const isStartDay = i === 0; // First date is start day
-        
+
         await new Promise((resolve, reject) => {
           logPeriodData.mutate(
             {
@@ -109,7 +109,7 @@ export default function EditPeriodScreen() {
 
   const hasChanges = () => {
     if (periodDates.length !== initialPeriodDates.length) return true;
-    return !periodDates.every(date => initialPeriodDates.includes(date));
+    return !periodDates.every((date) => initialPeriodDates.includes(date));
   };
 
   return (
@@ -120,23 +120,40 @@ export default function EditPeriodScreen() {
           onPress={handleSave}
           disabled={isSaving || !hasChanges()}
           className={`w-10 h-10 items-center justify-center rounded-full ${
-            isSaving || !hasChanges() 
-              ? (isDark ? 'bg-gray-700' : 'bg-gray-200')
-              : (isDark ? 'bg-pink-600' : 'bg-pink-50 border border-pink-200')
+            isSaving || !hasChanges()
+              ? isDark
+                ? 'bg-gray-700'
+                : 'bg-gray-200'
+              : isDark
+              ? 'bg-pink-600'
+              : 'bg-pink-50 border border-pink-200'
           }`}
         >
-          <Save size={20} color={
-            isSaving || !hasChanges()
-              ? (isDark ? '#6B7280' : '#9CA3AF')
-              : (isDark ? '#fff' : '#EC4899')
-          } />
+          <Save
+            size={20}
+            color={
+              isSaving || !hasChanges()
+                ? isDark
+                  ? '#6B7280'
+                  : '#9CA3AF'
+                : isDark
+                ? '#fff'
+                : '#EC4899'
+            }
+          />
         </TouchableOpacity>
       }
     >
       <View className="flex-1">
         {/* Instructions */}
-        <View className={`px-4 py-3 ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'} border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-          <Text className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-800'} text-center mb-1`}>
+        <View
+          className={`px-4 py-3 ${isDark ? 'bg-blue-900/20' : 'bg-blue-50'} border-b ${
+            isDark ? '' : 'border-gray-200'
+          }`}
+        >
+          <Text
+            className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-800'} text-center mb-1`}
+          >
             Tap dates to add or remove them from your period
           </Text>
           <Text className={`text-xs ${isDark ? 'text-blue-400' : 'text-blue-700'} text-center`}>
@@ -154,21 +171,33 @@ export default function EditPeriodScreen() {
         />
 
         {/* Save Button */}
-        <View className={`px-4 py-4 ${isDark ? 'bg-gray-800' : 'bg-white'} border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+        <View
+          className={`px-4 py-4 ${isDark ? 'bg-gray-800' : 'bg-white'} border-t ${
+            isDark ? '' : 'border-gray-200'
+          }`}
+        >
           <TouchableOpacity
             onPress={handleSave}
             disabled={isSaving || !hasChanges()}
             className={`py-3 rounded-xl ${
               isSaving || !hasChanges()
-                ? (isDark ? 'bg-gray-700' : 'bg-gray-300')
-                : (isDark ? 'bg-pink-600' : 'bg-pink-500')
+                ? isDark
+                  ? 'bg-gray-700'
+                  : 'bg-gray-300'
+                : isDark
+                ? 'bg-pink-600'
+                : 'bg-pink-500'
             }`}
           >
-            <Text className={`text-center font-medium ${
-              isSaving || !hasChanges()
-                ? (isDark ? 'text-gray-500' : 'text-gray-500')
-                : 'text-white'
-            }`}>
+            <Text
+              className={`text-center font-medium ${
+                isSaving || !hasChanges()
+                  ? isDark
+                    ? 'text-gray-500'
+                    : 'text-gray-500'
+                  : 'text-white'
+              }`}
+            >
               {isSaving ? 'Saving...' : hasChanges() ? 'Save Changes' : 'No Changes'}
             </Text>
           </TouchableOpacity>
