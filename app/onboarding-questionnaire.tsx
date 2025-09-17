@@ -9,11 +9,7 @@ import { validateOnboardingData } from '@/lib/utils/onboarding-validators';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
 
-// Commented out chat onboarding - using questionnaire instead
-// import { ChatOnboarding } from '@/components/onboarding/chat-onboarding';
-// import { useThemedStyles } from '@/lib/utils/theme';
-
-export default function OnboardingScreen() {
+export default function OnboardingQuestionnaireScreen() {
   const router = useRouter();
   const { setOnboardingData, completeOnboarding } = useOnboardingStorage();
 

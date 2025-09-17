@@ -97,3 +97,26 @@ export function updateOnboardingData(
 
   return newData;
 }
+
+/**
+ * Maps questionnaire responses to OnboardingData format
+ * Used for the alternative questionnaire-based onboarding flow
+ */
+export function mapQuestionnaireDataToOnboarding(
+  questionnaireData: Record<string, string | string[]>
+): Partial<OnboardingData> {
+  const onboardingData: Partial<OnboardingData> = {};
+
+  // Process each questionnaire response using the existing mapper logic
+  for (const [questionId, answer] of Object.entries(questionnaireData)) {
+    if (answer !== null && answer !== undefined && answer !== '') {
+      // Convert questionnaire responses to the chat format
+      const mappedData = updateOnboardingData(onboardingData, questionId, 
+        Array.isArray(answer) ? answer : String(answer)
+      );
+      Object.assign(onboardingData, mappedData);
+    }
+  }
+
+  return onboardingData;
+}

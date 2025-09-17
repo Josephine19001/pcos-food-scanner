@@ -111,3 +111,37 @@ export function getValidationError(
   
   return null; // Valid response
 }
+
+/**
+ * Validates questionnaire onboarding data format
+ */
+export function validateOnboardingData(data: any): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  // Required fields validation
+  if (!data.name || !data.name.trim()) {
+    errors.push('Name is required');
+  }
+  
+  if (!data.dateOfBirth) {
+    errors.push('Date of birth is required');
+  }
+  
+  // Basic data structure validation
+  if (data.cycleLength && (typeof data.cycleLength !== 'number' || data.cycleLength < 20 || data.cycleLength > 45)) {
+    errors.push('Invalid cycle length');
+  }
+  
+  if (data.height && (typeof data.height !== 'number' || data.height < 100 || data.height > 250)) {
+    errors.push('Invalid height');
+  }
+  
+  if (data.weight && (typeof data.weight !== 'number' || data.weight < 30 || data.weight > 300)) {
+    errors.push('Invalid weight');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}

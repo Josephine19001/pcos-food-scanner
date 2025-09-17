@@ -1,8 +1,9 @@
-import { View, ScrollView, Pressable, Modal, SafeAreaView } from 'react-native';
+import { View, ScrollView, Pressable, Modal, SafeAreaView, TextInput } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check } from 'lucide-react-native';
+import { ArrowLeft, Check, Calendar } from 'lucide-react-native';
 import { useTheme } from '@/context/theme-provider';
+import { useState } from 'react';
 
 export type QuestionnaireStep = {
   key: string;
@@ -14,6 +15,10 @@ export type QuestionnaireStep = {
     description: string;
     icon?: string;
   }>;
+  inputType?: 'text' | 'date';
+  placeholder?: string;
+  multiSelect?: boolean;
+  showIf?: { [key: string]: string };
 };
 
 export type QuestionnaireProps = {
@@ -21,19 +26,19 @@ export type QuestionnaireProps = {
   onClose: () => void;
   steps: QuestionnaireStep[];
   currentStepIndex: number;
-  selectedValues: Record<string, string | null>;
-  onSelectValue: (stepKey: string, value: string) => void;
+  selectedValues: Record<string, string | string[] | null>;
+  onSelectValue: (stepKey: string, value: string | string[]) => void;
   onNext: () => void;
   onBack: () => void;
   onComplete: () => void;
   progress: number;
   isGenerating: boolean;
   accentColor?: string;
+  onOpenDatePicker?: (stepKey: string) => void;
 };
 
 export default function Questionnaire({
   visible,
-  onClose,
   steps,
   currentStepIndex,
   selectedValues,
@@ -44,11 +49,14 @@ export default function Questionnaire({
   progress,
   isGenerating,
   accentColor = '#ec4899', // default pink-500
+  onOpenDatePicker,
 }: QuestionnaireProps) {
+  const [textInputs, setTextInputs] = useState<Record<string, string>>({});
   const currentStep = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
   const isComplete = currentStepIndex >= steps.length;
   const { theme } = useTheme();
+
 
   const handleNext = () => {
     if (isLastStep) {
@@ -58,13 +66,28 @@ export default function Questionnaire({
     }
   };
 
-  const renderOption = (option: any, stepKey: string) => {
-    const isSelected = selectedValues[stepKey] === option.value;
+  const renderOption = (option: any, stepKey: string, isMultiSelect = false) => {
+    const selectedValue = selectedValues[stepKey];
+    const isSelected = isMultiSelect 
+      ? Array.isArray(selectedValue) && selectedValue.includes(option.value)
+      : selectedValue === option.value;
+
+    const handlePress = () => {
+      if (isMultiSelect) {
+        const currentValues = Array.isArray(selectedValue) ? selectedValue : [];
+        const newValues = isSelected 
+          ? currentValues.filter(v => v !== option.value)
+          : [...currentValues, option.value];
+        onSelectValue(stepKey, newValues);
+      } else {
+        onSelectValue(stepKey, option.value);
+      }
+    };
 
     return (
       <Pressable
         key={option.value}
-        onPress={() => onSelectValue(stepKey, option.value)}
+        onPress={handlePress}
         className={`p-6 rounded-2xl mb-4 ${theme === 'dark' ? '' : 'border border-pink-100'}`}
         style={{
           backgroundColor: isSelected ? accentColor : theme === 'dark' ? '#374151' : '#ffffff',
@@ -102,6 +125,49 @@ export default function Questionnaire({
         </Text>
       </Pressable>
     );
+  };
+
+  const renderInputField = (step: QuestionnaireStep) => {
+    if (step.inputType === 'text') {
+      return (
+        <TextInput
+          className={`p-6 rounded-2xl mb-4 text-xl ${
+            theme === 'dark' 
+              ? 'bg-gray-700 text-white placeholder-gray-400' 
+              : 'bg-white text-gray-900 placeholder-gray-500'
+          }`}
+          placeholder={step.placeholder}
+          value={textInputs[step.key] || ''}
+          onChangeText={(text) => {
+            setTextInputs(prev => ({ ...prev, [step.key]: text }));
+            onSelectValue(step.key, text);
+          }}
+          placeholderTextColor={theme === 'dark' ? '#9CA3AF' : '#6B7280'}
+        />
+      );
+    }
+
+    if (step.inputType === 'date') {
+      return (
+        <Pressable
+          onPress={() => onOpenDatePicker?.(step.key)}
+          className={`p-6 rounded-2xl mb-4 flex-row items-center ${
+            theme === 'dark' ? 'bg-gray-700' : 'bg-white'
+          }`}
+        >
+          <Calendar size={24} color={theme === 'dark' ? '#9CA3AF' : '#6B7280'} />
+          <Text className={`ml-4 text-xl ${
+            selectedValues[step.key] 
+              ? theme === 'dark' ? 'text-white' : 'text-gray-900'
+              : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+          }`}>
+            {selectedValues[step.key] || step.placeholder || 'Select date'}
+          </Text>
+        </Pressable>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -165,18 +231,33 @@ export default function Questionnaire({
                 {currentStep.subtitle}
               </Text>
 
-              {currentStep.options.map((option) => renderOption(option, currentStep.key))}
+              {/* Render input field for text/date inputs */}
+              {(currentStep.inputType === 'text' || currentStep.inputType === 'date') && renderInputField(currentStep)}
+
+              {/* Render options for select/multi-select */}
+              {currentStep.options.length > 0 && currentStep.options.map((option) => 
+                renderOption(option, currentStep.key, currentStep.multiSelect)
+              )}
             </View>
           ) : null}
         </ScrollView>
 
-        {!isComplete && !isGenerating && (
+        {!isComplete && !isGenerating && currentStep && (
           <View className="p-4">
             <Button
-              title={isLastStep ? 'Generate Goals' : 'Next'}
+              title={isLastStep ? 'Complete Setup' : 'Next'}
               className="w-full"
               onPress={handleNext}
-              disabled={!currentStep || !selectedValues[currentStep.key]}
+              disabled={!currentStep || (
+                // For text/date inputs, check if value exists
+                (currentStep.inputType === 'text' || currentStep.inputType === 'date') 
+                  ? !selectedValues[currentStep.key] || selectedValues[currentStep.key] === ''
+                  // For multi-select, check if at least one option is selected
+                  : currentStep.multiSelect
+                    ? !selectedValues[currentStep.key] || (Array.isArray(selectedValues[currentStep.key]) && (selectedValues[currentStep.key] as string[]).length === 0)
+                    // For single select, check if option is selected
+                    : !selectedValues[currentStep.key]
+              )}
             />
           </View>
         )}
