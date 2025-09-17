@@ -23,11 +23,13 @@ import {
   Plus,
   Minus,
   RotateCcw,
+  Calendar,
 } from 'lucide-react-native';
 import { OliveOilIcon } from '@/components/icons/olive-oil-icon';
 import { MacroCard } from './macro-card';
 import { useThemedStyles } from '@/lib/utils/theme';
 import { useTheme } from '@/context/theme-provider';
+import { useCreateMealEntry } from '@/lib/hooks/use-meal-tracking';
 
 interface MealData {
   id: string;
@@ -64,6 +66,7 @@ export function FoodDetailsModal({
 }: FoodDetailsModalProps) {
   const themed = useThemedStyles();
   const { isDark } = useTheme();
+  const createMealEntry = useCreateMealEntry();
   const [quantity, setQuantity] = useState(1);
   const [originalQuantity, setOriginalQuantity] = useState(1); // Track original quantity for change detection
   const [editableCalories, setEditableCalories] = useState<number | null>(null);
@@ -358,16 +361,6 @@ export function FoodDetailsModal({
                   <View className="flex-1">
                     <Text className={themed("font-semibold text-gray-900 mb-1", "font-semibold text-white mb-1")}>{ingredient.name}</Text>
                     <Text className={themed("text-gray-600 text-sm", "text-gray-400 text-sm")}>{ingredient.portion}</Text>
-                  </View>
-                  <View className="items-end">
-                    <Text className={themed("font-bold text-gray-900", "font-bold text-white")}>
-                      {Math.round((ingredient.calories || 0) * quantity)} cal
-                    </Text>
-                    <Text className={themed("text-gray-500 text-xs", "text-gray-400 text-xs")}>
-                      {Math.round((ingredient.nutrition?.protein || 0) * quantity * 10) / 10}p •{' '}
-                      {Math.round((ingredient.nutrition?.carbs || 0) * quantity * 10) / 10}c •{' '}
-                      {Math.round((ingredient.nutrition?.fat || 0) * quantity * 10) / 10}f
-                    </Text>
                   </View>
                 </View>
               ))}

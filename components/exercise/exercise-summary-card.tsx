@@ -2,7 +2,9 @@ import React from 'react';
 import { View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { DailyExerciseSummary } from '@/lib/hooks/use-exercise-tracking';
-import { getAccurateCircularProgressStyles } from '@/lib/utils/progress-circle';
+import CircularProgress from '@/components/CircularProgress';
+import { Flame } from 'lucide-react-native';
+import { useThemedStyles } from '@/lib/utils/theme';
 
 interface ExerciseSummaryCardProps {
   dailySummary?: DailyExerciseSummary;
@@ -20,18 +22,8 @@ export function ExerciseSummaryCard({ dailySummary, isLoading }: ExerciseSummary
 
   // Daily goals instead of weekly
   const dailyMinutesTarget = 30; // 30 minutes per day is a good daily goal
-  const currentStreak = 5; // This would come from a streak calculation hook
 
-  // Get progress styles using utility function
-  const progressStyles = getAccurateCircularProgressStyles(
-    totalMinutes,
-    dailyMinutesTarget,
-    '#8B5CF6',
-    80, // size
-    4 // strokeWidth
-  );
-
-  const minutesProgress = (totalMinutes / dailyMinutesTarget) * 100;
+  const themed = useThemedStyles();
 
   return (
     <View className="mx-4 mb-6">
@@ -56,27 +48,25 @@ export function ExerciseSummaryCard({ dailySummary, isLoading }: ExerciseSummary
           </View>
 
           {/* Circular Progress Ring */}
-          <View className="relative w-24 h-24 items-center justify-center">
-            {/* Background Circle */}
-            <View className="absolute rounded-full" style={progressStyles.backgroundCircle} />
-
-            {/* Progress Circle - partial progress */}
-            {progressStyles.progressCircle && (
-              <View className="absolute rounded-full" style={progressStyles.progressCircle} />
-            )}
-
-            {/* Complete circle when 100% or more */}
-            {progressStyles.fullCircle && (
-              <View className="absolute rounded-full" style={progressStyles.fullCircle} />
-            )}
-
-            {/* Center Content */}
-            <View className="absolute w-20 h-20 items-center justify-center">
-              <Text className="text-purple-600 text-sm font-bold">
-                {Math.round(minutesProgress)}%
-              </Text>
+          <CircularProgress
+            consumed={totalMinutes}
+            target={dailyMinutesTarget}
+            size={80}
+            strokeWidth={6}
+            color="#8B5CF6"
+            showCenterText={false}
+            animated={true}
+            showOverflow={true}
+          >
+            <View
+              className={themed(
+                'w-12 h-12 bg-orange-100 rounded-full items-center justify-center',
+                'w-12 h-12 bg-orange-900/30 rounded-full items-center justify-center'
+              )}
+            >
+              <Flame size={20} color="#F59E0B" />
             </View>
-          </View>
+          </CircularProgress>
         </View>
 
         {/* Stats Row */}

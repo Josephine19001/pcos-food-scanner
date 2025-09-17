@@ -3,7 +3,7 @@ import { useThemedStyles } from '@/lib/utils/theme';
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'green';
   loading?: boolean;
   size?: 'small' | 'medium' | 'large';
   preIcon?: React.ReactNode;
@@ -42,6 +42,8 @@ export function Button({
     // Variant classes
     if (variant === 'primary') {
       baseClasses += themed(' bg-pink-500', ' bg-pink-600');
+    } else if (variant === 'green') {
+      baseClasses += themed(' bg-green-500', ' bg-green-600');
     } else {
       baseClasses += themed(' bg-white border border-pink-500', ' bg-gray-800 border border-pink-600');
     }
@@ -71,7 +73,7 @@ export function Button({
     }
 
     // Variant-based text color
-    if (variant === 'primary') {
+    if (variant === 'primary' || variant === 'green') {
       textClasses += ' text-white';
     } else {
       textClasses += themed(' text-pink-500', ' text-pink-400');

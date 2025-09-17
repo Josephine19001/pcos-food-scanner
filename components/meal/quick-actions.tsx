@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { Camera, Search, Plus, Sparkles } from 'lucide-react-native';
+import { Camera, Search, Plus, Sparkles, Heart } from 'lucide-react-native';
 import { useTheme } from '@/context/theme-provider';
 
 interface QuickActionsProps {
@@ -10,6 +10,7 @@ interface QuickActionsProps {
   onSearch: () => void;
   onAddCustomFood: () => void;
   onAIScan: () => void;
+  onSavedFood: () => void;
 }
 
 export const QuickActions: React.FC<QuickActionsProps> = ({
@@ -18,6 +19,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
   onSearch,
   onAddCustomFood,
   onAIScan,
+  onSavedFood,
 }) => {
   const { isDark } = useTheme();
   return (
@@ -43,14 +45,25 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        onPress={onAddCustomFood}
-        className={`rounded-2xl p-4 items-center border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-      >
-        <Plus size={24} color="#3B82F6" />
-        <Text className={`font-semibold mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Add Custom Food</Text>
-        <Text className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Create your own entry</Text>
-      </TouchableOpacity>
+      <View className="flex-row gap-3 mb-3">
+        <TouchableOpacity
+          onPress={onSavedFood}
+          className={`flex-1 rounded-2xl p-4 items-center border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+        >
+          <Heart size={24} color="#EC4899" />
+          <Text className={`font-semibold mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Saved Food</Text>
+          <Text className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Your saved meals</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={onAddCustomFood}
+          className={`flex-1 rounded-2xl p-4 items-center border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+        >
+          <Plus size={24} color="#3B82F6" />
+          <Text className={`font-semibold mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Custom Food</Text>
+          <Text className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Create your own</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Quick Scan Button */}
       <TouchableOpacity

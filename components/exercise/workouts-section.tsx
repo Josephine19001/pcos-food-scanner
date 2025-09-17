@@ -149,20 +149,6 @@ export function WorkoutsSection({
   const updateExerciseEntry = useUpdateExerciseEntry();
   const createExerciseEntry = useCreateExerciseEntry();
 
-  const handleDeleteExercise = (exerciseId: string) => {
-    Alert.alert('Delete Exercise', 'Are you sure you want to delete this exercise?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          deleteExerciseEntry.mutate(exerciseId);
-          setShowEditModal(false);
-        },
-      },
-    ]);
-  };
-
   const handleEditExercise = (exercise: any) => {
     setEditingExercise(exercise);
     setShowEditModal(true);
@@ -305,7 +291,10 @@ export function WorkoutsSection({
       <Text className="text-xl font-bold text-gray-900 mb-4">
         {selectedDate.toDateString() === new Date().toDateString()
           ? "Today's Workouts"
-          : `Workouts for ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+          : `Workouts for ${selectedDate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })}`}
       </Text>
 
       {todaysPlannedWorkout?.is_rest_day && allExercises.length === 0 ? (

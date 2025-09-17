@@ -38,7 +38,7 @@ const MacroCard = ({
   const remaining = target - consumed;
 
   return (
-    <View className={themed("bg-white rounded-xl p-3 border border-gray-100", "bg-gray-800 rounded-xl p-3 border border-gray-700")}>
+    <View className={themed("bg-white rounded-2xl p-4 border border-gray-100", "bg-gray-900 rounded-2xl p-4 border border-gray-700")}>
       {/* Top - Icon and progress circle */}
       <View className="items-center mb-3">
         <CircularProgress

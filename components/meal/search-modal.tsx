@@ -21,6 +21,8 @@ interface SearchModalProps {
   error: any;
   hasActiveSearch: boolean;
   popularFoodsLoading: boolean;
+  mode?: 'search' | 'saved';
+  title?: string;
 }
 
 export const SearchModal: React.FC<SearchModalProps> = ({
@@ -38,6 +40,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   error,
   hasActiveSearch,
   popularFoodsLoading,
+  mode = 'search',
+  title,
 }) => {
   const { isDark } = useTheme();
   return (
@@ -45,61 +49,73 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <View className="px-4 py-4">
           <View className="flex-row items-center justify-between">
-            <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Search Foods</Text>
+            <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              {title || (mode === 'saved' ? 'Saved Foods' : 'Search Foods')}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <X size={24} color={isDark ? '#9CA3AF' : '#6B7280'} />
             </TouchableOpacity>
           </View>
 
-          <View className="mt-4">
-            <SearchBar
-              value={searchQuery}
-              onChangeText={onSearchChange}
-              placeholder="Search for foods..."
-              autoFocus={true}
-              isDark={isDark}
-            />
+          {mode === 'search' && (
+            <View className="mt-4">
+              <SearchBar
+                value={searchQuery}
+                onChangeText={onSearchChange}
+                placeholder="Search for foods..."
+                autoFocus={true}
+                isDark={isDark}
+              />
 
-            {/* Quick Category Filters */}
-            <View className="mt-3">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="flex-row gap-2 px-1">
-                  {['All', 'Fruit', 'Vegetable', 'Protein', 'Grains', 'Dairy', 'Snacks'].map(
-                    (category) => {
-                      const categoryValue = category === 'All' ? null : category.toLowerCase();
-                      const isSelected = activeCategory === categoryValue;
-                      
-                      return (
-                        <TouchableOpacity
-                          key={category}
-                          onPress={() => onCategoryChange(categoryValue)}
-                          className={`px-3 py-1.5 rounded-full border ${
-                            isSelected
-                              ? isDark 
-                                ? 'bg-green-900/30 border-green-600' 
-                                : 'bg-green-100 border-green-200'
-                              : isDark 
-                                ? 'bg-gray-700 border-gray-600' 
-                                : 'bg-slate-100 border-slate-200'
-                          }`}
-                        >
-                          <Text
-                            className={`text-sm font-medium ${
+              {/* Quick Category Filters */}
+              <View className="mt-3">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View className="flex-row gap-2 px-1">
+                    {['All', 'Fruit', 'Vegetable', 'Protein', 'Grains', 'Dairy', 'Snacks'].map(
+                      (category) => {
+                        const categoryValue = category === 'All' ? null : category.toLowerCase();
+                        const isSelected = activeCategory === categoryValue;
+                        
+                        return (
+                          <TouchableOpacity
+                            key={category}
+                            onPress={() => onCategoryChange(categoryValue)}
+                            className={`px-3 py-1.5 rounded-full border ${
                               isSelected
-                                ? isDark ? 'text-green-300' : 'text-green-700'
-                                : isDark ? 'text-gray-300' : 'text-gray-600'
+                                ? isDark 
+                                  ? 'bg-green-900/30 border-green-600' 
+                                  : 'bg-green-100 border-green-200'
+                                : isDark 
+                                  ? 'bg-gray-700 border-gray-600' 
+                                  : 'bg-slate-100 border-slate-200'
                             }`}
                           >
-                            {category}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    }
-                  )}
-                </View>
-              </ScrollView>
+                            <Text
+                              className={`text-sm font-medium ${
+                                isSelected
+                                  ? isDark ? 'text-green-300' : 'text-green-700'
+                                  : isDark ? 'text-gray-300' : 'text-gray-600'
+                              }`}
+                            >
+                              {category}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      }
+                    )}
+                  </View>
+                </ScrollView>
+              </View>
             </View>
-          </View>
+          )}
+
+          {mode === 'saved' && foods.length === 0 && !isLoading && (
+            <View className="mt-4">
+              <Text className={`text-base ${isDark ? 'text-gray-300' : 'text-gray-600'} text-center py-4`}>
+                No saved foods yet. Save foods from your meal plans to see them here.
+              </Text>
+            </View>
+          )}
         </View>
 
         <InfiniteScrollList

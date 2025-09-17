@@ -15,6 +15,7 @@ import {
   useFlattenedResults,
   useSearchState,
 } from '@/lib/hooks/use-optimized-search';
+import { useFavoriteFoods } from '@/lib/hooks/use-favorite-foods';
 import * as ImagePicker from 'expo-image-picker';
 import { getLocalDateTime } from '@/lib/utils/date-helpers';
 
@@ -51,6 +52,7 @@ export default function LogMealScreen() {
   const [showScanner, setShowScanner] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showCustomFood, setShowCustomFood] = useState(false);
+  const [showSavedFood, setShowSavedFood] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Editing state
@@ -84,6 +86,28 @@ export default function LogMealScreen() {
   const popularFoodsQuery = usePopularFoodsCache();
   const searchData = useFlattenedResults(searchResults);
   const popularFoods = popularFoodsQuery.data?.map(convertToFoodItem) || [];
+  const favoriteFoodsQuery = useFavoriteFoods();
+
+  // Convert favorite foods to FoodItem format
+  const convertFavoriteToFoodItem = (favorite: any): FoodItem => ({
+    id: `favorite-${favorite.id}`,
+    name: favorite.food_name,
+    brand: 'Saved Food',
+    category: favorite.category || 'other',
+    servingSize: favorite.serving_size || '1 serving',
+    nutrition: favorite.nutrition_data || {
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
+      fiber: 0,
+      sugar: 0,
+    },
+  });
+
+  const savedFoods = favoriteFoodsQuery.data
+    ?.filter(food => food.is_active)
+    ?.map(convertFavoriteToFoodItem) || [];
 
   // Data for search modal
   const displayFoods = hasActiveSearch
@@ -405,6 +429,7 @@ export default function LogMealScreen() {
           onSearch={() => setShowSearch(true)}
           onAddCustomFood={() => setShowCustomFood(true)}
           onAIScan={handleAIScan}
+          onSavedFood={() => setShowSavedFood(true)}
         />
 
         {/* Selected Foods */}
@@ -462,6 +487,26 @@ export default function LogMealScreen() {
         error={searchResults.error}
         hasActiveSearch={hasActiveSearch}
         popularFoodsLoading={popularFoodsQuery.isLoading}
+        mode="search"
+      />
+
+      {/* Saved Food Modal */}
+      <SearchModal
+        visible={showSavedFood}
+        onClose={() => setShowSavedFood(false)}
+        searchQuery=""
+        onSearchChange={() => {}}
+        activeCategory={null}
+        onCategoryChange={() => {}}
+        foods={savedFoods}
+        onAddFood={handleAddFood}
+        isLoading={favoriteFoodsQuery.isLoading}
+        hasNextPage={false}
+        onLoadMore={() => {}}
+        error={null}
+        hasActiveSearch={false}
+        popularFoodsLoading={false}
+        mode="saved"
       />
 
       {/* Custom Food Modal */}

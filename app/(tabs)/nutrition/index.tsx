@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { Sparkles } from 'lucide-react-native';
+import { Sparkles, Calendar, ShoppingCart } from 'lucide-react-native';
 import PageLayout from '@/components/layouts/page-layout';
 import { router } from 'expo-router';
 import { useDailyNutritionSummary, useNutritionProgress } from '@/lib/hooks/use-nutrition-summary';
@@ -34,10 +34,25 @@ import {
 import { EmptyGoalsState } from '@/components/nutrition/empty-goals-state';
 import { GenerateMacrosButton } from '@/components/nutrition/generate-macros-button';
 import { FoodDetailsModal } from '@/components/nutrition/food-details-modal';
+import MealPlannerModal from '@/components/nutrition/meal-planner-modal';
+import MealPlanViewerModal from '@/components/nutrition/meal-plan-viewer-modal';
+import PlannedMealsSection from '@/components/nutrition/planned-meals-section';
+import SimpleMealModal from '@/components/nutrition/simple-meal-modal';
+import { useThemedStyles } from '@/lib/utils/theme';
+import { useCurrentCyclePhase, useTodaysPeriodLog } from '@/lib/hooks/use-cycle-data';
 
 export default function NutritionScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showMealPlanner, setShowMealPlanner] = useState(false);
+  const [showMealPlanViewer, setShowMealPlanViewer] = useState(false);
+  const [selectedMealPlan, setSelectedMealPlan] = useState<any>(null);
+  const [generatedMealPlan, setGeneratedMealPlan] = useState<any>(null);
+  const [showSimpleMealModal, setShowSimpleMealModal] = useState(false);
+  const [selectedPlannedMeal, setSelectedPlannedMeal] = useState<any>(null);
+  const [selectedMealType, setSelectedMealType] = useState<string>('');
+
+  const themed = useThemedStyles();
 
   const { startDate, endDate } = useDateRange();
   const {
@@ -66,6 +81,10 @@ export default function NutritionScreen() {
   const { data: streakData, isLoading: streakLoading } = useNutritionStreak();
   const { data: loggedDates = [] } = useLoggedDates(startDate, endDate);
 
+  // Meal planner data
+  const { data: currentCyclePhase } = useCurrentCyclePhase();
+  const todaysLog = useTodaysPeriodLog();
+
   const waterProgress = useWaterProgress(dateString, nutritionGoals?.water_ml || 2000);
   const quickAddWater = useQuickAddWater();
 
@@ -88,7 +107,8 @@ export default function NutritionScreen() {
   const hasBodyMeasurements = !!bodyMeasurements;
 
   const shouldShowEmptyGoalsState = !goalsLoading && !hasNutritionGoals;
-  const shouldShowGenerateMacrosButton = !goalsLoading && hasNutritionGoals && !nutritionGoals?.calories;
+  const shouldShowGenerateMacrosButton =
+    !goalsLoading && hasNutritionGoals && !nutritionGoals?.calories;
 
   const currentStreak = streakData?.currentStreak || 0;
 
@@ -119,6 +139,16 @@ export default function NutritionScreen() {
     return dayOfMonth % 3 === 0 || dayOfMonth % 7 === 0;
   };
 
+  const handleShowMealPlan = (plan: any) => {
+    setSelectedMealPlan(plan);
+    setShowMealPlanViewer(true);
+  };
+
+  const handleMealPlanGenerated = (plan: any) => {
+    setGeneratedMealPlan(plan);
+    setShowMealPlanViewer(true);
+  };
+
   return (
     <PageLayout
       title="Nutrition"
@@ -130,10 +160,7 @@ export default function NutritionScreen() {
         streakLoading ? (
           <StreakDisplaySkeleton />
         ) : (
-          <StreakDisplay
-            currentStreak={currentStreak}
-            isLoading={streakLoading}
-          />
+          <StreakDisplay currentStreak={currentStreak} isLoading={streakLoading} />
         )
       }
     >
@@ -159,11 +186,12 @@ export default function NutritionScreen() {
               </View>
               <Text className="text-gray-900 font-semibold text-xl mb-3">Generate Your Macros</Text>
               <Text className="text-gray-500 text-center mb-8 px-4">
-                You've completed your profile! Now let's calculate your personalized macro goals to start tracking your nutrition.
+                You've completed your profile! Now let's calculate your personalized macro goals to
+                start tracking your nutrition.
               </Text>
-              
-              <GenerateMacrosButton 
-                variant="primary" 
+
+              <GenerateMacrosButton
+                variant="primary"
                 onGenerationComplete={() => {
                   // Force refresh of nutrition goals
                   forceUpdate();
@@ -193,6 +221,17 @@ export default function NutritionScreen() {
               onAddWaterPress={() => router.push('/log-water')}
               onQuickAdd={() => quickAddWater.mutate({ date: dateString })}
             />
+
+            <View className="mt-4">
+              <PlannedMealsSection
+                onShowMealPlan={handleShowMealPlan}
+                onShowMealDetails={(meal, mealType) => {
+                  setSelectedPlannedMeal(meal);
+                  setSelectedMealType(mealType);
+                  setShowSimpleMealModal(true);
+                }}
+              />
+            </View>
 
             <MealsSection
               key={`meals-${forceUpdateKey}`}
@@ -224,7 +263,49 @@ export default function NutritionScreen() {
         onDone={handleMealDone}
         onRetry={handleRetryAnalysis}
       />
+
+      <MealPlannerModal
+        isVisible={showMealPlanner}
+        onClose={() => setShowMealPlanner(false)}
+        onMealPlanGenerated={handleMealPlanGenerated}
+        userContext={{
+          cyclePhase: currentCyclePhase?.phase,
+          cycleDay: currentCyclePhase?.day_in_cycle,
+          symptoms: todaysLog?.symptoms || [],
+          nutritionGoals: nutritionGoals
+            ? {
+                calories: nutritionGoals.calories,
+                protein: nutritionGoals.protein,
+                carbs: nutritionGoals.carbs,
+                fat: nutritionGoals.fat,
+                primary_goal: nutritionGoals.primary_goal,
+                activity_level: nutritionGoals.activity_level,
+              }
+            : undefined,
+        }}
+      />
+
+      <MealPlanViewerModal
+        isVisible={showMealPlanViewer}
+        onClose={() => {
+          setShowMealPlanViewer(false);
+          setSelectedMealPlan(null);
+          setGeneratedMealPlan(null);
+        }}
+        mealPlan={selectedMealPlan || generatedMealPlan}
+        onRegeneratePlan={() => setShowMealPlanner(true)}
+      />
+
+      <SimpleMealModal
+        isVisible={showSimpleMealModal}
+        onClose={() => {
+          setShowSimpleMealModal(false);
+          setSelectedPlannedMeal(null);
+          setSelectedMealType('');
+        }}
+        meal={selectedPlannedMeal}
+        mealType={selectedMealType}
+      />
     </PageLayout>
   );
 }
-

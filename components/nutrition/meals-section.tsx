@@ -1,6 +1,7 @@
 import { View, TouchableOpacity } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { useThemedStyles } from '@/lib/utils/theme';
+import { BookOpen } from 'lucide-react-native';
 
 import { MealCard } from './meal-card';
 import { EmptyMealsState } from './empty-meals-state';
@@ -60,9 +61,20 @@ export default function MealsSection({
   return (
     <View className="px-4 mb-6 mt-4">
       <View className="flex-row items-center justify-between mb-4">
-        <Text className={themed("text-xl font-bold text-gray-900", "text-xl font-bold text-white")}>Today's Meals</Text>
-        <TouchableOpacity onPress={onAddMealPress}>
-          <Text className="text-green-600 font-medium">Add Meal</Text>
+        <View className="flex-row items-center">
+          <View className={themed("w-8 h-8 bg-green-100 rounded-full items-center justify-center mr-3", "w-8 h-8 bg-green-900/30 rounded-full items-center justify-center mr-3")}>
+            <BookOpen size={16} color="#10B981" />
+          </View>
+          <Text className={themed("text-xl font-bold text-gray-900", "text-xl font-bold text-white")}>Logged Meals</Text>
+        </View>
+        <TouchableOpacity 
+          onPress={onAddMealPress}
+          className={themed("px-3 py-1 bg-green-50 rounded-full", "px-3 py-1 bg-green-900/20 rounded-full")}
+          activeOpacity={0.8}
+        >
+          <Text className={themed("text-xs font-medium text-green-700", "text-xs font-medium text-green-300")}>
+            Add Meal
+          </Text>
         </TouchableOpacity>
       </View>
 

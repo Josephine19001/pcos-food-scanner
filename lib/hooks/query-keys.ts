@@ -68,4 +68,12 @@ export const queryKeys = {
     all: ['progress'] as const,
     photos: (startDate: string, endDate: string) => [...queryKeys.progress.all, 'photos', startDate, endDate] as const,
   },
+  nutrition: {
+    all: ['nutrition'] as const,
+    mealPlans: ['nutrition', 'meal-plans'] as const,
+    groceryLists: ['nutrition', 'grocery-lists'] as const,
+    favoriteFoods: ['nutrition', 'favorite-foods'] as const,
+    dietaryPreferences: ['nutrition', 'dietary-preferences'] as const,
+    existingIngredients: ['nutrition', 'existing-ingredients'] as const,
+  },
 } as const;

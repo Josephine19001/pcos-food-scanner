@@ -8,7 +8,7 @@ import {
   RefreshControl,
   TextInput,
 } from 'react-native';
-import { Search, X } from 'lucide-react-native';
+import { Search, X, AlertCircle } from 'lucide-react-native';
 import { useTheme } from '@/context/theme-provider';
 
 interface InfiniteScrollListProps<T> {
