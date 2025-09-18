@@ -50,7 +50,7 @@ export default function MealPlannerModal({
   const [selectedFoodGroups, setSelectedFoodGroups] = useState<string[]>([]);
   const [selectedFavoriteFoods, setSelectedFavoriteFoods] = useState<string[]>([]);
   const [existingIngredients, setExistingIngredients] = useState<string[]>([]);
-  const [planDuration, setPlanDuration] = useState<'3_days' | '7_days' | '14_days'>('7_days');
+  const [planDuration, setPlanDuration] = useState<'3_days' | '7_days'>('7_days');
 
   const toggleCuisine = (cuisine: string) => {
     setSelectedCuisines((prev) =>
@@ -239,7 +239,7 @@ export default function MealPlannerModal({
             title={
               generateMealPlan.isPending
                 ? 'Generating Your Plan...'
-                : 'Generate Meal Plan & Grocery List'
+                : 'Generate Meal Plan'
             }
             onPress={handleGenerateMealPlan}
             disabled={!canGenerate || generateMealPlan.isPending}

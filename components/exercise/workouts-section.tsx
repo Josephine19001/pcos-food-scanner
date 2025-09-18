@@ -538,7 +538,12 @@ export function WorkoutsSection({
                   </View>
 
                   {/* Bottom details */}
-                  <View className={themed('pt-3 border-t border-gray-50', 'pt-3 border-t ')}>
+                  <View
+                    className={themed(
+                      'pt-3 border-t border-gray-50',
+                      'pt-3 border-t border-gray-800'
+                    )}
+                  >
                     <Text className={themed('text-sm text-gray-600', 'text-sm text-gray-400')}>
                       {exercise.calories_burned || exercise.calories_estimate || 0} cal •{' '}
                       {exercise.duration_minutes} min

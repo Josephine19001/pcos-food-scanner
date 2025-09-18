@@ -8,7 +8,7 @@ interface MealPlanParams {
   foodGroups: string[];
   selectedFavoriteFoods: string[];
   favoriteFoodNames: string[];
-  duration: '3_days' | '7_days' | '14_days';
+  duration: '3_days' | '7_days';
   existingIngredients: string[];
   userContext?: {
     cyclePhase?: string;

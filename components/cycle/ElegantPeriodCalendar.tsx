@@ -248,7 +248,7 @@ export function ElegantPeriodCalendar({
       {/* Year selector and day names header */}
       <View
         className={`px-4 py-2 ${isDark ? 'bg-gray-800' : 'bg-white'} border-b ${
-          isDark ? '' : 'border-gray-200'
+          isDark ? 'border-gray-700' : 'border-gray-200'
         }`}
       >
         {/* Year Picker */}
@@ -330,7 +330,7 @@ export function ElegantPeriodCalendar({
       {!editMode && (
         <View
           className={`px-4 py-4 pb-8 ${isDark ? 'bg-gray-800' : 'bg-white'} border-t ${
-            isDark ? '' : 'border-gray-200'
+            isDark ? 'border-gray-700' : 'border-gray-200'
           }`}
         >
           <View className="flex-row justify-around items-center">
@@ -442,7 +442,9 @@ export function ElegantPeriodCalendar({
               </ScrollView>
 
               {/* Cancel Button */}
-              <View className={`border-t ${isDark ? '' : 'border-gray-200'} mx-6 mt-4`}>
+              <View
+                className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-200'} mx-6 mt-4`}
+              >
                 <TouchableOpacity onPress={() => setShowYearPicker(false)} className="py-4">
                   <Text className="text-pink-600 font-semibold text-center text-lg">Cancel</Text>
                 </TouchableOpacity>

@@ -4,14 +4,13 @@ import { Text } from '@/components/ui/text';
 import { useThemedStyles } from '@/lib/utils/theme';
 
 interface PlanDurationSectionProps {
-  planDuration: '3_days' | '7_days' | '14_days';
-  setPlanDuration: (duration: '3_days' | '7_days' | '14_days') => void;
+  planDuration: '3_days' | '7_days';
+  setPlanDuration: (duration: '3_days' | '7_days') => void;
 }
 
 const durationOptions = [
   { id: '3_days' as const, label: '3 Days' },
   { id: '7_days' as const, label: '1 Week' },
-  { id: '14_days' as const, label: '2 Weeks' },
 ];
 
 export default function PlanDurationSection({ planDuration, setPlanDuration }: PlanDurationSectionProps) {

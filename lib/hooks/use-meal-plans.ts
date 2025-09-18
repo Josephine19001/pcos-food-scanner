@@ -43,7 +43,7 @@ export interface GenerateMealPlanParams {
   foodGroups: string[];
   selectedFavoriteFoods: string[];
   favoriteFoodNames: string[];
-  duration: '3_days' | '7_days' | '14_days';
+  duration: '3_days' | '7_days';
   existingIngredients: string[];
   userContext?: {
     cyclePhase?: string;
@@ -252,7 +252,9 @@ export function useGroceryList(mealPlanId?: string) {
   return useQuery<GroceryList | null, Error>({
     queryKey: [...queryKeys.nutrition.groceryLists, mealPlanId],
     queryFn: async () => {
-      if (!mealPlanId) return null;
+      if (!mealPlanId) {
+          return null;
+      }
 
       const { data, error } = await supabase
         .from('grocery_lists')
@@ -269,6 +271,59 @@ export function useGroceryList(mealPlanId?: string) {
     },
     enabled: !!mealPlanId,
     staleTime: 30 * 60 * 1000, // 30 minutes
+  });
+}
+
+// Generate grocery list for a meal plan
+export function useGenerateGroceryList() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    any,
+    Error,
+    {
+      meal_plan_id: string;
+      budget_range?: string;
+      existing_ingredients?: string[];
+      dietary_restrictions?: string[];
+      force_regenerate?: boolean;
+    }
+  >({
+    mutationFn: async (params) => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user?.id) {
+        throw new Error('Not authenticated');
+      }
+
+      const response = await supabase.functions.invoke('grocery-list-generator', {
+        body: params,
+      });
+
+      if (response.error) {
+        console.error('❌ Grocery list generation error:', response.error);
+        throw new Error(response.error.message || 'Failed to generate grocery list');
+      }
+
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch grocery list queries
+      queryClient.invalidateQueries({
+        queryKey: [...queryKeys.nutrition.groceryLists, variables.meal_plan_id],
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutrition.groceryLists });
+
+      console.log('✅ Grocery list generated successfully:', data.id);
+    },
+    onError: (error: Error) => {
+      console.error('❌ Grocery list generation failed:', error);
+      toast.error('Failed to generate grocery list', {
+        description: error.message,
+      });
+    },
   });
 }
 

@@ -238,7 +238,7 @@ export function FoodDetailsModal({
           <View
             className={themed(
               'mb-6 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm',
-              'mb-6 bg-gray-800 rounded-2xl p-5  shadow-sm'
+              'mb-6 bg-gray-800 rounded-2xl p-5 border-gray-700  shadow-sm'
             )}
           >
             <Text
@@ -499,7 +499,7 @@ export function FoodDetailsModal({
         <View
           className={themed(
             'flex-row gap-4 p-6 border-t border-gray-100',
-            'flex-row gap-4 p-6 border-t '
+            'flex-row gap-4 p-6 border-t border-gray-700'
           )}
         >
           {/* Retry Button (only show for failed analysis) */}
@@ -527,24 +527,27 @@ export function FoodDetailsModal({
           )}
 
           {/* Delete Button (only show if onDelete is provided) */}
-          {onDelete && (
-            <TouchableOpacity
-              onPress={handleDelete}
-              className={themed(
-                'flex-row items-center justify-center bg-red-100 px-6 py-3 rounded-xl',
-                'flex-row items-center justify-center bg-red-900/30 px-6 py-3 rounded-xl'
-              )}
-            >
-              <Trash2 size={18} color="#EF4444" />
-              <Text
-                className={themed('text-red-600 font-medium ml-2', 'text-red-400 font-medium ml-2')}
-              >
-                Delete
-              </Text>
-            </TouchableOpacity>
-          )}
 
-          <View className="flex-1">
+          <View className="flex flex-row justify-between items-center w-full">
+            {onDelete && (
+              <TouchableOpacity
+                onPress={handleDelete}
+                className={themed(
+                  'flex-row items-center justify-center bg-red-100 px-6 py-4 rounded-full',
+                  'flex-row items-center justify-center bg-red-900/30 px-6 py-4 rounded-full'
+                )}
+              >
+                <Trash2 size={18} color="#EF4444" />
+                <Text
+                  className={themed(
+                    'text-red-600 font-medium text-lg ml-2',
+                    'text-red-400 font-medium text-lg ml-2'
+                  )}
+                >
+                  Delete
+                </Text>
+              </TouchableOpacity>
+            )}
             <Button
               title="Done"
               variant="primary"

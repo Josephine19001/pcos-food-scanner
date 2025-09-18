@@ -31,6 +31,7 @@ interface PlannedMealsSectionProps {
   selectedDate?: string; // Add selectedDate prop to know which date we're viewing
   showHeader?: boolean;
   showViewAllButton?: boolean;
+  paddingXOff?: boolean;
 }
 
 export default function PlannedMealsSection({
@@ -43,6 +44,7 @@ export default function PlannedMealsSection({
   selectedDate,
   showHeader = true,
   showViewAllButton = true,
+  paddingXOff = false,
 }: PlannedMealsSectionProps) {
   const themed = useThemedStyles();
   const { requiresSubscriptionForFeature } = useRevenueCat();
@@ -447,7 +449,7 @@ export default function PlannedMealsSection({
   }
 
   return (
-    <View className="mx-4 mb-6">
+    <View className={`${paddingXOff ? '' : 'mx-4'}  mb-6`}>
       {showHeader && (
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">

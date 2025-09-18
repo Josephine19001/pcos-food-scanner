@@ -69,12 +69,12 @@ export default function MealPlanLoadingState({
             </View>
           </View>
 
-          <TouchableOpacity onPress={onClear} className="mt-4 bg-red-500 rounded-lg py-2 px-4">
+          {/* <TouchableOpacity onPress={onClear} className="mt-4 bg-red-500 rounded-lg py-2 px-4">
             <View className="flex-row items-center justify-center">
               <Bug size={16} color="white" />
               <Text className="text-white text-sm font-medium ml-2">Clear Stuck Plan (Debug)</Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     </View>

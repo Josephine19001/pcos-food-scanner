@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { Text } from '@/components/ui/text';
 import {
@@ -14,9 +14,10 @@ import {
 } from 'lucide-react-native';
 import { useThemedStyles } from '@/lib/utils/theme';
 import { useTheme } from '@/context/theme-provider';
-import { useGroceryList } from '@/lib/hooks/use-meal-plans';
+import { useGroceryList, useGenerateGroceryList } from '@/lib/hooks/use-meal-plans';
 import SimpleMealModal from './simple-meal-modal';
 import PlannedMealsSection from './planned-meals-section';
+import { calculateDayCalories } from '@/lib/utils/meal-plan-utils';
 
 interface MealPlanViewerModalProps {
   isVisible: boolean;
@@ -42,6 +43,28 @@ export default function MealPlanViewerModal({
   const [selectedMealType, setSelectedMealType] = useState<string>('');
   const [showMealModal, setShowMealModal] = useState(false);
   const { data: groceryList } = useGroceryList(mealPlan?.id);
+  const generateGroceryList = useGenerateGroceryList();
+
+  const handleGenerateGroceryList = (forceRegenerate = false) => {
+    if (!mealPlan?.id) return;
+
+    generateGroceryList.mutate({
+      meal_plan_id: mealPlan.id,
+      existing_ingredients: mealPlan.existing_ingredients || [],
+      budget_range: mealPlan.generation_context?.customBudget,
+      force_regenerate: forceRegenerate,
+    });
+  };
+
+  // Debug logging
+  useEffect(() => {
+    console.log('🐛 Modal Debug:', {
+      selectedTab,
+      groceryList,
+      mealPlanId: mealPlan?.id,
+      isPending: generateGroceryList.isPending,
+    });
+  }, [selectedTab, groceryList, mealPlan?.id, generateGroceryList.isPending]);
 
   if (!mealPlan) return null;
 
@@ -80,7 +103,7 @@ export default function MealPlanViewerModal({
             key={index}
             className={themed(
               'flex-row items-center justify-between py-2 border-b border-gray-200',
-              'flex-row items-center justify-between py-2 border-b '
+              'flex-row items-center justify-between py-2 border-b border-gray-700'
             )}
           >
             <View className="flex-1">
@@ -105,7 +128,7 @@ export default function MealPlanViewerModal({
         <View
           className={themed(
             'bg-white border-b border-gray-200 pt-12 pb-4 px-4',
-            'bg-gray-900 border-b  pt-12 pb-4 px-4'
+            'bg-gray-900 border-b border-gray-700  pt-12 pb-4 px-4'
           )}
         >
           <View className="flex-row items-center justify-between">
@@ -124,7 +147,7 @@ export default function MealPlanViewerModal({
                 </Text>
                 <View className="w-1 h-1 bg-gray-400 rounded-full mx-2" />
                 <Text className={themed('text-sm text-gray-600', 'text-sm text-gray-400')}>
-                  ${mealPlan.estimated_cost || 0}
+                  {mealPlan.generation_context?.customBudget || 'moderate'} budget
                 </Text>
               </View>
             </View>
@@ -216,7 +239,7 @@ export default function MealPlanViewerModal({
                               <Text
                                 className={themed('text-sm text-gray-600', 'text-sm text-gray-400')}
                               >
-                                {day.daily_totals?.calories || 0}
+                                {calculateDayCalories(day)}
                               </Text>
                             </View>
                           </View>
@@ -257,40 +280,18 @@ export default function MealPlanViewerModal({
                           setSelectedMealType(mealType);
                           setShowMealModal(true);
                         }}
+                        paddingXOff
                       />
                     )}
                   </View>
                 );
               })}
             </View>
-          ) : (
+          ) : selectedTab === 'grocery' ? (
             /* Grocery List Tab */
-            <View>
-              {groceryList ? (
+            <View className="flex-1">
+              {groceryList && groceryList.items && groceryList.items.length > 0 ? (
                 <>
-                  {/* <View
-                    className={themed(
-                      'bg-green-50 rounded-xl p-4 mb-6',
-                      'bg-green-900/20 rounded-xl p-4 mb-6'
-                    )}
-                  >
-                    <View className="flex-row items-center justify-between">
-                      <Text
-                        className={themed(
-                          'font-semibold text-green-800',
-                          'font-semibold text-green-200'
-                        )}
-                      >
-                        {groceryList.name}
-                      </Text>
-                      <Text
-                        className={themed('font-bold text-green-800', 'font-bold text-green-200')}
-                      >
-                        Total: ${groceryList.total_estimated_cost}
-                      </Text>
-                    </View>
-                  </View> */}
-
                   {groceryList.items && Array.isArray(groceryList.items) ? (
                     <View className="px-4">
                       {/* Group items by category and render each category */}
@@ -318,34 +319,79 @@ export default function MealPlanViewerModal({
                   )}
                 </>
               ) : (
-                <View className="items-center py-8">
-                  <ShoppingCart size={48} color="#9CA3AF" />
-                  <Text className={themed('text-gray-600 mt-4', 'text-gray-400 mt-4')}>
-                    Grocery list not available
+                <View className="items-center py-8 px-4">
+                  <View
+                    className={themed(
+                      'bg-gray-100 rounded-full p-4 mb-4',
+                      'bg-gray-700 rounded-full p-4 mb-4'
+                    )}
+                  >
+                    <ShoppingCart size={48} color={isDark ? '#9CA3AF' : '#6B7280'} />
+                  </View>
+                  <Text
+                    className={themed(
+                      'text-gray-600 mt-2 mb-6 text-center',
+                      'text-gray-400 mt-2 mb-6 text-center'
+                    )}
+                  >
+                    No grocery list generated yet
                   </Text>
+                  <TouchableOpacity
+                    onPress={() => handleGenerateGroceryList(false)}
+                    disabled={generateGroceryList.isPending}
+                    className={`px-8 py-4 rounded-xl flex-row items-center shadow-lg ${
+                      generateGroceryList.isPending
+                        ? themed('bg-gray-300', 'bg-gray-600')
+                        : themed('bg-green-500', 'bg-green-600')
+                    }`}
+                    activeOpacity={0.8}
+                  >
+                    <ShoppingCart size={20} color="white" />
+                    <Text className="text-white font-semibold ml-2 text-base">
+                      {generateGroceryList.isPending ? 'Generating...' : 'Generate Grocery List'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               )}
             </View>
-          )}
+          ) : null}
         </ScrollView>
 
-        {/* Regenerate Button */}
-        {onRegeneratePlan && (
-          <View className={themed('p-4 border-t border-gray-200', 'p-4 border-t ')}>
-            <TouchableOpacity
-              onPress={() => {
-                onRegeneratePlan();
-                onClose();
-              }}
-              className={themed(
-                'bg-green-500 rounded-xl py-4 px-6 flex-row items-center justify-center',
-                'bg-green-600 rounded-xl py-4 px-6 flex-row items-center justify-center'
-              )}
-              activeOpacity={0.8}
-            >
-              <Sparkles size={20} color="white" />
-              <Text className="text-white font-semibold ml-3 text-lg">Regenerate Meal Plan</Text>
-            </TouchableOpacity>
+        {/* Dynamic Regenerate Button */}
+        {(onRegeneratePlan || selectedTab === 'grocery') && (
+          <View className={themed('p-4 border-t border-gray-200', 'p-4 border-t border-gray-700')}>
+            {selectedTab === 'grocery' ? (
+              <TouchableOpacity
+                onPress={() => handleGenerateGroceryList(true)}
+                disabled={generateGroceryList.isPending}
+                className={`rounded-full py-4 px-6 flex-row items-center justify-center ${
+                  generateGroceryList.isPending
+                    ? themed('bg-gray-400', 'bg-gray-600')
+                    : themed('bg-green-500', 'bg-green-600')
+                }`}
+                activeOpacity={0.8}
+              >
+                <ShoppingCart size={20} color="white" />
+                <Text className="text-white font-semibold ml-3 text-lg">
+                  {generateGroceryList.isPending ? 'Regenerating...' : 'Regenerate Grocery List'}
+                </Text>
+              </TouchableOpacity>
+            ) : onRegeneratePlan ? (
+              <TouchableOpacity
+                onPress={() => {
+                  onRegeneratePlan();
+                  onClose();
+                }}
+                className={themed(
+                  'bg-green-500 rounded-full py-4 px-6 flex-row items-center justify-center',
+                  'bg-green-600 rounded-full py-4 px-6 flex-row items-center justify-center'
+                )}
+                activeOpacity={0.8}
+              >
+                <Sparkles size={20} color="white" />
+                <Text className="text-white font-semibold ml-3 text-lg">Regenerate Meal Plan</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         )}
       </View>
