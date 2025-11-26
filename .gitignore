@@ -52,6 +52,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
@@ -67,4 +68,4 @@ build/
 
 # Claude Code
 CLAUDE.md
-.claude/
+.claude/.env
