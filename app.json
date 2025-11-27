@@ -19,7 +19,8 @@
       "bundleIdentifier": "com.debt-free.app",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["remote-notification"]
       }
     },
     "web": {
@@ -37,10 +38,19 @@
           "resizeMode": "contain",
           "backgroundColor": "#004162"
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#10B981",
+          "sounds": []
+        }
       ]
     ],
     "android": {
-      "package": "com.debt-free.app"
+      "package": "com.debt-free.app",
+      "googleServicesFile": "./google-services.json"
     },
     "extra": {
       "eas": {

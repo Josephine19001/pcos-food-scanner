@@ -18,6 +18,7 @@ interface AuthContextType {
   signInWithApple: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: (reason: string, additionalComments?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -110,9 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (event === 'SIGNED_IN' && newSession?.user) {
         const userEmail = newSession.user.email || '';
         const userName =
-          newSession.user.user_metadata?.full_name ||
-          newSession.user.user_metadata?.name ||
-          '';
+          newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name || '';
         await ensureAccountExists(newSession.user.id, userEmail, userName);
       }
     });
@@ -156,10 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const options: any = {};
       if (appleCredential.fullName?.givenName || appleCredential.fullName?.familyName) {
-        const fullName = [
-          appleCredential.fullName?.givenName,
-          appleCredential.fullName?.familyName,
-        ]
+        const fullName = [appleCredential.fullName?.givenName, appleCredential.fullName?.familyName]
           .filter(Boolean)
           .join(' ');
 
@@ -245,11 +241,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setSession(null);
       setUser(null);
-      router.replace('/welcome');
-      toast.success('Signed out successfully');
+      router.replace('/auth');
+      // toast.success('Signed out successfully');
     } catch (error: any) {
       console.error('Sign out error:', error);
       toast.error('Failed to sign out');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteAccount = async (reason: string, additionalComments?: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-account', {
+        body: { reason, additional_comments: additionalComments },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setSession(null);
+      setUser(null);
+      toast.success('Account deleted successfully');
+      router.replace('/auth');
+    } catch (error: any) {
+      console.error('Delete account error:', error);
+      toast.error(error.message || 'Failed to delete account');
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -262,6 +281,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithApple,
     signInWithGoogle,
     signOut,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

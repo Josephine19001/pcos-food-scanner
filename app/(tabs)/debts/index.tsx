@@ -9,7 +9,8 @@ import {
   EmptyState,
   DebtListSkeleton,
 } from '@/components/debts';
-import { useDebts } from '@/lib/hooks/use-debts';
+import { PaymentDueBanner } from '@/components/home';
+import { useDebts, usePaymentsDue } from '@/lib/hooks/use-debts';
 import { useDebouncedValue } from '@/lib/hooks/utils';
 import { DebtCategory, DebtStatus, DEBT_CATEGORY_CONFIG } from '@/lib/types/debt';
 
@@ -27,6 +28,7 @@ export default function DebtsScreen() {
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
   const { data: debts, isLoading } = useDebts(debouncedSearch);
+  const { data: paymentsDue } = usePaymentsDue();
 
   const handleAddDebt = () => {
     router.push('/debt/add');
@@ -130,6 +132,11 @@ export default function DebtsScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
       >
+
+        {/* Payment Due Banner */}
+        {paymentsDue && paymentsDue.length > 0 && !showSearch && !showFilters && (
+          <PaymentDueBanner debts={paymentsDue} />
+        )}
 
         {/* Search Bar (expandable) */}
         {showSearch && (

@@ -69,7 +69,9 @@ function CustomTabBar({ state, navigation }: any) {
 
       {/* Advisor Button */}
       <Pressable onPress={handleAdvisorPress}>
-        <View className="w-[60px] h-[60px] rounded-full items-center justify-center bg-emerald-500/30">
+        <View className="w-[60px] h-[60px] rounded-full items-center justify-center overflow-hidden">
+          <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
+          <View className="absolute inset-0 rounded-full border border-white/10 bg-white/5" />
           <AdvisorIcon size={26} color="#10B981" />
           {hasUnread && (
             <View className="absolute top-1 right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-[#0F0F0F]" />

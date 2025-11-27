@@ -10,8 +10,9 @@ import {
   PriorityDebtCard,
   UpcomingPayments,
   QuickStats,
+  PaymentDueBanner,
 } from '@/components/home';
-import { useDebts, useDebtSummary } from '@/lib/hooks/use-debts';
+import { useDebts, useDebtSummary, usePaymentsDue } from '@/lib/hooks/use-debts';
 import {
   formatDate,
   calculatePayoffMonths,
@@ -28,6 +29,7 @@ export default function HomeScreen() {
 
   const { data: debts, isLoading: debtsLoading } = useDebts();
   const { data: summary, isLoading: summaryLoading } = useDebtSummary();
+  const { data: paymentsDue } = usePaymentsDue();
 
   const isLoading = debtsLoading || summaryLoading;
 
@@ -102,6 +104,11 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
+        {/* Payment Due Banner */}
+        {paymentsDue && paymentsDue.length > 0 && (
+          <PaymentDueBanner debts={paymentsDue} />
+        )}
+
         {/* Overview */}
         <OverviewCard
           totalBalance={totalBalance}

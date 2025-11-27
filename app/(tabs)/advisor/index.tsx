@@ -221,9 +221,9 @@ export default function AdvisorScreen() {
     setInputText('');
     // Scroll to bottom immediately when sending
     scrollToBottom();
-    // Mark as read when user sends a message (replying to check-in clears indicator)
-    markAsRead();
     await sendMessage(text);
+    // Mark as read AFTER response arrives so the new assistant message is also marked read
+    markAsRead();
     // Scroll again after response arrives
     scrollToBottom();
   };

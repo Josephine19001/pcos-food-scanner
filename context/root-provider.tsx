@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Toaster } from 'sonner-native';
 import { AuthProvider } from './auth-provider';
 import { RevenueCatProvider } from './revenuecat-provider';
+import { NotificationProvider } from './notification-provider';
 import { ThemeProvider } from './theme-provider';
 import { TabBarProvider } from './tab-bar-provider';
 
@@ -28,14 +29,16 @@ export const RootProvider = ({ children }: PropsWithChildren) => {
       <ThemeProvider>
         <AuthProvider>
           <RevenueCatProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <BottomSheetModalProvider>
-                <TabBarProvider>
-                  {children}
-                  <Toaster theme="dark" />
-                </TabBarProvider>
-              </BottomSheetModalProvider>
-            </GestureHandlerRootView>
+            <NotificationProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <BottomSheetModalProvider>
+                  <TabBarProvider>
+                    {children}
+                    <Toaster theme="dark" />
+                  </TabBarProvider>
+                </BottomSheetModalProvider>
+              </GestureHandlerRootView>
+            </NotificationProvider>
           </RevenueCatProvider>
         </AuthProvider>
       </ThemeProvider>

@@ -3,12 +3,7 @@ import { toast } from 'sonner-native';
 import { queryKeys } from './query-keys';
 import { handleError } from './utils';
 import { supabase } from '@/lib/supabase/client';
-import {
-  Debt,
-  DebtPayment,
-  DebtSummary,
-  DebtCategory,
-} from '@/lib/types/debt';
+import { Debt, DebtPayment, DebtSummary, DebtCategory } from '@/lib/types/debt';
 
 /**
  * Fetch all debts, optionally filtered by search query
@@ -21,10 +16,7 @@ export function useDebts(
   return useQuery({
     queryKey: queryKeys.debts.list(search),
     queryFn: async () => {
-      let query = supabase
-        .from('debts')
-        .select('*')
-        .order('interest_rate', { ascending: false });
+      let query = supabase.from('debts').select('*').order('interest_rate', { ascending: false });
 
       if (search && search.trim()) {
         query = query.or(`name.ilike.%${search}%,category.ilike.%${search}%`);
@@ -49,11 +41,7 @@ export function useDebt(
   return useQuery({
     queryKey: queryKeys.debts.detail(id),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('debts')
-        .select('*')
-        .eq('id', id)
-        .single();
+      const { data, error } = await supabase.from('debts').select('*').eq('id', id).single();
 
       if (error) throw new Error(error.message);
       return data as Debt;
@@ -150,7 +138,9 @@ export function useCreateDebt() {
 
   return useMutation({
     mutationFn: async (payload: CreateDebtPayload) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
@@ -174,7 +164,7 @@ export function useCreateDebt() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.debts.all });
-      toast.success('Debt added successfully');
+      // toast.success('Debt added successfully');
     },
     onError: (err: any) => handleError(err, 'Failed to add debt'),
   });
@@ -211,7 +201,7 @@ export function useUpdateDebt() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: queryKeys.debts.all });
       qc.invalidateQueries({ queryKey: queryKeys.debts.detail(data.id) });
-      toast.success('Debt updated successfully');
+      // toast.success('Debt updated successfully');
     },
     onError: (err: any) => handleError(err, 'Failed to update debt'),
   });
@@ -225,19 +215,59 @@ export function useDeleteDebt() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('debts')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('debts').delete().eq('id', id);
 
       if (error) throw new Error(error.message);
       return id;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.debts.all });
-      toast.success('Debt deleted successfully');
+      // toast.success('Debt deleted successfully');
     },
     onError: (err: any) => handleError(err, 'Failed to delete debt'),
+  });
+}
+
+/**
+ * Fetch debts that are due today (based on due_date matching today's day of month)
+ * Excludes debts that already have a payment recorded today
+ */
+export function usePaymentsDue() {
+  const today = new Date();
+  const dayOfMonth = today.getDate();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+  const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
+
+  return useQuery({
+    queryKey: queryKeys.debts.paymentsDue(),
+    queryFn: async () => {
+      // Get debts due today
+      const { data: debts, error: debtsError } = await supabase
+        .from('debts')
+        .select('*')
+        .eq('status', 'active')
+        .eq('due_date', dayOfMonth);
+
+      if (debtsError) throw new Error(debtsError.message);
+      if (!debts || debts.length === 0) return [];
+
+      // Get payments made today for these debts
+      const debtIds = debts.map((d) => d.id);
+      const { data: payments, error: paymentsError } = await supabase
+        .from('debt_payments')
+        .select('debt_id')
+        .in('debt_id', debtIds)
+        .gte('payment_date', todayStart)
+        .lt('payment_date', todayEnd);
+
+      if (paymentsError) throw new Error(paymentsError.message);
+
+      // Filter out debts that already have a payment today
+      const paidDebtIds = new Set(payments?.map((p) => p.debt_id) || []);
+      const unpaidDebts = debts.filter((d) => !paidDebtIds.has(d.id));
+
+      return unpaidDebts as Debt[];
+    },
   });
 }
 
@@ -269,7 +299,7 @@ export function useRecordPayment() {
       qc.invalidateQueries({ queryKey: queryKeys.debts.all });
       qc.invalidateQueries({ queryKey: queryKeys.debts.detail(data.debt_id) });
       qc.invalidateQueries({ queryKey: queryKeys.debts.payments(data.debt_id) });
-      toast.success('Payment recorded successfully');
+      // toast.success('Payment recorded successfully');
     },
     onError: (err: any) => handleError(err, 'Failed to record payment'),
   });

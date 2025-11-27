@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import {
@@ -7,9 +7,12 @@ import {
   Edit3,
   Calendar,
   CreditCard,
+  Check,
 } from 'lucide-react-native';
 import { PageLayout, SectionHeader } from '@/components/layouts';
-import { useDebt, useDeleteDebt } from '@/lib/hooks/use-debts';
+import { GlassBottomSheet, GlassBottomSheetRef } from '@/components/ui/glass-bottom-sheet';
+import { useDebt, useDeleteDebt, useRecordPayment, useDebtPayments } from '@/lib/hooks/use-debts';
+import * as Haptics from 'expo-haptics';
 import { showConfirmAlert } from '@/lib/utils/alert';
 import {
   formatCurrency,
@@ -36,10 +39,15 @@ export default function DebtDetailScreen() {
   const id = typeof params.id === 'string' ? params.id : params.id?.[0] ?? '';
   const router = useRouter();
   const { data: debt, isLoading } = useDebt(id);
+  const { data: payments } = useDebtPayments(id);
   const deleteDebt = useDeleteDebt();
+  const recordPayment = useRecordPayment();
+  const paymentSheetRef = useRef<GlassBottomSheetRef>(null);
+  const historySheetRef = useRef<GlassBottomSheetRef>(null);
 
   const [extraPayment, setExtraPayment] = useState<number | null>(null);
   const [newRate, setNewRate] = useState<number | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
 
   useEffect(() => {
     if (debt) {
@@ -68,6 +76,31 @@ export default function DebtDetailScreen() {
 
   const handleEdit = () => {
     router.push(`/debt/edit/${id}`);
+  };
+
+  const handleOpenPaymentSheet = () => {
+    if (debt) {
+      setPaymentAmount(debt.minimum_payment.toString());
+      paymentSheetRef.current?.expand();
+    }
+  };
+
+  const handleRecordPayment = async () => {
+    const amount = parseFloat(paymentAmount);
+    if (!amount || amount <= 0 || !debt) return;
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    paymentSheetRef.current?.close();
+    await recordPayment.mutateAsync({
+      debt_id: debt.id,
+      amount,
+    });
+    setPaymentAmount('');
+  };
+
+  const handleQuickPay = (amount: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPaymentAmount(amount.toString());
   };
 
   if (isLoading) {
@@ -227,6 +260,68 @@ export default function DebtDetailScreen() {
           ]}
         />
 
+        {/* Payment History Section */}
+        {payments && payments.length > 0 && (
+          <>
+            <SectionHeader title="Payment History" />
+            <View className="mx-4 rounded-2xl overflow-hidden">
+              <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill}>
+                <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.05)' }} />
+              </BlurView>
+              <View className="absolute inset-0 rounded-2xl border border-white/10" />
+
+              {payments.slice(0, 5).map((payment, index) => {
+                const paymentDate = new Date(payment.payment_date);
+                const formattedDate = paymentDate.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                });
+
+                return (
+                  <View
+                    key={payment.id}
+                    className={`flex-row items-center justify-between p-4 ${
+                      index !== Math.min(payments.length - 1, 4) ? 'border-b border-white/10' : ''
+                    }`}
+                  >
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-full bg-emerald-500/20 items-center justify-center mr-3">
+                        <Check size={18} color="#10B981" />
+                      </View>
+                      <View>
+                        <Text className="text-white font-medium">
+                          {formatCurrency(payment.amount)}
+                        </Text>
+                        <Text className="text-gray-500 text-xs">{formattedDate}</Text>
+                      </View>
+                    </View>
+                    <View className="items-end">
+                      <Text className="text-gray-400 text-xs">
+                        Principal: {formatCurrency(payment.principal_paid)}
+                      </Text>
+                      <Text className="text-gray-500 text-xs">
+                        Interest: {formatCurrency(payment.interest_paid)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+
+              {payments.length > 5 && (
+                <Pressable
+                  onPress={() => historySheetRef.current?.expand()}
+                  className="p-3 border-t border-white/10"
+                >
+                  <Text className="text-emerald-400 text-center text-sm font-medium">
+                    See all {payments.length} payments
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          </>
+        )}
+
         {/* What If Section */}
         <SectionHeader title="What If..." />
 
@@ -244,6 +339,150 @@ export default function DebtDetailScreen() {
           onNewRateChange={setNewRate}
         />
       </ScrollView>
+
+      {/* Record Payment Button */}
+      <View className="absolute bottom-0 left-0 right-0 px-4 pb-8 pt-4">
+        <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
+        <Pressable
+          onPress={handleOpenPaymentSheet}
+          className="bg-emerald-500 rounded-2xl py-4 flex-row items-center justify-center"
+        >
+          <Check size={20} color="#FFFFFF" />
+          <Text className="text-white font-semibold text-lg ml-2">Record Payment</Text>
+        </Pressable>
+      </View>
+
+      {/* Payment Bottom Sheet */}
+      <GlassBottomSheet ref={paymentSheetRef} snapPoints={['45%']}>
+        <View className="px-5 pt-2 pb-4">
+          <Text className="text-white text-xl font-semibold mb-2">Record Payment</Text>
+          <Text className="text-gray-400 text-sm mb-6">
+            Enter the amount you paid towards {debt.name}
+          </Text>
+
+          {/* Amount Input */}
+          <View className="bg-white/5 rounded-2xl p-4 mb-4 border border-white/10">
+            <Text className="text-gray-400 text-sm mb-2">Payment Amount</Text>
+            <View className="flex-row items-center">
+              <Text className="text-white text-3xl font-bold mr-1">$</Text>
+              <TextInput
+                value={paymentAmount}
+                onChangeText={setPaymentAmount}
+                keyboardType="decimal-pad"
+                placeholder="0"
+                placeholderTextColor="#6B7280"
+                className="text-white text-3xl font-bold flex-1"
+                style={{ padding: 0 }}
+              />
+            </View>
+          </View>
+
+          {/* Quick Amount Buttons */}
+          <View className="flex-row gap-2 mb-6">
+            <Pressable
+              onPress={() => handleQuickPay(debt.minimum_payment)}
+              className={`flex-1 py-3 rounded-xl border ${
+                paymentAmount === debt.minimum_payment.toString()
+                  ? 'bg-emerald-500/20 border-emerald-500/50'
+                  : 'bg-white/5 border-white/10'
+              }`}
+            >
+              <Text className="text-white text-center font-medium">
+                Min ({formatCurrency(debt.minimum_payment)})
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => handleQuickPay(debt.minimum_payment * 2)}
+              className={`flex-1 py-3 rounded-xl border ${
+                paymentAmount === (debt.minimum_payment * 2).toString()
+                  ? 'bg-emerald-500/20 border-emerald-500/50'
+                  : 'bg-white/5 border-white/10'
+              }`}
+            >
+              <Text className="text-white text-center font-medium">
+                2x ({formatCurrency(debt.minimum_payment * 2)})
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => handleQuickPay(debt.current_balance)}
+              className={`flex-1 py-3 rounded-xl border ${
+                paymentAmount === debt.current_balance.toString()
+                  ? 'bg-emerald-500/20 border-emerald-500/50'
+                  : 'bg-white/5 border-white/10'
+              }`}
+            >
+              <Text className="text-white text-center font-medium">Full</Text>
+            </Pressable>
+          </View>
+
+          {/* Confirm Button */}
+          <Pressable
+            onPress={handleRecordPayment}
+            disabled={!paymentAmount || parseFloat(paymentAmount) <= 0 || recordPayment.isPending}
+            className={`rounded-2xl py-4 ${
+              paymentAmount && parseFloat(paymentAmount) > 0
+                ? 'bg-emerald-500'
+                : 'bg-gray-700'
+            }`}
+          >
+            <Text className="text-white font-semibold text-lg text-center">
+              {recordPayment.isPending ? 'Recording...' : 'Confirm Payment'}
+            </Text>
+          </Pressable>
+        </View>
+      </GlassBottomSheet>
+
+      {/* Payment History Bottom Sheet */}
+      {payments && payments.length > 0 && (
+        <GlassBottomSheet ref={historySheetRef} snapPoints={['70%']}>
+          <View className="px-5 pt-2 pb-4 flex-1">
+            <Text className="text-white text-xl font-semibold mb-2">Payment History</Text>
+            <Text className="text-gray-400 text-sm mb-4">
+              {payments.length} payments recorded for {debt.name}
+            </Text>
+
+            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+              {payments.map((payment, index) => {
+                const paymentDate = new Date(payment.payment_date);
+                const formattedDate = paymentDate.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                });
+
+                return (
+                  <View
+                    key={payment.id}
+                    className={`flex-row items-center justify-between py-3 ${
+                      index !== payments.length - 1 ? 'border-b border-white/10' : ''
+                    }`}
+                  >
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-full bg-emerald-500/20 items-center justify-center mr-3">
+                        <Check size={18} color="#10B981" />
+                      </View>
+                      <View>
+                        <Text className="text-white font-medium">
+                          {formatCurrency(payment.amount)}
+                        </Text>
+                        <Text className="text-gray-500 text-xs">{formattedDate}</Text>
+                      </View>
+                    </View>
+                    <View className="items-end">
+                      <Text className="text-gray-400 text-xs">
+                        Principal: {formatCurrency(payment.principal_paid)}
+                      </Text>
+                      <Text className="text-gray-500 text-xs">
+                        Interest: {formatCurrency(payment.interest_paid)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </GlassBottomSheet>
+      )}
     </PageLayout>
   );
 }

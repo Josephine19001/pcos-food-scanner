@@ -39,7 +39,7 @@ export default function ProfileScreen() {
 
     try {
       await updateAccount.mutateAsync({ name, username });
-      toast.success('Profile updated successfully');
+      // toast.success('Profile updated successfully');
       setHasChanges(false);
     } catch (error) {
       // Error handled by mutation
@@ -54,19 +54,10 @@ export default function ProfileScreen() {
       isLoading={isLoading}
       skeletonFields={3}
       rightAction={
-        <SaveButton
-          onPress={handleSave}
-          disabled={!hasChanges}
-          loading={updateAccount.isPending}
-        />
+        <SaveButton onPress={handleSave} disabled={!hasChanges} loading={updateAccount.isPending} />
       }
     >
-      <FormField
-        label="Name"
-        value={name}
-        onChangeText={setName}
-        placeholder="Enter your name"
-      />
+      <FormField label="Name" value={name} onChangeText={setName} placeholder="Enter your name" />
 
       <FormField
         label="Username"
@@ -75,11 +66,7 @@ export default function ProfileScreen() {
         placeholder="Enter username"
       />
 
-      <FormField
-        label="Email"
-        value={email}
-        editable={false}
-      />
+      <FormField label="Email" value={email} editable={false} />
     </FormPage>
   );
 }

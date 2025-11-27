@@ -18,6 +18,33 @@ interface PaymentSummary {
   payment_count: number;
 }
 
+interface ExpoPushMessage {
+  to: string;
+  sound: 'default';
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+}
+
+async function sendExpoPushNotification(message: ExpoPushMessage): Promise<boolean> {
+  try {
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(message),
+    });
+
+    const result = await response.json();
+    return result.data?.status === 'ok';
+  } catch (err) {
+    console.error('Push notification error:', err);
+    return false;
+  }
+}
+
 function getSupabaseServiceClient() {
   return createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
@@ -97,10 +124,10 @@ Deno.serve(async (req) => {
 
     const supabase = getSupabaseServiceClient();
 
-    // Get all accounts
+    // Get all accounts with push tokens
     const { data: accounts, error: accountsError } = await supabase
       .from('accounts')
-      .select('id, name');
+      .select('id, name, push_token');
 
     if (accountsError) {
       throw new Error(`Failed to fetch accounts: ${accountsError.message}`);
@@ -163,6 +190,18 @@ Deno.serve(async (req) => {
           errors.push(`Account ${account.id}: ${insertError.message}`);
         } else {
           messagesSent++;
+
+          // Send push notification if user has a push token
+          if (account.push_token) {
+            const firstName = account.name?.split(' ')[0] || 'Hey';
+            await sendExpoPushNotification({
+              to: account.push_token,
+              sound: 'default',
+              title: 'Weekly Check-in',
+              body: `${firstName}, your debt advisor has a message for you!`,
+              data: { type: 'weekly_checkin' },
+            });
+          }
         }
       } catch (err: any) {
         errors.push(`Account ${account.id}: ${err.message}`);

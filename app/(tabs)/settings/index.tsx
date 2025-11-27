@@ -6,11 +6,15 @@ import {
   Pressable,
   Linking,
   StyleSheet,
+  TextInput,
+  ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { PageLayout, GlassCard } from '@/components/layouts';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
-import { showConfirmAlert } from '@/lib/utils/alert';
+import { useAuth } from '@/context/auth-provider';
 import {
   User,
   Bell,
@@ -80,28 +84,46 @@ function SettingsGroup({
   );
 }
 
+const DELETE_REASONS = [
+  'No longer need the app',
+  'Found a better alternative',
+  'Too difficult to use',
+  'Privacy concerns',
+  'Other',
+];
+
 export default function SettingsScreen() {
   const router = useRouter();
+  const { deleteAccount, signOut } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [additionalComments, setAdditionalComments] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLogout = async () => {
     setShowLogoutModal(false);
-    router.replace('/auth');
+    await signOut();
   };
 
   const handleDeleteAccount = async () => {
-    // TODO: Implement account deletion
-    router.replace('/auth');
+    if (!deleteReason) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteAccount(deleteReason, additionalComments);
+      setShowDeleteModal(false);
+    } catch {
+      // Error is handled in auth provider
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const showDeleteAlert = () => {
-    showConfirmAlert({
-      title: 'Delete Account',
-      message: 'This action cannot be undone. All your data will be permanently deleted.',
-      confirmText: 'Delete',
-      onConfirm: handleDeleteAccount,
-      destructive: true,
-    });
+    setDeleteReason('');
+    setAdditionalComments('');
+    setShowDeleteModal(true);
   };
 
   return (
@@ -203,6 +225,110 @@ export default function SettingsScreen() {
         confirmText="Log Out"
         cancelText="Cancel"
       />
+
+      {/* Delete Account Modal */}
+      <Modal visible={showDeleteModal} transparent animationType="fade">
+        <Pressable
+          className="flex-1 justify-center items-center px-6"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+          onPress={() => !isDeleting && setShowDeleteModal(false)}
+        >
+          <Pressable
+            className="w-full rounded-3xl overflow-hidden"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill}>
+              <View
+                style={{
+                  ...StyleSheet.absoluteFillObject,
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                }}
+              />
+            </BlurView>
+            <View
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+            />
+            <View className="p-6">
+              <Text className="text-xl font-semibold text-center mb-2 text-white">
+                Delete Account
+              </Text>
+              <Text className="text-gray-400 text-center mb-4">
+                This action cannot be undone. All your data will be permanently deleted.
+              </Text>
+
+              <Text className="text-white font-medium mb-2">
+                Please tell us why you're leaving:
+              </Text>
+              {DELETE_REASONS.map((reason) => (
+                <Pressable
+                  key={reason}
+                  onPress={() => setDeleteReason(reason)}
+                  className={`flex-row items-center py-3 px-3 rounded-lg mb-2 ${
+                    deleteReason === reason ? 'bg-red-500/20' : 'bg-white/5'
+                  }`}
+                >
+                  <View
+                    className={`w-5 h-5 rounded-full border-2 mr-3 items-center justify-center ${
+                      deleteReason === reason ? 'border-red-500' : 'border-gray-500'
+                    }`}
+                  >
+                    {deleteReason === reason && (
+                      <View className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                    )}
+                  </View>
+                  <Text className="text-white">{reason}</Text>
+                </Pressable>
+              ))}
+
+              <TextInput
+                placeholder="Additional comments (optional)"
+                placeholderTextColor="#6B7280"
+                value={additionalComments}
+                onChangeText={setAdditionalComments}
+                multiline
+                numberOfLines={3}
+                className="bg-white/5 rounded-lg p-3 text-white mt-2 mb-4"
+                style={{ textAlignVertical: 'top', minHeight: 80 }}
+              />
+
+              {isDeleting && (
+                <View className="flex-row items-center justify-center mb-4">
+                  <ActivityIndicator size="small" color="#EF4444" />
+                  <Text className="text-gray-400 ml-2">Deleting your account...</Text>
+                </View>
+              )}
+
+              <View className="gap-3">
+                <Pressable
+                  onPress={handleDeleteAccount}
+                  disabled={!deleteReason || isDeleting}
+                  className={`py-4 rounded-2xl ${
+                    !deleteReason || isDeleting ? 'bg-red-500/40' : 'bg-red-500/80'
+                  }`}
+                >
+                  <Text className="text-white text-center font-semibold">
+                    {isDeleting ? 'Deleting...' : 'Delete Account'}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => setShowDeleteModal(false)}
+                  disabled={isDeleting}
+                  className="py-4 rounded-2xl"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  <Text className="text-white text-center font-medium">Cancel</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </PageLayout>
   );
 }

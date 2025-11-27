@@ -10,6 +10,7 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.debts.all, 'detail', id] as const,
     summary: () => [...queryKeys.debts.all, 'summary'] as const,
     payments: (debtId: string) => [...queryKeys.debts.all, 'payments', debtId] as const,
+    paymentsDue: () => [...queryKeys.debts.all, 'payments-due'] as const,
   },
   subscription: {
     all: ['subscription'] as const,
