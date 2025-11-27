@@ -1,94 +1,60 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { useAuth } from '@/context/auth-provider';
 import { useRevenueCat } from '@/context/revenuecat-provider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { WelcomeScreen } from '@/components/screens';
 
-const ONBOARDING_COMPLETE_KEY = '@debt_free_onboarding_complete';
+SplashScreen.preventAutoHideAsync();
 
 export default function Index() {
-  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { isSubscribed, loading: subscriptionLoading } = useRevenueCat();
-  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
 
   useEffect(() => {
-    checkOnboardingStatus();
-  }, []);
+    const navigate = async () => {
+      await SplashScreen.hideAsync();
 
-  useEffect(() => {
-    // Wait for all loading states to complete
-    if (authLoading || subscriptionLoading || checkingOnboarding) {
-      return;
+      if (user) {
+        // User exists but no active subscription -> show paywall
+        if (!isSubscribed) {
+          router.replace('/paywall');
+        } else {
+          // User has active subscription -> go to home
+          router.replace('/(tabs)/home');
+        }
+      }
+    };
+
+    // Only navigate when not loading
+    if (!authLoading && !subscriptionLoading) {
+      navigate();
     }
+  }, [user, authLoading, subscriptionLoading, isSubscribed]);
 
-    navigateToAppropriateScreen();
-  }, [user, authLoading, subscriptionLoading, isSubscribed, checkingOnboarding, hasSeenOnboarding]);
+  // Show loading state while checking auth/subscription
+  if (authLoading || subscriptionLoading) {
+    return (
+      <View className="flex-1 bg-[#0F0F0F] items-center justify-center">
+        <ActivityIndicator size="large" color="#10B981" />
+      </View>
+    );
+  }
 
-  const checkOnboardingStatus = async () => {
-    try {
-      const value = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-      setHasSeenOnboarding(value === 'true');
-    } catch (error) {
-      console.error('Error checking onboarding status:', error);
-    } finally {
-      setCheckingOnboarding(false);
-    }
-  };
+  // No user -> show welcome screen
+  if (!user) {
+    return (
+      <View style={{ flex: 1 }}>
+        <WelcomeScreen />
+      </View>
+    );
+  }
 
-  const navigateToAppropriateScreen = () => {
-    // Case 1: User not logged in and hasn't seen onboarding -> Welcome screen
-    if (!user && !hasSeenOnboarding) {
-      router.replace('/welcome');
-      return;
-    }
-
-    // Case 2: User not logged in but has seen onboarding -> Auth screen
-    if (!user && hasSeenOnboarding) {
-      router.replace('/auth?mode=signin');
-      return;
-    }
-
-    // Case 3: User logged in but not subscribed -> Paywall
-    if (user && !isSubscribed) {
-      router.replace('/paywall');
-      return;
-    }
-
-    // Case 4: User logged in and subscribed -> Home
-    if (user && isSubscribed) {
-      router.replace('/(tabs)/home');
-      return;
-    }
-
-    // Default: Go to home
-    router.replace('/(tabs)/home');
-  };
-
-  // Show loading indicator while checking states
+  // User exists -> show loader while determining route
   return (
     <View className="flex-1 bg-[#0F0F0F] items-center justify-center">
       <ActivityIndicator size="large" color="#10B981" />
     </View>
   );
 }
-
-// Helper function to mark onboarding as complete (call this after signup)
-export const markOnboardingComplete = async () => {
-  try {
-    await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, 'true');
-  } catch (error) {
-    console.error('Error marking onboarding complete:', error);
-  }
-};
-
-// Helper function to reset onboarding (useful for testing)
-export const resetOnboarding = async () => {
-  try {
-    await AsyncStorage.removeItem(ONBOARDING_COMPLETE_KEY);
-  } catch (error) {
-    console.error('Error resetting onboarding:', error);
-  }
-};

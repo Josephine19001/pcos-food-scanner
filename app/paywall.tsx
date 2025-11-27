@@ -55,11 +55,16 @@ export default function PaywallScreen() {
   const monthlyPackage = offerings?.current?.monthly;
   const yearlyPackage = offerings?.current?.annual;
 
-  // Use RevenueCat prices or fallbacks
+  // Use RevenueCat formatted price strings (includes currency symbol)
+  const monthlyPriceString = monthlyPackage?.product.priceString ?? `$${FALLBACK_MONTHLY_PRICE}`;
+  const yearlyPriceString = yearlyPackage?.product.priceString ?? `$${FALLBACK_YEARLY_PRICE}`;
+  const yearlyPerMonthString = yearlyPackage?.product.pricePerMonthString ?? `$${(FALLBACK_YEARLY_PRICE / 12).toFixed(2)}`;
+
+  // Numeric prices for calculations
   const monthlyPrice = monthlyPackage?.product.price ?? FALLBACK_MONTHLY_PRICE;
   const yearlyPrice = yearlyPackage?.product.price ?? FALLBACK_YEARLY_PRICE;
 
-  const currentPrice = selectedPlan === 'yearly' ? yearlyPrice : monthlyPrice;
+  const currentPriceString = selectedPlan === 'yearly' ? yearlyPriceString : monthlyPriceString;
   const savingsPercent = Math.round((1 - (yearlyPrice / 12) / monthlyPrice) * 100);
 
   const handleStartTrial = async () => {
@@ -163,8 +168,8 @@ export default function PaywallScreen() {
                       {selectedPlan === 'yearly' && <Check size={12} color="#fff" />}
                     </View>
                     <Text className="text-white font-bold text-lg mb-1">Yearly</Text>
-                    <Text className="text-white font-bold text-2xl">${yearlyPrice.toFixed(2)}</Text>
-                    <Text className="text-gray-500 text-sm">${(yearlyPrice / 12).toFixed(2)}/mo</Text>
+                    <Text className="text-white font-bold text-2xl">{yearlyPriceString}</Text>
+                    <Text className="text-gray-500 text-sm">{yearlyPerMonthString}/mo</Text>
                   </View>
                 </View>
               </Pressable>
@@ -189,7 +194,7 @@ export default function PaywallScreen() {
                       {selectedPlan === 'monthly' && <Check size={12} color="#fff" />}
                     </View>
                     <Text className="text-white font-bold text-lg mb-1">Monthly</Text>
-                    <Text className="text-white font-bold text-2xl">${monthlyPrice.toFixed(2)}</Text>
+                    <Text className="text-white font-bold text-2xl">{monthlyPriceString}</Text>
                     <Text className="text-gray-500 text-sm">/month</Text>
                   </View>
                 </View>
@@ -243,11 +248,11 @@ export default function PaywallScreen() {
               </Text>
               {selectedPlan === 'yearly' ? (
                 <Text className="text-emerald-200 text-sm mt-1">
-                  Then ${currentPrice.toFixed(2)}/year
+                  Then {currentPriceString}/year
                 </Text>
               ) : (
                 <Text className="text-emerald-200 text-sm mt-1">
-                  ${currentPrice.toFixed(2)}/month
+                  {currentPriceString}/month
                 </Text>
               )}
             </View>

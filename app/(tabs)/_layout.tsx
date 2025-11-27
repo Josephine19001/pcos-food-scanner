@@ -4,12 +4,17 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeIcon, DebtsIcon, AdvisorIcon, SettingsIcon } from '@/components/icons/tab-icons';
 import { useTabBar } from '@/context/tab-bar-provider';
+import { useUnreadMessages, useUnreadRealtime } from '@/lib/hooks/use-chat';
 import * as Haptics from 'expo-haptics';
 
 function CustomTabBar({ state, navigation }: any) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { hideTabBar } = useTabBar();
+  const { hasUnread } = useUnreadMessages();
+
+  // Set up realtime subscription for unread notifications
+  useUnreadRealtime();
 
   const mainTabs = state.routes.filter((route: any) => route.name !== 'advisor/index');
 
@@ -66,6 +71,9 @@ function CustomTabBar({ state, navigation }: any) {
       <Pressable onPress={handleAdvisorPress}>
         <View className="w-[60px] h-[60px] rounded-full items-center justify-center bg-emerald-500/30">
           <AdvisorIcon size={26} color="#10B981" />
+          {hasUnread && (
+            <View className="absolute top-1 right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-[#0F0F0F]" />
+          )}
         </View>
       </Pressable>
     </View>

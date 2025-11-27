@@ -33,6 +33,7 @@ async function getAuthenticatedUser(supabaseClient: any) {
 
 interface ChatPayload {
   message: string;
+  focusedDebtId?: string | null;
 }
 
 interface Debt {
@@ -46,29 +47,36 @@ interface Debt {
   status: string;
 }
 
-function buildSystemPrompt(debts: Debt[], totalBalance: number, totalMinPayment: number): string {
-  const debtSummary = debts.map((d) =>
-    `- ${d.name} (${d.category}): $${d.current_balance.toLocaleString()} at ${(d.interest_rate * 100).toFixed(2)}% APR, min payment $${d.minimum_payment}`
-  ).join("\n");
+function buildSystemPrompt(focusedDebt: Debt | null, allDebtsCount: number, totalBalance: number): string {
+  // Minimal context - only what's needed
+  let context = "";
 
-  return `You are a helpful debt advisor assistant for a personal finance app. You help users understand their debt situation and make informed financial decisions.
+  if (focusedDebt) {
+    // Single debt focus - very minimal
+    context = `FOCUSED DEBT: ${focusedDebt.name}
+Balance: $${focusedDebt.current_balance.toLocaleString()}
+APR: ${(focusedDebt.interest_rate * 100).toFixed(1)}%
+Min payment: $${focusedDebt.minimum_payment}/mo`;
+  } else if (allDebtsCount > 0) {
+    // All debts - just summary
+    context = `Total debt: $${totalBalance.toLocaleString()} across ${allDebtsCount} ${allDebtsCount === 1 ? 'debt' : 'debts'}`;
+  } else {
+    context = "No debts recorded yet.";
+  }
 
-CURRENT USER'S DEBT SITUATION:
-Total Debt: $${totalBalance.toLocaleString()}
-Total Minimum Monthly Payment: $${totalMinPayment.toLocaleString()}
-Number of Debts: ${debts.length}
+  return `You're a friendly debt buddy. Supportive, chill, helpful.
 
-${debts.length > 0 ? `INDIVIDUAL DEBTS:\n${debtSummary}` : "The user has no debts recorded yet."}
+${context}
 
-GUIDELINES:
-- Be encouraging but realistic about debt payoff
-- Explain the avalanche method (paying highest interest first) and snowball method (paying smallest balance first)
-- When asked about consolidation, consider their current interest rates
-- Provide specific advice based on their actual debt data
-- Keep responses concise and actionable (2-3 paragraphs max)
-- Never provide investment advice or guarantee specific outcomes
-- If they ask about something unrelated to debt/personal finance, politely redirect
-- Use simple language, avoid jargon`;
+RULES:
+- 2-4 sentences MAX
+- Only greet if user greets first
+- Answer questions directly without filler
+- DON'T end every message with encouragement like "You've got this!" or "Keep going!" - save that for when they actually need a boost
+- DON'T be repetitive - vary your tone
+- Be specific to their numbers
+- Sound like a real friend texting, not a motivational poster
+- 1 emoji max, only if it fits naturally`;
 }
 
 Deno.serve(async (req) => {
@@ -87,7 +95,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { message }: ChatPayload = await req.json();
+    const { message, focusedDebtId }: ChatPayload = await req.json();
 
     if (!message || !message.trim()) {
       return new Response(
@@ -102,7 +110,7 @@ Deno.serve(async (req) => {
     // Fetch user's debts for context
     const { data: debts, error: debtsError } = await supabase
       .from("debts")
-      .select("*")
+      .select("id, name, category, current_balance, interest_rate, minimum_payment")
       .eq("account_id", user.id)
       .eq("status", "active");
 
@@ -112,15 +120,19 @@ Deno.serve(async (req) => {
 
     const userDebts: Debt[] = debts || [];
     const totalBalance = userDebts.reduce((sum, d) => sum + Number(d.current_balance), 0);
-    const totalMinPayment = userDebts.reduce((sum, d) => sum + Number(d.minimum_payment), 0);
 
-    // Get recent chat history for context (last 10 messages)
+    // Find focused debt if specified
+    const focusedDebt = focusedDebtId
+      ? userDebts.find((d) => d.id === focusedDebtId) || null
+      : null;
+
+    // Get recent chat history for context (last 6 messages - reduced for less context)
     const { data: recentMessages } = await supabase
       .from("chat_messages")
       .select("role, content")
       .eq("account_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(10);
+      .limit(6);
 
     const chatHistory = (recentMessages || [])
       .reverse()
@@ -135,7 +147,7 @@ Deno.serve(async (req) => {
       throw new Error("OpenAI API key not configured");
     }
 
-    const systemPrompt = buildSystemPrompt(userDebts, totalBalance, totalMinPayment);
+    const systemPrompt = buildSystemPrompt(focusedDebt, userDebts.length, totalBalance);
 
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -150,8 +162,8 @@ Deno.serve(async (req) => {
           ...chatHistory,
           { role: "user", content: message },
         ],
-        max_tokens: 500,
-        temperature: 0.7,
+        max_tokens: 250,
+        temperature: 0.8,
       }),
     });
 

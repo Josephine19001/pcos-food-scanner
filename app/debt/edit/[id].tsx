@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { PageLayout } from '@/components/layouts';
 import { FormField, SaveButton } from '@/components/ui/form-page';
-import { useCreateDebt } from '@/lib/hooks/use-debts';
+import { useDebt, useUpdateDebt } from '@/lib/hooks/use-debts';
 import { DebtCategory, DEBT_CATEGORY_CONFIG } from '@/lib/types/debt';
 import { Check } from 'lucide-react-native';
+import { DebtDetailSkeleton } from '@/components/debts';
 
 const CATEGORIES: DebtCategory[] = [
   'credit_card',
@@ -19,9 +20,12 @@ const CATEGORIES: DebtCategory[] = [
 
 const DUE_DATE_OPTIONS = Array.from({ length: 31 }, (_, i) => i + 1);
 
-export default function AddDebtScreen() {
+export default function EditDebtScreen() {
+  const params = useLocalSearchParams();
+  const id = typeof params.id === 'string' ? params.id : params.id?.[0] ?? '';
   const router = useRouter();
-  const createDebt = useCreateDebt();
+  const { data: debt, isLoading } = useDebt(id);
+  const updateDebt = useUpdateDebt();
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState<DebtCategory>('credit_card');
@@ -30,6 +34,18 @@ export default function AddDebtScreen() {
   const [minimumPayment, setMinimumPayment] = useState('');
   const [dueDate, setDueDate] = useState(1);
 
+  // Populate form with existing debt data
+  useEffect(() => {
+    if (debt) {
+      setName(debt.name);
+      setCategory(debt.category);
+      setBalance(debt.current_balance.toString());
+      setInterestRate((debt.interest_rate * 100).toFixed(2));
+      setMinimumPayment(debt.minimum_payment.toString());
+      setDueDate(debt.due_date);
+    }
+  }, [debt]);
+
   const isValid =
     name.trim() &&
     parseFloat(balance) > 0 &&
@@ -37,13 +53,14 @@ export default function AddDebtScreen() {
     parseFloat(minimumPayment) > 0;
 
   const handleSave = async () => {
-    if (!isValid) return;
+    if (!isValid || !debt) return;
 
-    await createDebt.mutateAsync({
+    await updateDebt.mutateAsync({
+      id,
       name: name.trim(),
       category,
       current_balance: parseFloat(balance),
-      interest_rate: parseFloat(interestRate) / 100, // Convert percentage to decimal
+      interest_rate: parseFloat(interestRate) / 100,
       minimum_payment: parseFloat(minimumPayment),
       due_date: dueDate,
     });
@@ -51,15 +68,42 @@ export default function AddDebtScreen() {
     router.back();
   };
 
+  if (isLoading) {
+    return (
+      <PageLayout title="" showBackButton>
+        <DebtDetailSkeleton />
+      </PageLayout>
+    );
+  }
+
+  if (!debt) {
+    return (
+      <PageLayout title="Not Found" showBackButton>
+        <View className="flex-1 items-center justify-center px-4">
+          <Text className="text-gray-400 text-center">
+            Debt not found. It may have been deleted.
+          </Text>
+        </View>
+      </PageLayout>
+    );
+  }
+
+  const getDueDateSuffix = (day: number) => {
+    if (day === 1 || day === 21 || day === 31) return 'st';
+    if (day === 2 || day === 22) return 'nd';
+    if (day === 3 || day === 23) return 'rd';
+    return 'th';
+  };
+
   return (
     <PageLayout
-      title="Add Debt"
+      title="Edit Debt"
       showBackButton
       rightAction={
         <SaveButton
           onPress={handleSave}
           disabled={!isValid}
-          loading={createDebt.isPending}
+          loading={updateDebt.isPending}
           label="Save"
         />
       }
@@ -151,12 +195,6 @@ export default function AddDebtScreen() {
             >
               {DUE_DATE_OPTIONS.map((day) => {
                 const isSelected = dueDate === day;
-                const getDueDateSuffix = (d: number) => {
-                  if (d === 1 || d === 21 || d === 31) return 'st';
-                  if (d === 2 || d === 22) return 'nd';
-                  if (d === 3 || d === 23) return 'rd';
-                  return 'th';
-                };
                 return (
                   <Pressable
                     key={day}

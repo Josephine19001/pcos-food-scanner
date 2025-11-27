@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { toast } from 'sonner-native';
 import { FormPage, FormField, SaveButton } from '@/components/ui/form-page';
+import { supabase } from '@/lib/supabase/client';
 
 export default function FeedbackScreen() {
   const router = useRouter();
@@ -14,8 +15,21 @@ export default function FeedbackScreen() {
 
     setIsSubmitting(true);
     try {
-      // TODO: Send feedback to backend
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please sign in to submit feedback');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('feedback')
+        .insert({
+          account_id: user.id,
+          feedback: feedback.trim(),
+        });
+
+      if (error) throw error;
+
       toast.success('Thank you for your feedback!');
       router.back();
     } catch (error) {

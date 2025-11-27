@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
-import { useMutation, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef, useCallback } from 'react';
+import { useMutation, useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
 import { queryKeys } from './query-keys';
 import { handleError } from './utils';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/context/auth-provider';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface ChatMessage {
   id: string;
@@ -121,7 +122,7 @@ export function useChatRealtime() {
 /**
  * Send a message and get AI response
  */
-export function useSendMessage() {
+export function useSendMessage(focusedDebtId: string | null = null) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -144,7 +145,7 @@ export function useSendMessage() {
 
       // Call the edge function for AI response
       const { data, error } = await supabase.functions.invoke('chat-advisor', {
-        body: { message: content },
+        body: { message: content, focusedDebtId },
       });
 
       if (error) throw new Error(error.message);
@@ -187,9 +188,9 @@ export function useClearChat() {
 /**
  * Combined hook for chat functionality
  */
-export function useChat() {
+export function useChat(focusedDebtId: string | null = null) {
   const messagesQuery = useChatMessages();
-  const sendMessage = useSendMessage();
+  const sendMessage = useSendMessage(focusedDebtId);
   const clearChat = useClearChat();
 
   // Set up realtime subscription
@@ -212,4 +213,123 @@ export function useChat() {
     isFetchingMore: messagesQuery.isFetchingNextPage,
     fetchMore: messagesQuery.fetchNextPage,
   };
+}
+
+const LAST_READ_KEY = 'advisor_last_read_at';
+
+/**
+ * Get the last read timestamp from storage
+ */
+async function getLastReadTimestamp(): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(LAST_READ_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Set the last read timestamp in storage
+ */
+async function setLastReadTimestamp(timestamp: string): Promise<void> {
+  try {
+    await AsyncStorage.setItem(LAST_READ_KEY, timestamp);
+  } catch {
+    // Silently fail
+  }
+}
+
+/**
+ * Hook to check if there are unread messages from the advisor
+ */
+export function useUnreadMessages() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: hasUnread = false, isLoading } = useQuery({
+    queryKey: queryKeys.chat.unreadCount(),
+    queryFn: async () => {
+      if (!user) return false;
+
+      const lastRead = await getLastReadTimestamp();
+
+      // Query for assistant messages after last read time
+      let query = supabase
+        .from('chat_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('account_id', user.id)
+        .eq('role', 'assistant');
+
+      if (lastRead) {
+        query = query.gt('created_at', lastRead);
+      }
+
+      const { count, error } = await query;
+
+      if (error) {
+        console.error('Error checking unread messages:', error);
+        return false;
+      }
+
+      return (count ?? 0) > 0;
+    },
+    enabled: !!user,
+    staleTime: 30000, // Consider stale after 30 seconds
+    refetchInterval: 60000, // Refetch every minute
+  });
+
+  const markAsRead = useCallback(async () => {
+    const now = new Date().toISOString();
+    await setLastReadTimestamp(now);
+    // Invalidate the query to refetch
+    queryClient.setQueryData(queryKeys.chat.unreadCount(), false);
+  }, [queryClient]);
+
+  return {
+    hasUnread,
+    isLoading,
+    markAsRead,
+  };
+}
+
+/**
+ * Hook for realtime unread notification updates
+ */
+export function useUnreadRealtime() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const channelRef = useRef<RealtimeChannel | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Subscribe to new assistant messages
+    const channel = supabase
+      .channel('unread_messages_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `account_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newMessage = payload.new as ChatMessage;
+          // Only update unread count for assistant messages
+          if (newMessage.role === 'assistant') {
+            queryClient.setQueryData(queryKeys.chat.unreadCount(), true);
+          }
+        }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
+  }, [user, queryClient]);
 }

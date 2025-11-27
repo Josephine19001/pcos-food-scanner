@@ -25,8 +25,11 @@ export function ExtraPaymentSlider({
   extraPayment,
   onExtraPaymentChange,
 }: ExtraPaymentSliderProps) {
-  const scenario = calculateExtraPaymentScenario(debt, extraPayment);
+  // extraPayment is the total monthly payment, starting at minimum_payment
+  const extraAboveMinimum = Math.max(0, extraPayment - debt.minimum_payment);
+  const scenario = calculateExtraPaymentScenario(debt, extraAboveMinimum);
   const maxExtra = Math.min(500, debt.current_balance / 2);
+  const maxPayment = debt.minimum_payment + maxExtra;
 
   return (
     <GlassCard>
@@ -35,7 +38,7 @@ export function ExtraPaymentSlider({
           <DollarSign size={20} color="#10B981" />
         </View>
         <View>
-          <Text className="text-white font-semibold">Extra Monthly Payment</Text>
+          <Text className="text-white font-semibold">Monthly Payment</Text>
           <Text className="text-gray-400 text-xs">See how extra payments accelerate payoff</Text>
         </View>
       </View>
@@ -43,30 +46,34 @@ export function ExtraPaymentSlider({
       {/* Slider */}
       <View className="mb-4">
         <View className="flex-row justify-between mb-2">
-          <Text className="text-gray-400 text-sm">Extra Payment</Text>
+          <Text className="text-gray-400 text-sm">Payment Amount</Text>
           <Text className="text-emerald-400 font-bold text-lg">
-            +{formatCurrency(extraPayment)}/mo
+            {formatCurrency(extraPayment)}/mo
           </Text>
         </View>
         <Slider
           value={extraPayment}
           onValueChange={onExtraPaymentChange}
-          minimumValue={0}
-          maximumValue={maxExtra}
+          minimumValue={debt.minimum_payment}
+          maximumValue={maxPayment}
           step={10}
           minimumTrackTintColor="#10B981"
           maximumTrackTintColor="rgba(255,255,255,0.1)"
           thumbTintColor="#10B981"
         />
         <View className="flex-row justify-between">
-          <Text className="text-gray-500 text-xs">$0</Text>
-          <Text className="text-gray-500 text-xs">{formatCurrency(maxExtra)}</Text>
+          <Text className="text-gray-500 text-xs">{formatCurrency(debt.minimum_payment)} (min)</Text>
+          <Text className="text-gray-500 text-xs">{formatCurrency(maxPayment)}</Text>
         </View>
       </View>
 
       {/* Results */}
-      {extraPayment > 0 && (
+      {extraAboveMinimum > 0 && (
         <View className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/20">
+          <Text className="text-emerald-400 text-sm mb-3">
+            +{formatCurrency(extraAboveMinimum)} extra per month
+          </Text>
+
           <View className="flex-row justify-between mb-3">
             <View className="flex-row items-center">
               <Calendar size={16} color="#10B981" />

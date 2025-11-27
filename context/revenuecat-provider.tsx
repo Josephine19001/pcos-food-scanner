@@ -48,6 +48,9 @@ export function RevenueCatProvider({ children }: { children: ReactNode }) {
   // Load subscription when user changes
   useEffect(() => {
     if (user) {
+      // Set loading to true immediately while we fetch subscription status
+      setState((prev) => ({ ...prev, loading: true }));
+
       Purchases.logIn(user.id)
         .then(() => {
           return loadSubscriptionStatus();

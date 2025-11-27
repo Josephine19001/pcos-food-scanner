@@ -38,14 +38,19 @@ export default function DebtDetailScreen() {
   const { data: debt, isLoading } = useDebt(id);
   const deleteDebt = useDeleteDebt();
 
-  const [extraPayment, setExtraPayment] = useState(0);
-  const [newRate, setNewRate] = useState(0);
+  const [extraPayment, setExtraPayment] = useState<number | null>(null);
+  const [newRate, setNewRate] = useState<number | null>(null);
 
   useEffect(() => {
-    if (debt && newRate === 0) {
-      setNewRate(debt.interest_rate);
+    if (debt) {
+      if (extraPayment === null) {
+        setExtraPayment(debt.minimum_payment);
+      }
+      if (newRate === null) {
+        setNewRate(debt.interest_rate);
+      }
     }
-  }, [debt, newRate]);
+  }, [debt, extraPayment, newRate]);
 
   const handleDelete = () => {
     if (!debt) return;
@@ -228,14 +233,14 @@ export default function DebtDetailScreen() {
         {/* Extra Payment Slider */}
         <ExtraPaymentSlider
           debt={debt}
-          extraPayment={extraPayment}
+          extraPayment={extraPayment ?? debt.minimum_payment}
           onExtraPaymentChange={setExtraPayment}
         />
 
         {/* Refinance Slider */}
         <RefinanceSlider
           debt={debt}
-          newRate={newRate}
+          newRate={newRate ?? debt.interest_rate}
           onNewRateChange={setNewRate}
         />
       </ScrollView>

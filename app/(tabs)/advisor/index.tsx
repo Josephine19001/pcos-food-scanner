@@ -11,15 +11,19 @@ import {
   StyleSheet,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Modal,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Send, Trash2, ChevronLeft } from 'lucide-react-native';
-import { useChat, ChatMessage } from '@/lib/hooks/use-chat';
-import { useDebtSummary } from '@/lib/hooks/use-debts';
+import { Send, Trash2, ChevronLeft, ChevronDown, Check } from 'lucide-react-native';
+import { useChat, ChatMessage, useUnreadMessages } from '@/lib/hooks/use-chat';
+import { useDebts, useDebtSummary } from '@/lib/hooks/use-debts';
 import { useTabBar } from '@/context/tab-bar-provider';
 import { AdvisorIcon } from '@/components/icons/tab-icons';
+import { formatCurrency } from '@/lib/utils/debt-calculator';
 import * as Haptics from 'expo-haptics';
 
 const QUICK_PROMPTS = [
@@ -58,6 +62,38 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   );
 }
 
+function TypingIndicator() {
+  const [activeDot, setActiveDot] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveDot((prev) => (prev + 1) % 3);
+    }, 300);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <View style={[styles.messageBubble, styles.assistantBubble]}>
+      <View style={styles.assistantIcon}>
+        <AdvisorIcon size={16} color="#10B981" />
+      </View>
+      <View style={[styles.messageContent, styles.assistantContent, styles.typingContent]}>
+        <View style={styles.dotsContainer}>
+          {[0, 1, 2].map((i) => (
+            <View
+              key={i}
+              style={[
+                styles.dot,
+                { opacity: activeDot === i ? 1 : 0.3 },
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function EmptyState({ onPromptPress }: { onPromptPress: (prompt: string) => void }) {
   return (
     <View style={styles.emptyState}>
@@ -88,8 +124,11 @@ export default function AdvisorScreen() {
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
   const [inputText, setInputText] = useState('');
+  const [selectedDebtId, setSelectedDebtId] = useState<string | null>(null);
+  const [showDebtPicker, setShowDebtPicker] = useState(false);
 
   const { hideTabBar, showTabBar } = useTabBar();
+  const { markAsRead } = useUnreadMessages();
   const {
     messages,
     isLoading,
@@ -100,15 +139,37 @@ export default function AdvisorScreen() {
     hasMore,
     isFetchingMore,
     fetchMore,
-  } = useChat();
+  } = useChat(selectedDebtId);
   const { data: summary } = useDebtSummary();
+  const { data: debts } = useDebts();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
+  const selectedDebt = selectedDebtId ? debts?.find((d) => d.id === selectedDebtId) : null;
+  const displayLabel = selectedDebt ? selectedDebt.name : 'All Debts';
+  const displayAmount = selectedDebt
+    ? formatCurrency(selectedDebt.current_balance)
+    : summary
+      ? formatCurrency(summary.total_balance)
+      : null;
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardWillShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardWillHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   // Hide tab bar when entering, show when leaving
+  // Also mark messages as read when opening the screen
   useEffect(() => {
     hideTabBar();
+    markAsRead();
     return () => showTabBar();
-  }, [hideTabBar, showTabBar]);
+  }, [hideTabBar, showTabBar, markAsRead]);
 
   // Scroll to bottom on initial load only
   useEffect(() => {
@@ -126,6 +187,13 @@ export default function AdvisorScreen() {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, []);
+
+  // Scroll to bottom when typing indicator appears
+  useEffect(() => {
+    if (isSending) {
+      scrollToBottom();
+    }
+  }, [isSending, scrollToBottom]);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -151,7 +219,12 @@ export default function AdvisorScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const text = inputText.trim();
     setInputText('');
+    // Scroll to bottom immediately when sending
+    scrollToBottom();
+    // Mark as read when user sends a message (replying to check-in clears indicator)
+    markAsRead();
     await sendMessage(text);
+    // Scroll again after response arrives
     scrollToBottom();
   };
 
@@ -178,14 +251,23 @@ export default function AdvisorScreen() {
         <Pressable onPress={handleBack} style={styles.backButton}>
           <ChevronLeft size={28} color="#FFFFFF" strokeWidth={2} />
         </Pressable>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Advisor</Text>
-          {summary && (
+        <Pressable
+          style={styles.headerCenter}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowDebtPicker(true);
+          }}
+        >
+          <View style={styles.debtSelector}>
+            <Text style={styles.headerTitle}>Advisor</Text>
+            <ChevronDown size={16} color="#6B7280" style={{ marginLeft: 4 }} />
+          </View>
+          {displayAmount && (
             <Text style={styles.headerSubtitle}>
-              ${summary.total_balance.toLocaleString()} total debt
+              {displayLabel} · {displayAmount}
             </Text>
           )}
-        </View>
+        </Pressable>
         <View style={styles.headerRight}>
           {hasMessages && (
             <Pressable
@@ -202,6 +284,66 @@ export default function AdvisorScreen() {
           )}
         </View>
       </View>
+
+      {/* Debt Picker Modal */}
+      <Modal
+        visible={showDebtPicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDebtPicker(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowDebtPicker(false)}
+        >
+          <View style={[styles.modalContent, { paddingBottom: insets.bottom + 16 }]}>
+            <Text style={styles.modalTitle}>Focus on</Text>
+
+            {/* All Debts Option */}
+            <Pressable
+              style={styles.debtOption}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSelectedDebtId(null);
+                setShowDebtPicker(false);
+              }}
+            >
+              <View style={styles.debtOptionInfo}>
+                <Text style={styles.debtOptionName}>All Debts</Text>
+                {summary && (
+                  <Text style={styles.debtOptionAmount}>
+                    {formatCurrency(summary.total_balance)}
+                  </Text>
+                )}
+              </View>
+              {selectedDebtId === null && <Check size={20} color="#10B981" />}
+            </Pressable>
+
+            {/* Individual Debts */}
+            <ScrollView style={styles.debtList} showsVerticalScrollIndicator={false}>
+              {debts?.map((debt) => (
+                <Pressable
+                  key={debt.id}
+                  style={styles.debtOption}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setSelectedDebtId(debt.id);
+                    setShowDebtPicker(false);
+                  }}
+                >
+                  <View style={styles.debtOptionInfo}>
+                    <Text style={styles.debtOptionName}>{debt.name}</Text>
+                    <Text style={styles.debtOptionAmount}>
+                      {formatCurrency(debt.current_balance)}
+                    </Text>
+                  </View>
+                  {selectedDebtId === debt.id && <Check size={20} color="#10B981" />}
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
 
       {/* Messages */}
       <KeyboardAvoidingView
@@ -230,13 +372,14 @@ export default function AdvisorScreen() {
                 </View>
               ) : null
             }
+            ListFooterComponent={isSending ? <TypingIndicator /> : null}
           />
         ) : (
           <EmptyState onPromptPress={handlePromptPress} />
         )}
 
         {/* Input */}
-        <View style={[styles.inputContainer, { paddingBottom: insets.bottom + 16 }]}>
+        <View style={[styles.inputContainer, { paddingBottom: keyboardVisible ? 8 : insets.bottom + 8 }]}>
           <View style={styles.inputWrapper}>
             <LinearGradient
               colors={['#1a1a1f', '#141418']}
@@ -264,11 +407,7 @@ export default function AdvisorScreen() {
                 (!inputText.trim() || isSending) && styles.sendButtonDisabled,
               ]}
             >
-              {isSending ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Send size={20} color="#FFFFFF" />
-              )}
+              <Send size={20} color="#FFFFFF" />
             </Pressable>
           </View>
         </View>
@@ -458,5 +597,70 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: '#374151',
+  },
+  typingContent: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#9CA3AF',
+  },
+  debtSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#1a1a1f',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingHorizontal: 16,
+    maxHeight: '60%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  debtList: {
+    maxHeight: 300,
+  },
+  debtOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: '#141418',
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  debtOptionInfo: {
+    flex: 1,
+  },
+  debtOptionName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#FFFFFF',
+  },
+  debtOptionAmount: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 2,
   },
 });
