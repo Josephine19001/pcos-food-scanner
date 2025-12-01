@@ -3,9 +3,11 @@ import { Tabs, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Lock } from 'lucide-react-native';
 import { HomeIcon, DebtsIcon, AdvisorIcon, SettingsIcon } from '@/components/icons/tab-icons';
 import { useTabBar } from '@/context/tab-bar-provider';
 import { useUnreadMessages, useUnreadRealtime } from '@/lib/hooks/use-chat';
+import { useRevenueCat } from '@/context/revenuecat-provider';
 import * as Haptics from 'expo-haptics';
 
 function CustomTabBar({ state, navigation }: any) {
@@ -13,6 +15,7 @@ function CustomTabBar({ state, navigation }: any) {
   const insets = useSafeAreaInsets();
   const { hideTabBar } = useTabBar();
   const { hasUnread } = useUnreadMessages();
+  const { isSubscribed } = useRevenueCat();
 
   // Set up realtime subscription for unread notifications
   useUnreadRealtime();
@@ -21,6 +24,13 @@ function CustomTabBar({ state, navigation }: any) {
 
   const handleAdvisorPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    // Gate AI Advisor behind subscription
+    if (!isSubscribed) {
+      router.push('/paywall');
+      return;
+    }
+
     hideTabBar();
     router.push('/(tabs)/advisor');
   };
@@ -73,22 +83,35 @@ function CustomTabBar({ state, navigation }: any) {
         <View
           className="w-[60px] h-[60px] rounded-full items-center justify-center overflow-hidden"
           style={{
-            shadowColor: '#10B981',
+            shadowColor: isSubscribed ? '#10B981' : '#6B7280',
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.4,
+            shadowOpacity: isSubscribed ? 0.4 : 0.2,
             shadowRadius: 12,
             elevation: 8,
           }}
         >
           <LinearGradient
-            colors={['#10B981', '#059669']}
+            colors={isSubscribed ? ['#10B981', '#059669'] : ['#4B5563', '#374151']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
-          <View className="absolute inset-0 rounded-full border border-emerald-400/30" />
-          <AdvisorIcon size={26} color="#FFFFFF" />
-          {hasUnread && (
+          <View
+            className={`absolute inset-0 rounded-full border ${
+              isSubscribed ? 'border-emerald-400/30' : 'border-gray-500/30'
+            }`}
+          />
+          <View style={{ opacity: isSubscribed ? 1 : 0.5 }}>
+            <AdvisorIcon size={26} color="#FFFFFF" />
+          </View>
+          {/* Lock icon for non-subscribers */}
+          {!isSubscribed && (
+            <View className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-gray-700 items-center justify-center border border-gray-500">
+              <Lock size={10} color="#FFFFFF" />
+            </View>
+          )}
+          {/* Unread badge for subscribers */}
+          {isSubscribed && hasUnread && (
             <View className="absolute top-1 right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-emerald-500" />
           )}
         </View>

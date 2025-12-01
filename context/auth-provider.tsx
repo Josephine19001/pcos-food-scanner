@@ -15,7 +15,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  signInWithApple: () => Promise<void>;
+  signInWithApple: () => Promise<boolean>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   deleteAccount: (reason: string, additionalComments?: string) => Promise<void>;
@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signInWithApple = async () => {
+  const signInWithApple = async (): Promise<boolean> => {
     setLoading(true);
     try {
       const nonce = Math.random().toString(36).substring(2, 10);
@@ -164,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
       }
 
-      const { error } = await supabase.auth.signInWithIdToken({
+      const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'apple',
         token: appleCredential.identityToken!,
         nonce,
@@ -172,9 +172,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) throw error;
+
+      // Ensure account exists in database
+      if (data.user) {
+        await ensureAccountExists(data.user.id, data.user.email, options.data?.full_name);
+      }
+
+      // Navigate to paywall after successful sign-in
+      router.replace('/paywall');
+      return true;
     } catch (error: any) {
       if (error.code === 'ERR_REQUEST_CANCELED') {
-        return;
+        return false; // Cancelled
       }
       console.error('Apple sign-in error:', error);
       toast.error(error.message || 'Failed to sign in with Apple');

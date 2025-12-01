@@ -171,6 +171,7 @@ export default function OnboardingScreen() {
     try {
       await saveOnboardingData();
       await signInWithApple();
+      // Navigation is handled in auth provider after successful sign-in
     } catch (error) {
       console.error('Apple auth error:', error);
     } finally {
@@ -178,18 +179,20 @@ export default function OnboardingScreen() {
     }
   };
 
-  const handleGoogleAuth = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setGoogleLoading(true);
-    try {
-      await saveOnboardingData();
-      await signInWithGoogle();
-    } catch (error) {
-      console.error('Google auth error:', error);
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
+  // const handleGoogleAuth = async () => {
+  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  //   setGoogleLoading(true);
+  //   try {
+  //     await saveOnboardingData();
+  //     await signInWithGoogle();
+  //     // Navigate to index which will handle routing based on subscription status
+  //     router.replace('/');
+  //   } catch (error) {
+  //     console.error('Google auth error:', error);
+  //   } finally {
+  //     setGoogleLoading(false);
+  //   }
+  // };
 
   const revealAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: revealScale.value }],

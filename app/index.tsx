@@ -36,27 +36,49 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    if (!appIsReady || authLoading || subscriptionLoading) {
+    if (!appIsReady || authLoading) {
       return;
     }
 
-    if (user) {
-      if (!isSubscribed) {
-        router.replace('/paywall');
-      } else {
-        router.replace('/(tabs)/home');
-      }
+    // No user - don't wait for subscription loading
+    if (!user) {
+      return;
+    }
+
+    // User exists - wait for subscription status before routing
+    if (subscriptionLoading) {
+      return;
+    }
+
+    // Show paywall to non-subscribers (they can skip with "Continue for Free")
+    if (!isSubscribed) {
+      router.replace('/paywall');
+    } else {
+      router.replace('/(tabs)/home');
     }
   }, [appIsReady, user, authLoading, subscriptionLoading, isSubscribed]);
 
   const onLayoutRootView = useCallback(() => {
-    if (appIsReady && !authLoading && !subscriptionLoading) {
+    if (appIsReady && !authLoading) {
       SplashScreen.hide();
     }
-  }, [appIsReady, authLoading, subscriptionLoading]);
+  }, [appIsReady, authLoading]);
 
-  if (!appIsReady || authLoading || subscriptionLoading) {
+  // Only wait for auth loading initially
+  if (!appIsReady || authLoading) {
     return null;
+  }
+
+  // If user exists but subscription is still loading, show loader
+  if (user && subscriptionLoading) {
+    return (
+      <View
+        className="flex-1 bg-[#0F0F0F] items-center justify-center"
+        onLayout={onLayoutRootView}
+      >
+        <ActivityIndicator size="large" color="#10B981" />
+      </View>
+    );
   }
 
   // No user -> show welcome screen

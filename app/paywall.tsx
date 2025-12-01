@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet, Linking, ScrollView, StatusBar } fro
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Unlock, TrendingUp, Calendar, PiggyBank, Check } from 'lucide-react-native';
+import { Bot, MessageCircle, Sparkles, Check } from 'lucide-react-native';
 import { useRevenueCat } from '@/context/revenuecat-provider';
 import { APP_URLS } from '@/lib/config/urls';
 
@@ -16,19 +16,19 @@ type PlanType = 'monthly' | 'yearly';
 
 const features = [
   {
-    icon: TrendingUp,
-    title: 'Debt Avalanche Scheduler',
-    description: 'Optimized payment strategy to save thousands',
+    icon: Bot,
+    title: 'AI Debt Advisor',
+    description: 'Get personalized advice for your situation',
   },
   {
-    icon: Calendar,
-    title: 'Custom Payoff Timeline',
-    description: 'See your exact debt-free date',
+    icon: MessageCircle,
+    title: 'Unlimited Conversations',
+    description: 'Ask anything about your debt strategy',
   },
   {
-    icon: PiggyBank,
-    title: 'Scenario Planner',
-    description: 'What-if analysis for extra payments',
+    icon: Sparkles,
+    title: 'Smart Recommendations',
+    description: 'AI-powered insights to pay off debt faster',
   },
 ];
 
@@ -86,12 +86,12 @@ export default function PaywallScreen() {
             {/* Header */}
             <View className="items-center mb-8">
               <View className="w-20 h-20 rounded-3xl bg-emerald-500/20 items-center justify-center mb-4">
-                <Unlock size={40} color="#10B981" />
+                <Bot size={40} color="#10B981" />
               </View>
               <Text className="text-white text-2xl font-bold text-center mb-2">
-                Unlock Your Savings
+                Unlock AI Advisor
               </Text>
-              <Text className="text-gray-400 text-center">You're about to save thousands</Text>
+              <Text className="text-gray-400 text-center">Your personal debt-free coach</Text>
             </View>
 
             {/* Features */}
@@ -235,6 +235,13 @@ export default function PaywallScreen() {
                 <Text className="text-emerald-200 text-sm mt-1">{currentPriceString}/month</Text>
               )}
             </View>
+          </Pressable>
+
+          {/* Continue for Free */}
+          <Pressable onPress={() => router.replace('/(tabs)/home')} className="mb-4">
+            <Text className="text-gray-400 text-center text-base font-medium">
+              Continue for Free
+            </Text>
           </Pressable>
 
           {/* Secondary Actions */}
