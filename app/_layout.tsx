@@ -23,6 +23,7 @@ export default function Layout() {
         <Stack
           screenOptions={{
             headerShown: false,
+            contentStyle: { backgroundColor: '#FFFFFF' },
           }}
         >
           {/* Main App Entry */}
@@ -45,11 +46,8 @@ export default function Layout() {
           {/* Settings Pages */}
           <Stack.Screen name="profile" />
           <Stack.Screen name="feedback" />
-          <Stack.Screen name="notifications" />
-          <Stack.Screen name="currency" />
-
-          {/* Debt Pages */}
-          <Stack.Screen name="debt" />
+          <Stack.Screen name="referral" />
+          <Stack.Screen name="how-it-works" />
 
           {/* Error Handling */}
           <Stack.Screen name="+not-found" />

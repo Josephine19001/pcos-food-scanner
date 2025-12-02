@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: PropsWithChildren) {
   const systemTheme = useColorScheme();
-  const [theme, setThemeState] = useState<Theme>('dark'); // Default to dark theme
+  const [theme, setThemeState] = useState<Theme>('light'); // Default to light theme
   const [isLoading, setIsLoading] = useState(true);
 
   // Calculate resolved theme
@@ -25,18 +25,18 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     const loadTheme = async () => {
       try {
         const storedTheme = await getStoredTheme();
-        
+
         if (storedTheme === 'system') {
-          // First time user - default to dark theme
-          setThemeState('dark');
-          await saveTheme('dark');
+          // First time user - default to light theme
+          setThemeState('light');
+          await saveTheme('light');
         } else {
           setThemeState(storedTheme);
         }
       } catch (error) {
         console.error('Error loading theme preference:', error);
-        // Fallback to dark theme as default
-        setThemeState('dark');
+        // Fallback to light theme as default
+        setThemeState('light');
       } finally {
         setIsLoading(false);
       }

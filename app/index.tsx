@@ -73,10 +73,10 @@ export default function Index() {
   if (user && subscriptionLoading) {
     return (
       <View
-        className="flex-1 bg-[#0F0F0F] items-center justify-center"
+        className="flex-1 bg-white items-center justify-center"
         onLayout={onLayoutRootView}
       >
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#0D9488" />
       </View>
     );
   }
@@ -93,10 +93,10 @@ export default function Index() {
   // User exists -> show loader while navigating
   return (
     <View
-      className="flex-1 bg-[#0F0F0F] items-center justify-center"
+      className="flex-1 bg-white items-center justify-center"
       onLayout={onLayoutRootView}
     >
-      <ActivityIndicator size="large" color="#10B981" />
+      <ActivityIndicator size="large" color="#0D9488" />
     </View>
   );
 }

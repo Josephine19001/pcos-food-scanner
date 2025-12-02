@@ -12,15 +12,12 @@ import {
   Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { PageLayout, GlassCard } from '@/components/layouts';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { useAuth } from '@/context/auth-provider';
-import { useCurrency } from '@/context/currency-provider';
 import { APP_URLS } from '@/lib/config/urls';
 import {
   User,
-  Bell,
   Shield,
   FileText,
   MessageCircle,
@@ -29,7 +26,8 @@ import {
   Trash2,
   ChevronRight,
   Gift,
-  Coins,
+  Info,
+  HelpCircle,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
@@ -52,13 +50,13 @@ function SettingsItem({
     <Pressable onPress={onPress} className="flex-row items-center py-4 px-1">
       <View
         className={`w-9 h-9 rounded-full items-center justify-center mr-3 ${
-          danger ? 'bg-red-500/20' : 'bg-white/5'
+          danger ? 'bg-red-100' : 'bg-gray-100'
         }`}
       >
-        <Icon size={18} color={danger ? '#EF4444' : '#9CA3AF'} />
+        <Icon size={18} color={danger ? '#EF4444' : '#6B7280'} />
       </View>
-      <Text className={`flex-1 text-base ${danger ? 'text-red-400' : 'text-white'}`}>{label}</Text>
-      {showChevron && <ChevronRight size={20} color="#6B7280" />}
+      <Text className={`flex-1 text-base ${danger ? 'text-red-500' : 'text-gray-900'}`}>{label}</Text>
+      {showChevron && <ChevronRight size={20} color="#D1D5DB" />}
     </Pressable>
   );
 }
@@ -87,7 +85,6 @@ const DELETE_REASONS = [
 export default function SettingsScreen() {
   const router = useRouter();
   const { deleteAccount, signOut } = useAuth();
-  const { currency } = useCurrency();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteReason, setDeleteReason] = useState('');
@@ -102,7 +99,7 @@ export default function SettingsScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `I've been using Debt Free to crush my debt and it's actually working! If you're looking for a simple way to track your payments and stay motivated, check it out:\n\n${APP_URLS.appStore}`,
+        message: `I've been using PCOS Food Scanner to manage my diet and it's been really helpful! If you have PCOS, check it out:\n\n${APP_URLS.appStore}`,
       });
     } catch {
       // User cancelled or error
@@ -140,20 +137,19 @@ export default function SettingsScreen() {
         <Pressable onPress={handleShare} className="mx-4 mb-4">
           <View className="rounded-2xl overflow-hidden">
             <LinearGradient
-              colors={['#064e3b', '#065f46', '#047857']}
+              colors={['#0D9488', '#0F766E', '#115E59']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
-            <View className="absolute inset-0 rounded-2xl border border-emerald-400/20" />
             <View className="p-4 flex-row items-center">
               <View className="w-12 h-12 rounded-2xl bg-white/15 items-center justify-center mr-4">
                 <Gift size={24} color="#ffffff" />
               </View>
               <View className="flex-1">
                 <Text className="text-white font-bold text-base">Share with Friends</Text>
-                <Text className="text-emerald-100/80 text-sm">
-                  Help a friend start their debt-free journey
+                <Text className="text-white/80 text-sm">
+                  Help others manage their PCOS diet
                 </Text>
               </View>
               <ChevronRight size={20} color="rgba(255,255,255,0.7)" />
@@ -164,24 +160,6 @@ export default function SettingsScreen() {
         {/* Account Section */}
         <SettingsGroup title="Account">
           <SettingsItem icon={User} label="Profile" onPress={() => router.push('/profile')} />
-          <View className="h-px bg-white/10 mx-1" />
-          <SettingsItem
-            icon={Bell}
-            label="Notifications"
-            onPress={() => router.push('/notifications')}
-          />
-          <View className="h-px bg-white/10 mx-1" />
-          <Pressable
-            onPress={() => router.push('/currency')}
-            className="flex-row items-center py-4 px-1"
-          >
-            <View className="w-9 h-9 rounded-full items-center justify-center mr-3 bg-white/5">
-              <Coins size={18} color="#9CA3AF" />
-            </View>
-            <Text className="flex-1 text-base text-white">Currency</Text>
-            <Text className="text-gray-400 mr-2">{currency.flag} {currency.code}</Text>
-            <ChevronRight size={20} color="#6B7280" />
-          </Pressable>
         </SettingsGroup>
 
         {/* Support Section */}
@@ -191,8 +169,23 @@ export default function SettingsScreen() {
             label="Give Feedback"
             onPress={() => router.push('/feedback')}
           />
-          <View className="h-px bg-white/10 mx-1" />
+          <View className="h-px bg-gray-200 mx-1" />
           <SettingsItem icon={Star} label="Rate the App" onPress={() => {}} />
+        </SettingsGroup>
+
+        {/* About Section */}
+        <SettingsGroup title="About">
+          <SettingsItem
+            icon={HelpCircle}
+            label="How It Works"
+            onPress={() => router.push('/how-it-works')}
+          />
+          <View className="h-px bg-gray-200 mx-1" />
+          <SettingsItem
+            icon={Info}
+            label="About PCOS"
+            onPress={() => Linking.openURL('https://www.womenshealth.gov/a-z-topics/polycystic-ovary-syndrome')}
+          />
         </SettingsGroup>
 
         {/* Legal Section */}
@@ -202,7 +195,7 @@ export default function SettingsScreen() {
             label="Terms of Service"
             onPress={() => Linking.openURL(APP_URLS.terms)}
           />
-          <View className="h-px bg-white/10 mx-1" />
+          <View className="h-px bg-gray-200 mx-1" />
           <SettingsItem
             icon={Shield}
             label="Privacy Policy"
@@ -218,7 +211,7 @@ export default function SettingsScreen() {
             onPress={() => setShowLogoutModal(true)}
             showChevron={false}
           />
-          <View className="h-px bg-white/10 mx-1" />
+          <View className="h-px bg-gray-200 mx-1" />
           <SettingsItem
             icon={Trash2}
             label="Delete Account"
@@ -230,7 +223,7 @@ export default function SettingsScreen() {
 
         {/* App Version */}
         <View className="items-center mt-4">
-          <Text className="text-gray-600 text-sm">Debt Free v1.0.0</Text>
+          <Text className="text-gray-400 text-sm">PCOS Food Scanner v1.0.0</Text>
         </View>
       </ScrollView>
 
@@ -249,38 +242,22 @@ export default function SettingsScreen() {
       <Modal visible={showDeleteModal} transparent animationType="fade">
         <Pressable
           className="flex-1 justify-center items-center px-6"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
           onPress={() => !isDeleting && setShowDeleteModal(false)}
         >
           <Pressable
-            className="w-full rounded-3xl overflow-hidden"
+            className="w-full rounded-3xl overflow-hidden bg-white"
             onPress={(e) => e.stopPropagation()}
           >
-            <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill}>
-              <View
-                style={{
-                  ...StyleSheet.absoluteFillObject,
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                }}
-              />
-            </BlurView>
-            <View
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                borderRadius: 24,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}
-            />
             <View className="p-6">
-              <Text className="text-xl font-semibold text-center mb-2 text-white">
+              <Text className="text-xl font-semibold text-center mb-2 text-gray-900">
                 Delete Account
               </Text>
-              <Text className="text-gray-400 text-center mb-4">
+              <Text className="text-gray-500 text-center mb-4">
                 This action cannot be undone. All your data will be permanently deleted.
               </Text>
 
-              <Text className="text-white font-medium mb-2">
+              <Text className="text-gray-900 font-medium mb-2">
                 Please tell us why you're leaving:
               </Text>
               {DELETE_REASONS.map((reason) => (
@@ -288,37 +265,37 @@ export default function SettingsScreen() {
                   key={reason}
                   onPress={() => setDeleteReason(reason)}
                   className={`flex-row items-center py-3 px-3 rounded-lg mb-2 ${
-                    deleteReason === reason ? 'bg-red-500/20' : 'bg-white/5'
+                    deleteReason === reason ? 'bg-red-50' : 'bg-gray-100'
                   }`}
                 >
                   <View
                     className={`w-5 h-5 rounded-full border-2 mr-3 items-center justify-center ${
-                      deleteReason === reason ? 'border-red-500' : 'border-gray-500'
+                      deleteReason === reason ? 'border-red-500' : 'border-gray-400'
                     }`}
                   >
                     {deleteReason === reason && (
                       <View className="w-2.5 h-2.5 rounded-full bg-red-500" />
                     )}
                   </View>
-                  <Text className="text-white">{reason}</Text>
+                  <Text className="text-gray-900">{reason}</Text>
                 </Pressable>
               ))}
 
               <TextInput
                 placeholder="Additional comments (optional)"
-                placeholderTextColor="#6B7280"
+                placeholderTextColor="#9CA3AF"
                 value={additionalComments}
                 onChangeText={setAdditionalComments}
                 multiline
                 numberOfLines={3}
-                className="bg-white/5 rounded-lg p-3 text-white mt-2 mb-4"
+                className="bg-gray-100 rounded-lg p-3 text-gray-900 mt-2 mb-4"
                 style={{ textAlignVertical: 'top', minHeight: 80 }}
               />
 
               {isDeleting && (
                 <View className="flex-row items-center justify-center mb-4">
                   <ActivityIndicator size="small" color="#EF4444" />
-                  <Text className="text-gray-400 ml-2">Deleting your account...</Text>
+                  <Text className="text-gray-500 ml-2">Deleting your account...</Text>
                 </View>
               )}
 
@@ -327,7 +304,7 @@ export default function SettingsScreen() {
                   onPress={handleDeleteAccount}
                   disabled={!deleteReason || isDeleting}
                   className={`py-4 rounded-2xl ${
-                    !deleteReason || isDeleting ? 'bg-red-500/40' : 'bg-red-500/80'
+                    !deleteReason || isDeleting ? 'bg-red-200' : 'bg-red-500'
                   }`}
                 >
                   <Text className="text-white text-center font-semibold">
@@ -338,10 +315,9 @@ export default function SettingsScreen() {
                 <Pressable
                   onPress={() => setShowDeleteModal(false)}
                   disabled={isDeleting}
-                  className="py-4 rounded-2xl"
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                  className="py-4 rounded-2xl bg-gray-100"
                 >
-                  <Text className="text-white text-center font-medium">Cancel</Text>
+                  <Text className="text-gray-900 text-center font-medium">Cancel</Text>
                 </Pressable>
               </View>
             </View>

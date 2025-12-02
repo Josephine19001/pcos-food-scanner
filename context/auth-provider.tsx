@@ -198,7 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Create redirect URI for OAuth
       const redirectUri = makeRedirectUri({
-        scheme: 'debtfree',
+        scheme: 'pcos-food-scanner',
         path: 'auth/callback',
       });
 

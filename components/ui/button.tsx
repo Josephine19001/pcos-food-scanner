@@ -41,11 +41,11 @@ export function Button({
 
     // Variant classes
     if (variant === 'primary') {
-      baseClasses += themed(' bg-pink-500', ' bg-pink-600');
+      baseClasses += themed(' bg-black', ' bg-white');
     } else if (variant === 'green') {
-      baseClasses += themed(' bg-green-500', ' bg-green-600');
+      baseClasses += themed(' bg-black', ' bg-white');
     } else {
-      baseClasses += themed(' bg-white border border-pink-500', ' bg-gray-800 border border-pink-600');
+      baseClasses += themed(' bg-white border border-black', ' bg-black border border-white');
     }
 
     // Disabled/loading state
@@ -74,9 +74,9 @@ export function Button({
 
     // Variant-based text color
     if (variant === 'primary' || variant === 'green') {
-      textClasses += ' text-white';
+      textClasses += themed(' text-white', ' text-black');
     } else {
-      textClasses += themed(' text-pink-500', ' text-pink-400');
+      textClasses += themed(' text-black', ' text-white');
     }
 
     return textClasses;

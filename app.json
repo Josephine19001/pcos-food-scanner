@@ -1,21 +1,22 @@
 {
   "expo": {
-    "name": "Debt Free",
-    "slug": "debtfree",
-    "version": "1.0.2",
+    "name": "PCOS Food Scanner",
+    "slug": "pcos-food-scanner",
+    "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "debtfree",
-    "userInterfaceStyle": "dark",
-    "newArchEnabled": false,
+    "icon": "./assets/images/logo.png",
+    "scheme": "pcos-food-scanner",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "userInterfaceStyle": "dark",
-      "bundleIdentifier": "com.debt-free.app",
+      "userInterfaceStyle": "light",
+      "bundleIdentifier": "com.pcos-food-scanner.app",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "UIBackgroundModes": ["remote-notification"]
+        "NSCameraUsageDescription": "PCOS Food Scanner uses your camera to scan food items and check if they are PCOS-friendly.",
+        "NSPhotoLibraryUsageDescription": "PCOS Food Scanner accesses your photo library to analyze food items from your saved photos.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "web": {
@@ -25,31 +26,26 @@
     },
     "plugins": [
       "expo-router",
+      "expo-camera",
+      "expo-image-picker",
       "expo-apple-authentication",
       [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#FFFFFF"
         }
       ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/icon.png",
-          "color": "#10B981",
-          "sounds": []
-        }
-      ]
+      "expo-web-browser"
     ],
-    "android": {
-      "package": "com.debt-free.app",
-      "googleServicesFile": "./google-services.json"
+    "experiments": {
+      "typedRoutes": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "33893c8a-e548-48d9-9b9e-09465e7e233a"
+        "projectId": "a7121311-8424-431f-b230-00dd96e02324"
       }
     }
   }

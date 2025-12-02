@@ -1,52 +1,33 @@
-import { BlurView } from 'expo-blur';
 import { Tabs, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Lock } from 'lucide-react-native';
-import { HomeIcon, DebtsIcon, AdvisorIcon, SettingsIcon } from '@/components/icons/tab-icons';
+import { Home, Settings, Scan } from 'lucide-react-native';
 import { useTabBar } from '@/context/tab-bar-provider';
-import { useUnreadMessages, useUnreadRealtime } from '@/lib/hooks/use-chat';
-import { useRevenueCat } from '@/context/revenuecat-provider';
 import * as Haptics from 'expo-haptics';
 
 function CustomTabBar({ state, navigation }: any) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { hideTabBar } = useTabBar();
-  const { hasUnread } = useUnreadMessages();
-  const { isSubscribed } = useRevenueCat();
 
-  // Set up realtime subscription for unread notifications
-  useUnreadRealtime();
-
-  const mainTabs = state.routes.filter((route: any) => route.name !== 'advisor/index');
-
-  const handleAdvisorPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    // Gate AI Advisor behind subscription
-    if (!isSubscribed) {
-      router.push('/paywall');
-      return;
-    }
-
-    hideTabBar();
-    router.push('/(tabs)/advisor');
+  const handleScanPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/(tabs)/scan');
   };
 
   return (
     <View
-      className="absolute bottom-0 left-0 right-0 flex-row items-center gap-3 px-5"
+      className="absolute bottom-0 left-0 right-0 flex-row items-end justify-center px-6"
       style={{ paddingBottom: insets.bottom + 10 }}
     >
-      {/* Main Tabs Container */}
-      <View className="flex-1 h-[60px] rounded-[30px] overflow-hidden">
-        <BlurView intensity={50} tint="dark" style={StyleSheet.absoluteFill} />
-        <View className="absolute inset-0 rounded-[30px] border border-white/10 bg-white/5" />
-        <View className="flex-1 flex-row items-center justify-around px-5">
-          {mainTabs.map((route: any) => {
-            const isFocused = state.index === state.routes.findIndex((r: any) => r.key === route.key);
+      {/* Tab Bar Container */}
+      <View className="flex-1 h-[64px] rounded-full overflow-hidden bg-white shadow-lg" style={styles.tabBar}>
+        <View className="flex-1 flex-row items-center justify-around px-6">
+          {/* Home Tab */}
+          {state.routes.map((route: any, index: number) => {
+            if (route.name === 'scan/index') return null;
+
+            const isFocused = state.index === index;
 
             const onPress = () => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -61,64 +42,76 @@ function CustomTabBar({ state, navigation }: any) {
               }
             };
 
-            const color = isFocused ? '#10B981' : '#9BA1A6';
+            const color = isFocused ? '#0D9488' : '#9CA3AF';
 
-            return (
-              <Pressable
-                key={route.key}
-                onPress={onPress}
-                className="items-center justify-center p-2"
-              >
-                {route.name === 'home/index' && <HomeIcon size={28} color={color} />}
-                {route.name === 'debts/index' && <DebtsIcon size={28} color={color} />}
-                {route.name === 'settings/index' && <SettingsIcon size={28} color={color} />}
-              </Pressable>
-            );
+            if (route.name === 'home/index') {
+              return (
+                <Pressable
+                  key={route.key}
+                  onPress={onPress}
+                  className="items-center justify-center p-3"
+                >
+                  <Home size={26} color={color} strokeWidth={isFocused ? 2.5 : 2} />
+                </Pressable>
+              );
+            }
+
+            if (route.name === 'settings/index') {
+              return (
+                <Pressable
+                  key={route.key}
+                  onPress={onPress}
+                  className="items-center justify-center p-3"
+                >
+                  <Settings size={26} color={color} strokeWidth={isFocused ? 2.5 : 2} />
+                </Pressable>
+              );
+            }
+
+            return null;
           })}
         </View>
       </View>
 
-      {/* Advisor Button */}
-      <Pressable onPress={handleAdvisorPress}>
-        <View
-          className="w-[60px] h-[60px] rounded-full items-center justify-center overflow-hidden"
-          style={{
-            shadowColor: isSubscribed ? '#10B981' : '#6B7280',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: isSubscribed ? 0.4 : 0.2,
-            shadowRadius: 12,
-            elevation: 8,
-          }}
-        >
-          <LinearGradient
-            colors={isSubscribed ? ['#10B981', '#059669'] : ['#4B5563', '#374151']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
+      {/* Center Scan Button */}
+      <View className="absolute bottom-0 left-1/2 -translate-x-1/2" style={{ marginBottom: insets.bottom + 18 }}>
+        <Pressable onPress={handleScanPress}>
           <View
-            className={`absolute inset-0 rounded-full border ${
-              isSubscribed ? 'border-emerald-400/30' : 'border-gray-500/30'
-            }`}
-          />
-          <View style={{ opacity: isSubscribed ? 1 : 0.5 }}>
-            <AdvisorIcon size={26} color="#FFFFFF" />
+            className="w-[72px] h-[72px] rounded-full items-center justify-center overflow-hidden"
+            style={styles.scanButton}
+          >
+            <LinearGradient
+              colors={['#0D9488', '#0F766E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <Scan size={32} color="#FFFFFF" strokeWidth={2} />
           </View>
-          {/* Lock icon for non-subscribers */}
-          {!isSubscribed && (
-            <View className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-gray-700 items-center justify-center border border-gray-500">
-              <Lock size={10} color="#FFFFFF" />
-            </View>
-          )}
-          {/* Unread badge for subscribers */}
-          {isSubscribed && hasUnread && (
-            <View className="absolute top-1 right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-emerald-500" />
-          )}
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  scanButton: {
+    shadowColor: '#0D9488',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+});
 
 export default function TabLayout() {
   const { isTabBarVisible } = useTabBar();
@@ -127,14 +120,18 @@ export default function TabLayout() {
     <Tabs
       tabBar={(props) => (isTabBarVisible ? <CustomTabBar {...props} /> : null)}
       screenOptions={{
-        sceneStyle: { backgroundColor: '#0F0F0F' },
+        sceneStyle: { backgroundColor: '#FFFFFF' },
         headerShown: false,
       }}
     >
       <Tabs.Screen name="home/index" />
-      <Tabs.Screen name="debts/index" />
+      <Tabs.Screen
+        name="scan/index"
+        options={{
+          href: null,
+        }}
+      />
       <Tabs.Screen name="settings/index" />
-      <Tabs.Screen name="advisor/index" />
     </Tabs>
   );
 }

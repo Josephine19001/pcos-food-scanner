@@ -3,132 +3,39 @@ import {
   View,
   Text,
   Pressable,
-  StyleSheet,
-  Keyboard,
   StatusBar,
   Platform,
   ActivityIndicator,
   Linking,
-  TouchableWithoutFeedback,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { APP_URLS } from '@/lib/config/urls';
 import Animated, {
-  SlideInRight,
+  FadeIn,
   FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  withDelay,
-  Easing,
+  FadeInRight,
+  FadeOutLeft,
 } from 'react-native-reanimated';
-import { ChevronLeft, CreditCard, Layers, TrendingDown, Zap } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useAuth } from '@/context/auth-provider';
-import { useCurrency, CurrencyConfig } from '@/context/currency-provider';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { AppleIcon, GoogleIcon } from '@/components/icons/tab-icons';
-import {
-  useOptimizedDebtCalculations,
-  useCurrencyInput,
-  formatDuration,
-} from '@/lib/hooks';
-import {
-  OnboardingStep,
-  CurrencyInput,
-  PercentInput,
-  OptionCard,
-  StrategyCard,
-  GradientButton,
-  CurrencySelector,
-} from '@/components/onboarding';
+import { AppleIcon } from '@/components/icons/tab-icons';
 
-type Step = 'currency' | 'debt' | 'rate' | 'payment' | 'type' | 'reveal' | 'signup';
-type DebtType = 'single' | 'multiple';
-type Strategy = 'avalanche' | 'snowball';
-
-const ONBOARDING_DATA_KEY = '@debt_free_onboarding_data';
-
-interface OnboardingData {
-  currencyCode: string;
-  totalDebt: number;
-  interestRate: number;
-  monthlyPayment: number;
-  debtType: DebtType;
-  strategy: Strategy;
-  totalInterest: number;
-  payoffMonths: number;
-  optimizedPayment: number;
-  optimizedMonths: number;
-  interestSaved: number;
-  monthsSaved: number;
-  debtFreeDate: string;
-}
+type Step = 'slide1' | 'slide2' | 'signup';
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { signInWithApple, signInWithGoogle, loading: authLoading } = useAuth();
-  const { currency, setCurrency, formatCurrency: formatMoney } = useCurrency();
+  const { signInWithApple, loading: authLoading } = useAuth();
 
-  // Step state
-  const [step, setStep] = useState<Step>('currency');
-  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyConfig>(currency);
-
-  // Input states
-  const debtInput = useCurrencyInput();
-  const paymentInput = useCurrencyInput();
-  const [interestRate, setInterestRate] = useState('');
-  const [debtType, setDebtType] = useState<DebtType | null>(null);
-  const [selectedStrategy, setSelectedStrategy] = useState<Strategy>('avalanche');
-
-  // Auth loading states
+  const [step, setStep] = useState<Step>('slide1');
   const [appleLoading, setAppleLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
-  // Animation values
-  const revealScale = useSharedValue(0);
+  const isLoading = authLoading || appleLoading;
 
-  // Parse rate
-  const rate = parseFloat(interestRate) || 0;
-
-  // Calculations using the hook
-  const calculations = useOptimizedDebtCalculations({
-    principal: debtInput.numericValue,
-    annualRate: rate / 100,
-    monthlyPayment: paymentInput.numericValue,
-  });
-
-  const {
-    payoffMonths,
-    totalInterest,
-    minPaymentRequired,
-    paymentCoversInterest,
-    debtFreeDate,
-    optimizedPayment,
-    optimizedMonths,
-    interestSaved,
-    monthsSaved,
-  } = calculations;
-
-  const isLoading = authLoading || appleLoading || googleLoading;
-
-  // Validation
-  const canProceedFromDebt = debtInput.numericValue > 0;
-  const canProceedFromRate = rate > 0 && rate <= 100;
-  const canProceedFromPayment = paymentInput.numericValue > 0;
-  const canProceedFromType = debtType !== null;
-
-  // Progress
-  const steps: Step[] = ['currency', 'debt', 'rate', 'payment', 'type', 'reveal', 'signup'];
+  const steps: Step[] = ['slide1', 'slide2', 'signup'];
   const progress = steps.indexOf(step);
-
-  // Handle currency selection and save
-  const handleCurrencyNext = async () => {
-    await setCurrency(selectedCurrency);
-    goToStep('debt');
-  };
 
   const goBack = () => {
     const i = steps.indexOf(step);
@@ -139,451 +46,204 @@ export default function OnboardingScreen() {
     }
   };
 
-  const goToStep = (nextStep: Step) => {
-    Keyboard.dismiss();
-    setStep(nextStep);
-
-    if (nextStep === 'reveal') {
-      setTimeout(() => {
-        revealScale.value = withDelay(
-          200,
-          withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.2)) })
-        );
-      }, 100);
-    }
-  };
-
-  const saveOnboardingData = async () => {
-    try {
-      const data: OnboardingData = {
-        currencyCode: selectedCurrency.code,
-        totalDebt: debtInput.numericValue,
-        interestRate: rate,
-        monthlyPayment: paymentInput.numericValue,
-        debtType: debtType || 'single',
-        strategy: selectedStrategy,
-        totalInterest,
-        payoffMonths,
-        optimizedPayment,
-        optimizedMonths,
-        interestSaved,
-        monthsSaved,
-        debtFreeDate: debtFreeDate.toISOString(),
-      };
-      await AsyncStorage.setItem(ONBOARDING_DATA_KEY, JSON.stringify(data));
-    } catch (error) {
-      console.error('Error saving onboarding data:', error);
+  const goNext = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const i = steps.indexOf(step);
+    if (i < steps.length - 1) {
+      setStep(steps[i + 1]);
     }
   };
 
   const handleAppleAuth = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setAppleLoading(true);
-    try {
-      await saveOnboardingData();
-      await signInWithApple();
-      // Navigation is handled in auth provider after successful sign-in
-    } catch (error) {
-      console.error('Apple auth error:', error);
-    } finally {
-      setAppleLoading(false);
-    }
+    // TODO: Re-enable Apple auth
+    // setAppleLoading(true);
+    // try {
+    //   await signInWithApple();
+    // } catch (error) {
+    //   console.error('Apple auth error:', error);
+    // } finally {
+    //   setAppleLoading(false);
+    // }
+    router.replace('/(tabs)/home');
   };
 
-  // const handleGoogleAuth = async () => {
-  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  //   setGoogleLoading(true);
-  //   try {
-  //     await saveOnboardingData();
-  //     await signInWithGoogle();
-  //     // Navigate to index which will handle routing based on subscription status
-  //     router.replace('/');
-  //   } catch (error) {
-  //     console.error('Google auth error:', error);
-  //   } finally {
-  //     setGoogleLoading(false);
-  //   }
-  // };
-
-  const revealAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: revealScale.value }],
-    opacity: revealScale.value,
-  }));
-
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View className="flex-1 bg-[#0F0F0F]">
-        <StatusBar barStyle="light-content" />
-        <SafeAreaView className="flex-1">
-          {/* Progress Bar with Back Button */}
-          <View className="flex-row items-center py-4 px-6">
-            <Pressable onPress={goBack} className="flex-row items-center mr-4">
-              <ChevronLeft size={24} color="#9CA3AF" />
-            </Pressable>
-            <View className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-              <View
-                className="h-full bg-emerald-500 rounded-full"
-                style={{ width: `${((progress + 1) / steps.length) * 100}%` }}
-              />
-            </View>
+    <View className="flex-1 bg-white">
+      <StatusBar barStyle="dark-content" />
+      <SafeAreaView className="flex-1">
+        {/* Progress Bar with Back Button */}
+        <View className="flex-row items-center py-4 px-6">
+          <Pressable onPress={goBack} className="flex-row items-center mr-4">
+            <ChevronLeft size={24} color="#6B7280" />
+          </Pressable>
+          <View className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+            <View
+              className="h-full bg-black rounded-full"
+              style={{ width: `${((progress + 1) / steps.length) * 100}%` }}
+            />
           </View>
+        </View>
 
-          {/* Step 1: Currency Selection */}
-          {step === 'currency' && (
-            <OnboardingStep
-              title="Select your currency"
-              subtitle="Choose the currency you use for your debts"
-              footer={<GradientButton onPress={handleCurrencyNext} />}
-            >
-              <CurrencySelector selected={selectedCurrency} onSelect={setSelectedCurrency} />
-            </OnboardingStep>
-          )}
-
-          {/* Step 2: Total Debt */}
-          {step === 'debt' && (
-            <OnboardingStep
-              title="What's your total debt?"
-              subtitle="Include all credit cards, loans, etc."
-              withKeyboardAvoid
-              footer={
-                <GradientButton onPress={() => goToStep('rate')} disabled={!canProceedFromDebt} />
-              }
-            >
-              <CurrencyInput
-                value={debtInput.value}
-                onChangeText={(text) => debtInput.setValue(text)}
-                autoFocus
-                prefix={selectedCurrency.symbol}
-              />
-            </OnboardingStep>
-          )}
-
-          {/* Step 2: Interest Rate */}
-          {step === 'rate' && (
-            <OnboardingStep
-              title="What's your interest rate?"
-              subtitle="The annual percentage rate (APR)"
-              withKeyboardAvoid
-              footer={
-                <GradientButton
-                  onPress={() => goToStep('payment')}
-                  disabled={!canProceedFromRate}
-                  animated={false}
-                />
-              }
-            >
-              <PercentInput
-                value={interestRate}
-                onChangeText={setInterestRate}
-                autoFocus
-                hint="Credit cards are typically 15-25%"
-              />
-            </OnboardingStep>
-          )}
-
-          {/* Step 3: Monthly Payment */}
-          {step === 'payment' && (
-            <OnboardingStep
-              title="How much can you pay monthly?"
-              subtitle="The amount you can comfortably afford"
-              withKeyboardAvoid
-              footer={
-                <GradientButton
-                  onPress={() => goToStep('type')}
-                  disabled={!canProceedFromPayment}
-                  animated={false}
-                />
-              }
-            >
-              <CurrencyInput
-                value={paymentInput.value}
-                onChangeText={(text) => paymentInput.setValue(text)}
-                autoFocus
-                prefix={selectedCurrency.symbol}
-                hint={
-                  debtInput.numericValue > 0 && rate > 0
-                    ? `Minimum to cover interest: ${formatMoney(Math.ceil(minPaymentRequired + 1), { decimals: false })}`
-                    : 'per month'
-                }
-              />
-            </OnboardingStep>
-          )}
-
-          {/* Step 4: Debt Type */}
-          {step === 'type' && (
-            <OnboardingStep
-              title="How is your debt structured?"
-              subtitle="This helps us find the best strategy"
-              footer={
-                <GradientButton
-                  onPress={() => goToStep('reveal')}
-                  disabled={!canProceedFromType}
-                  label="See My Plan"
-                  animated={false}
-                />
-              }
-            >
-              <Animated.View entering={FadeInUp.delay(300).duration(500)}>
-                <View className="mb-4">
-                  <OptionCard
-                    selected={debtType === 'single'}
-                    onSelect={() => setDebtType('single')}
-                    icon={
-                      <CreditCard size={24} color={debtType === 'single' ? '#10B981' : '#9CA3AF'} />
-                    }
-                    title="Single debt"
-                    subtitle="One loan or credit card"
-                  />
-                </View>
-                <OptionCard
-                  selected={debtType === 'multiple'}
-                  onSelect={() => setDebtType('multiple')}
-                  icon={
-                    <Layers size={24} color={debtType === 'multiple' ? '#10B981' : '#9CA3AF'} />
-                  }
-                  title="Multiple debts"
-                  subtitle="Several cards or loans to manage"
+        {/* Slide 1: Scan Food */}
+        {step === 'slide1' && (
+          <Animated.View
+            entering={FadeInRight.duration(300)}
+            exiting={FadeOutLeft.duration(300)}
+            className="flex-1 px-6 justify-between pb-8"
+          >
+            <View className="flex-1 justify-center items-center">
+              {/* Screenshot placeholder for demo - iPhone aspect ratio (9:19.5) scaled down */}
+              <Animated.View
+                entering={FadeIn.delay(200).duration(500)}
+                className="bg-gray-100 rounded-[40px] items-center justify-center mb-6 border-[6px] border-gray-800 overflow-hidden shadow-xl"
+                style={{ width: 240, height: 520 }}
+              >
+                <Image
+                  source={require('@/assets/images/demo-scan.png')}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="cover"
                 />
               </Animated.View>
-            </OnboardingStep>
-          )}
 
-          {/* Step 5: Reveal */}
-          {step === 'reveal' && (
-            <Animated.View
-              entering={SlideInRight.duration(300)}
-              className="flex-1 px-6 justify-between pb-8"
-            >
-              <View className="flex-1 justify-center">
-                <Animated.Text
-                  entering={FadeInUp.duration(400)}
-                  className="text-gray-400 text-center mb-1 mt-4"
-                >
-                  {formatMoney(debtInput.numericValue)} at {rate}% paying{' '}
-                  {formatMoney(paymentInput.numericValue)}/mo
-                </Animated.Text>
-                <Animated.Text
-                  entering={FadeInUp.delay(100).duration(400)}
-                  className="text-white text-xl font-semibold text-center mb-4"
-                >
-                  You'll pay in interest
-                </Animated.Text>
+              <Animated.Text
+                entering={FadeInUp.delay(300).duration(500)}
+                className="text-gray-900 text-3xl font-bold text-center mb-3"
+              >
+                Scan Any Food
+              </Animated.Text>
+              <Animated.Text
+                entering={FadeInUp.delay(400).duration(500)}
+                className="text-gray-500 text-lg text-center px-4"
+              >
+                Point your camera at any food, meal, or package
+              </Animated.Text>
+            </View>
 
-                <Animated.View style={revealAnimatedStyle} className="items-center mb-6">
-                  <Text className="text-red-500 text-5xl font-black text-center">
-                    {formatMoney(totalInterest)}
-                  </Text>
-                  <Text className="text-gray-500 text-sm mt-2">
-                    {paymentCoversInterest
-                      ? `Paid off in ${formatDuration(payoffMonths)}`
-                      : "Payment doesn't cover interest!"}
-                  </Text>
-                </Animated.View>
-
-                {/* Strategy Selection - Only for multiple debts */}
-                {paymentCoversInterest && debtType === 'multiple' && (
-                  <Animated.View entering={FadeInUp.delay(500).duration(500)}>
-                    <Text className="text-white font-semibold text-center mb-3">
-                      Choose your payoff strategy
-                    </Text>
-                    <View className="mb-3">
-                      <StrategyCard
-                        selected={selectedStrategy === 'avalanche'}
-                        onSelect={() => setSelectedStrategy('avalanche')}
-                        icon={
-                          <TrendingDown
-                            size={20}
-                            color={selectedStrategy === 'avalanche' ? '#10B981' : '#9CA3AF'}
-                          />
-                        }
-                        title="Avalanche Method"
-                        subtitle="Pay highest interest first"
-                        metricLabel="Saves most money"
-                        metricValue={formatMoney(interestSaved)}
-                        badge={selectedStrategy === 'avalanche' ? 'BEST' : undefined}
-                        accentColor="emerald"
-                      />
-                    </View>
-                    <StrategyCard
-                      selected={selectedStrategy === 'snowball'}
-                      onSelect={() => setSelectedStrategy('snowball')}
-                      icon={
-                        <Zap
-                          size={20}
-                          color={selectedStrategy === 'snowball' ? '#3B82F6' : '#9CA3AF'}
-                        />
-                      }
-                      title="Snowball Method"
-                      subtitle="Pay smallest balance first"
-                      metricLabel="Faster wins, more motivation"
-                      metricValue="Quick wins"
-                      accentColor="blue"
-                    />
-                  </Animated.View>
-                )}
-
-                {/* Single debt - just show savings */}
-                {paymentCoversInterest && debtType === 'single' && (
-                  <Animated.View entering={FadeInUp.delay(500).duration(500)}>
-                    <View className="rounded-2xl overflow-hidden">
-                      <LinearGradient
-                        colors={['#0f1f1a', '#0a1512']}
-                        style={StyleSheet.absoluteFill}
-                      />
-                      <View className="p-5 border border-emerald-500/30 rounded-2xl">
-                        <Text className="text-emerald-400 text-sm font-semibold mb-3">
-                          PAY 20% MORE MONTHLY
-                        </Text>
-                        <View className="flex-row justify-between mb-2">
-                          <Text className="text-gray-400">New payment</Text>
-                          <Text className="text-white font-bold">
-                            {formatMoney(optimizedPayment)}/mo
-                          </Text>
-                        </View>
-                        <View className="flex-row justify-between mb-2">
-                          <Text className="text-gray-400">Interest saved</Text>
-                          <Text className="text-emerald-400 font-bold">
-                            {formatMoney(interestSaved)}
-                          </Text>
-                        </View>
-                        <View className="flex-row justify-between">
-                          <Text className="text-gray-400">Time saved</Text>
-                          <Text className="text-white font-bold">
-                            {formatDuration(monthsSaved)}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  </Animated.View>
-                )}
+            {/* Next Button */}
+            <Pressable onPress={goNext} className="rounded-2xl overflow-hidden bg-black">
+              <View className="py-4 px-6 flex-row items-center justify-center">
+                <Text className="text-white font-bold text-lg mr-2">Next</Text>
+                <ChevronRight size={20} color="#ffffff" />
               </View>
+            </Pressable>
+          </Animated.View>
+        )}
 
-              <GradientButton
-                onPress={() => goToStep('signup')}
-                label="Get My Plan"
-                animated={false}
-              />
-            </Animated.View>
-          )}
+        {/* Slide 2: Get Results */}
+        {step === 'slide2' && (
+          <Animated.View
+            entering={FadeInRight.duration(300)}
+            exiting={FadeOutLeft.duration(300)}
+            className="flex-1 px-6 justify-between pb-8"
+          >
+            <View className="flex-1 justify-center items-center">
+              {/* Screenshot placeholder for demo - iPhone aspect ratio (9:19.5) scaled down */}
+              <Animated.View
+                entering={FadeIn.delay(200).duration(500)}
+                className="bg-gray-100 rounded-[40px] items-center justify-center mb-6 border-[6px] border-gray-800 overflow-hidden shadow-xl"
+                style={{ width: 240, height: 520 }}
+              >
+                <Image
+                  source={require('@/assets/images/demo-result.png')}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="cover"
+                />
+              </Animated.View>
 
-          {/* Step 6: Signup */}
-          {step === 'signup' && (
-            <Animated.View
-              entering={SlideInRight.duration(300)}
-              className="flex-1 px-6 justify-between pb-8"
-            >
-              <View className="flex-1 justify-center">
-                <Animated.View
-                  entering={FadeInUp.delay(100).duration(500)}
-                  className="items-center mb-10"
-                >
-                  <Text className="text-gray-400 text-lg mb-2">Your goal</Text>
-                  <Text className="text-white text-3xl font-black text-center mb-1">
-                    Debt-free by
-                  </Text>
-                  <Text className="text-emerald-400 text-4xl font-black">
-                    {debtFreeDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                  </Text>
-                </Animated.View>
+              <Animated.Text
+                entering={FadeInUp.delay(300).duration(500)}
+                className="text-gray-900 text-3xl font-bold text-center mb-3"
+              >
+                Get Instant Results
+              </Animated.Text>
+              <Animated.Text
+                entering={FadeInUp.delay(400).duration(500)}
+                className="text-gray-500 text-lg text-center px-4"
+              >
+                We'll show you what's good, what's not, and why
+              </Animated.Text>
+            </View>
 
-                <Animated.View
-                  entering={FadeInUp.delay(300).duration(500)}
-                  className="rounded-2xl bg-white/5 p-5 mb-8"
-                >
-                  <View className="flex-row justify-between mb-3">
-                    <Text className="text-gray-400">Total debt</Text>
-                    <Text className="text-white font-bold">
-                      {formatMoney(debtInput.numericValue)}
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between mb-3">
-                    <Text className="text-gray-400">Interest rate</Text>
-                    <Text className="text-white font-bold">{rate}%</Text>
-                  </View>
-                  <View className="flex-row justify-between mb-3">
-                    <Text className="text-gray-400">Your payment</Text>
-                    <Text className="text-white font-bold">
-                      {formatMoney(paymentInput.numericValue)}/mo
-                    </Text>
-                  </View>
-                  <View className="flex-row justify-between">
-                    <Text className="text-gray-400">Interest you'll save</Text>
-                    <Text className="text-emerald-400 font-bold">{formatMoney(interestSaved)}</Text>
-                  </View>
-                </Animated.View>
+            {/* Next Button */}
+            <Pressable onPress={goNext} className="rounded-2xl overflow-hidden bg-black">
+              <View className="py-4 px-6 flex-row items-center justify-center">
+                <Text className="text-white font-bold text-lg mr-2">Get Started</Text>
+                <ChevronRight size={20} color="#ffffff" />
+              </View>
+            </Pressable>
+          </Animated.View>
+        )}
 
-                <Animated.View entering={FadeInUp.delay(500).duration(500)}>
-                  {Platform.OS === 'ios' && (
-                    <Pressable
-                      onPress={handleAppleAuth}
-                      disabled={isLoading}
-                      className={`rounded-2xl overflow-hidden mb-3 ${
-                        isLoading ? 'opacity-70' : ''
-                      }`}
-                    >
-                      <View className="bg-white py-4 flex-row items-center justify-center">
-                        {appleLoading ? (
-                          <ActivityIndicator color="#000" />
-                        ) : (
-                          <>
-                            <AppleIcon size={20} color="#000" />
-                            <Text className="text-black font-semibold text-lg ml-3">
-                              Continue with Apple
-                            </Text>
-                          </>
-                        )}
-                      </View>
-                    </Pressable>
-                  )}
+        {/* Signup Step */}
+        {step === 'signup' && (
+          <Animated.View
+            entering={FadeInRight.duration(300)}
+            className="flex-1 px-6 justify-between pb-8"
+          >
+            <View className="flex-1 justify-center">
+              <Animated.View
+                entering={FadeInUp.delay(100).duration(500)}
+                className="items-center mb-10"
+              >
+                <Image
+                  source={require('@/assets/images/logo.png')}
+                  style={{ width: 80, height: 80 }}
+                  resizeMode="contain"
+                />
+                <Text className="text-gray-900 text-2xl font-bold text-center mt-6 mb-2">
+                  Create Your Account
+                </Text>
+                <Text className="text-gray-500 text-base text-center px-4">
+                  Sign in to save your scans and get personalized recommendations
+                </Text>
+              </Animated.View>
 
-                  {/* Google Sign In - temporarily disabled */}
-                  {/* <Pressable
-                    onPress={handleGoogleAuth}
+              <Animated.View entering={FadeInUp.delay(300).duration(500)}>
+                {Platform.OS === 'ios' && (
+                  <Pressable
+                    onPress={handleAppleAuth}
                     disabled={isLoading}
-                    className={`rounded-2xl border border-white/20 py-4 flex-row items-center justify-center ${isLoading ? 'opacity-70' : ''}`}
+                    className={`rounded-2xl overflow-hidden mb-3 ${
+                      isLoading ? 'opacity-70' : ''
+                    }`}
                   >
-                    {googleLoading ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <>
-                        <GoogleIcon size={20} />
-                        <Text className="text-white font-semibold text-lg ml-3">Continue with Google</Text>
-                      </>
-                    )}
-                  </Pressable> */}
-                </Animated.View>
-              </View>
+                    <View className="bg-black py-4 flex-row items-center justify-center">
+                      {appleLoading ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <>
+                          <AppleIcon size={20} color="#fff" />
+                          <Text className="text-white font-semibold text-lg ml-3">
+                            Continue with Apple
+                          </Text>
+                        </>
+                      )}
+                    </View>
+                  </Pressable>
+                )}
+              </Animated.View>
+            </View>
 
-              <Text className="text-gray-600 text-xs text-center">
-                By continuing, you agree to our{' '}
-                <Text
-                  className="text-gray-500 underline"
-                  onPress={() => Linking.openURL(APP_URLS.terms)}
-                >
-                  Terms
-                </Text>
-                {' & '}
-                <Text
-                  className="text-gray-500 underline"
-                  onPress={() => Linking.openURL(APP_URLS.privacy)}
-                >
-                  Privacy Policy
-                </Text>
+            <Text className="text-gray-400 text-xs text-center">
+              By continuing, you agree to our{' '}
+              <Text
+                className="text-gray-500 underline"
+                onPress={() => Linking.openURL(APP_URLS.terms)}
+              >
+                Terms
               </Text>
-            </Animated.View>
-          )}
-        </SafeAreaView>
-      </View>
-    </TouchableWithoutFeedback>
+              {' & '}
+              <Text
+                className="text-gray-500 underline"
+                onPress={() => Linking.openURL(APP_URLS.privacy)}
+              >
+                Privacy Policy
+              </Text>
+            </Text>
+          </Animated.View>
+        )}
+      </SafeAreaView>
+    </View>
   );
 }
-
-export const getOnboardingData = async (): Promise<OnboardingData | null> => {
-  try {
-    const data = await AsyncStorage.getItem(ONBOARDING_DATA_KEY);
-    return data ? JSON.parse(data) : null;
-  } catch (error) {
-    console.error('Error getting onboarding data:', error);
-    return null;
-  }
-};

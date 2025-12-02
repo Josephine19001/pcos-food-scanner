@@ -18,7 +18,7 @@ export default function ReferralScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Join me on Debt Free and take control of your finances! Use my referral code ${REFERRAL_CODE} to get started. ${REFERRAL_LINK}`,
+        message: `Join me on PCOS Food Scanner and take control of your finances! Use my referral code ${REFERRAL_CODE} to get started. ${REFERRAL_LINK}`,
       });
     } catch (error) {
       // User cancelled

@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform, StatusBar, Pressable } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
@@ -28,15 +27,6 @@ export function PageLayout({
 
     return (
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        {headerStyle === 'glass' && (
-          <>
-            <LinearGradient
-              colors={['rgba(31, 41, 55, 0.9)', 'rgba(17, 24, 39, 0.85)']}
-              style={StyleSheet.absoluteFill}
-            />
-            <View style={styles.headerGlassBorder} />
-          </>
-        )}
         <View style={styles.headerContent}>
           <View style={styles.headerLeft}>
             {showBackButton && (
@@ -45,7 +35,7 @@ export function PageLayout({
                 style={styles.backButton}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <ChevronLeft size={28} color="#FFFFFF" strokeWidth={2} />
+                <ChevronLeft size={28} color="#0D0D0D" strokeWidth={2} />
               </Pressable>
             )}
             {title && !showBackButton && (
@@ -69,9 +59,8 @@ export function PageLayout({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       {renderHeader()}
-      {/* <View style={[styles.content, { paddingBottom: 100 }]}> */}
       <View style={[styles.content]}>{children}</View>
     </View>
   );
@@ -86,13 +75,6 @@ interface GlassCardProps {
 export function GlassCard({ children, style }: GlassCardProps) {
   return (
     <View style={[styles.glassCard, style]}>
-      <LinearGradient
-        colors={['rgba(30, 30, 35, 0.95)', 'rgba(20, 20, 25, 0.98)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <View style={styles.glassCardBorder} />
       <View style={styles.glassCardContent}>{children}</View>
     </View>
   );
@@ -115,13 +97,14 @@ export function SectionHeader({ title, action }: SectionHeaderProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F0F0F',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 16,
     position: 'relative',
     overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
   },
   headerContent: {
     flexDirection: 'row',
@@ -144,16 +127,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#0D0D0D',
     letterSpacing: -0.3,
-  },
-  headerGlassBorder: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   backButton: {
     padding: 4,
@@ -163,20 +138,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   glassCard: {
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
     marginHorizontal: 16,
     marginVertical: 8,
     position: 'relative',
-  },
-  glassCardBorder: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 20,
+    backgroundColor: '#F9FAFB',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: '#E5E7EB',
   },
   glassCardContent: {
-    padding: 20,
+    padding: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -189,7 +161,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#0D0D0D',
     letterSpacing: -0.2,
   },
 });

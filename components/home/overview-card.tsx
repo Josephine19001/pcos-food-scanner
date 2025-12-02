@@ -19,9 +19,8 @@ export function OverviewCard({
   isLoading,
 }: OverviewCardProps) {
   const { formatCurrency } = useCurrency();
-  const progress = totalOriginal > 0
-    ? Math.round(((totalOriginal - totalBalance) / totalOriginal) * 100)
-    : 0;
+  const progress =
+    totalOriginal > 0 ? Math.round(((totalOriginal - totalBalance) / totalOriginal) * 100) : 0;
   const hasDebts = totalBalance > 0;
 
   return (
@@ -79,10 +78,10 @@ export function OverviewCard({
             </Text>
           </View>
           <View className="flex-1 pl-4">
-            <Text className="text-gray-600 text-xs uppercase tracking-wider mb-1">Debt Free</Text>
-            <Text className="text-white font-bold text-lg">
-              {isLoading ? '...' : debtFreeDate}
+            <Text className="text-gray-600 text-xs uppercase tracking-wider mb-1">
+              PCOS Food Scanner
             </Text>
+            <Text className="text-white font-bold text-lg">{isLoading ? '...' : debtFreeDate}</Text>
           </View>
         </View>
       </View>

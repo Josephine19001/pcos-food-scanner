@@ -42,7 +42,8 @@ export default function NotificationsScreen() {
       } else {
         showSettingsAlert({
           title: 'Notifications Disabled',
-          message: 'To enable push notifications, please go to your device settings and allow notifications for Debt Free.',
+          message:
+            'To enable push notifications, please go to your device settings and allow notifications for PCOS Food Scanner.',
           onOpenSettings: () => Linking.openSettings(),
         });
       }
@@ -66,7 +67,8 @@ export default function NotificationsScreen() {
 
       <View className="mt-4 px-1">
         <Text className="text-gray-500 text-sm">
-          When enabled, you'll receive helpful reminders to stay on track with your debt-free journey.
+          When enabled, you'll receive helpful reminders to stay on track with your
+          pcos-food-scanner journey.
         </Text>
       </View>
     </FormPage>

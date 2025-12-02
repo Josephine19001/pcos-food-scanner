@@ -64,7 +64,7 @@ export default function AuthScreen() {
               </Text>
               <Text className="text-gray-400 text-center">
                 {isSignUp
-                  ? 'Sign up to start your debt-free journey'
+                  ? 'Sign up to start your pcos-food-scanner journey'
                   : 'Sign in to continue your progress'}
               </Text>
             </View>
@@ -131,12 +131,12 @@ export default function AuthScreen() {
                 {isSignUp ? (
                   <>
                     Already have an account?{' '}
-                    <Text className="text-emerald-400 font-semibold">Sign In</Text>
+                    <Text className="text-white font-semibold">Sign In</Text>
                   </>
                 ) : (
                   <>
                     Don't have an account?{' '}
-                    <Text className="text-emerald-400 font-semibold">Get Started</Text>
+                    <Text className="text-white font-semibold">Get Started</Text>
                   </>
                 )}
               </Text>
