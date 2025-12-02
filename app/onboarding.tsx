@@ -79,7 +79,7 @@ export default function OnboardingScreen() {
           </Pressable>
           <View className="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
             <View
-              className="h-full bg-black rounded-full"
+              className="h-full bg-teal-600 rounded-full"
               style={{ width: `${((progress + 1) / steps.length) * 100}%` }}
             />
           </View>
@@ -121,7 +121,7 @@ export default function OnboardingScreen() {
             </View>
 
             {/* Next Button */}
-            <Pressable onPress={goNext} className="rounded-2xl overflow-hidden bg-black">
+            <Pressable onPress={goNext} className="rounded-2xl overflow-hidden bg-teal-600">
               <View className="py-4 px-6 flex-row items-center justify-center">
                 <Text className="text-white font-bold text-lg mr-2">Next</Text>
                 <ChevronRight size={20} color="#ffffff" />
@@ -166,7 +166,7 @@ export default function OnboardingScreen() {
             </View>
 
             {/* Next Button */}
-            <Pressable onPress={goNext} className="rounded-2xl overflow-hidden bg-black">
+            <Pressable onPress={goNext} className="rounded-2xl overflow-hidden bg-teal-600">
               <View className="py-4 px-6 flex-row items-center justify-center">
                 <Text className="text-white font-bold text-lg mr-2">Get Started</Text>
                 <ChevronRight size={20} color="#ffffff" />

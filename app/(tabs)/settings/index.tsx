@@ -28,6 +28,7 @@ import {
   Gift,
   Info,
   HelpCircle,
+  BookOpen,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
@@ -179,6 +180,12 @@ export default function SettingsScreen() {
             icon={HelpCircle}
             label="How It Works"
             onPress={() => router.push('/how-it-works')}
+          />
+          <View className="h-px bg-gray-200 mx-1" />
+          <SettingsItem
+            icon={BookOpen}
+            label="Nutrition Guide"
+            onPress={() => router.push('/nutrition-guide')}
           />
           <View className="h-px bg-gray-200 mx-1" />
           <SettingsItem

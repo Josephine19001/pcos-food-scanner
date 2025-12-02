@@ -53,7 +53,7 @@ export function WelcomeScreen() {
             {/* Get Started Button */}
             <Pressable
               onPress={handleGetStarted}
-              className="rounded-2xl overflow-hidden mb-4 bg-black"
+              className="rounded-2xl overflow-hidden mb-4 bg-teal-600"
             >
               <View className="py-4 px-6 flex-row items-center justify-center">
                 <Text className="text-white font-bold text-lg mr-2">Get Started</Text>
@@ -65,7 +65,7 @@ export function WelcomeScreen() {
             <Pressable onPress={handleSignIn} className="py-3">
               <Text className="text-gray-500 text-center">
                 Already have an account?{' '}
-                <Text className="text-black font-semibold">Sign In</Text>
+                <Text className="text-teal-600 font-semibold">Sign In</Text>
               </Text>
             </Pressable>
           </Animated.View>

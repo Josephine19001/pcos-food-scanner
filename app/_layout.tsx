@@ -1,6 +1,5 @@
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
-import 'expo-router/entry';
 import '../global.css';
 
 // Global error handling for unhandled promise rejections
@@ -43,11 +42,15 @@ export default function Layout() {
           {/* Monetization */}
           <Stack.Screen name="paywall" />
 
+          {/* Scan Details */}
+          <Stack.Screen name="scan/[id]" />
+
           {/* Settings Pages */}
           <Stack.Screen name="profile" />
           <Stack.Screen name="feedback" />
           <Stack.Screen name="referral" />
           <Stack.Screen name="how-it-works" />
+          <Stack.Screen name="nutrition-guide" />
 
           {/* Error Handling */}
           <Stack.Screen name="+not-found" />

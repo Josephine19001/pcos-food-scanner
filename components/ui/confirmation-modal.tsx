@@ -1,6 +1,5 @@
 import { View, Modal, Pressable, StyleSheet } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { BlurView } from 'expo-blur';
 
 type Props = {
   visible: boolean;
@@ -25,55 +24,26 @@ export function ConfirmationModal({
 }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <Pressable
-        className="flex-1 justify-center items-center px-6"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
-        onPress={onClose}
-      >
-        <Pressable
-          className="w-full rounded-3xl overflow-hidden"
-          onPress={(e) => e.stopPropagation()}
-        >
-          <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill}>
-            <View
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              }}
-            />
-          </BlurView>
-          <View
-            style={{
-              ...StyleSheet.absoluteFillObject,
-              borderRadius: 24,
-              borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.1)',
-            }}
-          />
-          <View className="p-6">
-            <Text className="text-xl font-semibold text-center mb-2 text-white">
-              {title}
-            </Text>
-            <Text className="text-gray-400 text-center mb-6">{message}</Text>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable style={styles.modalContainer} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.content}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.message}>{message}</Text>
 
-            <View className="gap-3">
+            <View style={styles.buttons}>
               <Pressable
                 onPress={onConfirm}
-                className={`py-4 rounded-2xl ${destructive ? 'bg-red-500/80' : 'bg-emerald-500/80'}`}
+                style={[
+                  styles.button,
+                  styles.confirmButton,
+                  destructive && styles.destructiveButton,
+                ]}
               >
-                <Text className="text-white text-center font-semibold">
-                  {confirmText}
-                </Text>
+                <Text style={styles.confirmButtonText}>{confirmText}</Text>
               </Pressable>
 
-              <Pressable
-                onPress={onClose}
-                className="py-4 rounded-2xl"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              >
-                <Text className="text-white text-center font-medium">
-                  {cancelText}
-                </Text>
+              <Pressable onPress={onClose} style={[styles.button, styles.cancelButton]}>
+                <Text style={styles.cancelButtonText}>{cancelText}</Text>
               </Pressable>
             </View>
           </View>
@@ -82,3 +52,68 @@ export function ConfirmationModal({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  modalContainer: {
+    width: '100%',
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  content: {
+    padding: 24,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+    color: '#111827',
+  },
+  message: {
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 24,
+    color: '#6B7280',
+    lineHeight: 22,
+  },
+  buttons: {
+    gap: 12,
+  },
+  button: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  confirmButton: {
+    backgroundColor: '#0D9488',
+  },
+  destructiveButton: {
+    backgroundColor: '#EF4444',
+  },
+  confirmButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  cancelButton: {
+    backgroundColor: 'rgba(243, 244, 246, 0.95)',
+  },
+  cancelButtonText: {
+    color: '#6B7280',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+});

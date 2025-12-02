@@ -52,19 +52,19 @@ export default function AuthScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#0F0F0F]">
-      <StatusBar barStyle="light-content" />
+    <View className="flex-1 bg-white">
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView className="flex-1">
         <View className="flex-1 px-6 justify-between pb-8">
           <View className="flex-1 justify-center">
             {/* Title */}
             <View className="mb-10">
-              <Text className="text-white text-3xl font-bold text-center mb-2">
+              <Text className="text-gray-900 text-3xl font-bold text-center mb-2">
                 {isSignUp ? 'Create Account' : 'Welcome Back'}
               </Text>
-              <Text className="text-gray-400 text-center">
+              <Text className="text-gray-500 text-center">
                 {isSignUp
-                  ? 'Sign up to start your pcos-food-scanner journey'
+                  ? 'Sign up to start your PCOS journey'
                   : 'Sign in to continue your progress'}
               </Text>
             </View>
@@ -78,13 +78,13 @@ export default function AuthScreen() {
                   disabled={isLoading}
                   className={`rounded-2xl overflow-hidden mb-3 ${isLoading ? 'opacity-70' : ''}`}
                 >
-                  <View className="bg-white py-4 px-6 flex-row items-center justify-center">
+                  <View className="bg-black py-4 px-6 flex-row items-center justify-center">
                     {appleLoading ? (
-                      <ActivityIndicator color="#000" />
+                      <ActivityIndicator color="#fff" />
                     ) : (
                       <>
-                        <AppleIcon size={20} color="#000" />
-                        <Text className="text-black font-semibold text-lg ml-3">
+                        <AppleIcon size={20} color="#fff" />
+                        <Text className="text-white font-semibold text-lg ml-3">
                           Continue with Apple
                         </Text>
                       </>
@@ -101,13 +101,13 @@ export default function AuthScreen() {
                   isLoading ? 'opacity-70' : ''
                 }`}
               >
-                <View className="bg-white/10 border border-white/20 rounded-2xl py-4 px-6 flex-row items-center justify-center">
+                <View className="bg-gray-100 border border-gray-200 rounded-2xl py-4 px-6 flex-row items-center justify-center">
                   {googleLoading ? (
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color="#111827" />
                   ) : (
                     <>
                       <GoogleIcon size={20} />
-                      <Text className="text-white font-semibold text-lg ml-3">
+                      <Text className="text-gray-900 font-semibold text-lg ml-3">
                         Continue with Google
                       </Text>
                     </>
@@ -127,16 +127,16 @@ export default function AuthScreen() {
               }}
               className="py-3"
             >
-              <Text className="text-gray-400 text-center">
+              <Text className="text-gray-500 text-center">
                 {isSignUp ? (
                   <>
                     Already have an account?{' '}
-                    <Text className="text-white font-semibold">Sign In</Text>
+                    <Text className="text-teal-600 font-semibold">Sign In</Text>
                   </>
                 ) : (
                   <>
                     Don't have an account?{' '}
-                    <Text className="text-white font-semibold">Get Started</Text>
+                    <Text className="text-teal-600 font-semibold">Get Started</Text>
                   </>
                 )}
               </Text>
@@ -144,7 +144,7 @@ export default function AuthScreen() {
           </View>
 
           {/* Terms */}
-          <Text className="text-gray-600 text-xs text-center">
+          <Text className="text-gray-400 text-xs text-center">
             By continuing, you agree to our{' '}
             <Text
               className="text-gray-500 underline"

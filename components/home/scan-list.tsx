@@ -1,8 +1,8 @@
-import { FlatList, View, ActivityIndicator, RefreshControl } from 'react-native';
+import { FlatList, View, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native';
 import { ScanCard } from './scan-card';
 import { EmptyState } from './empty-state';
 import type { ScanResult } from '@/lib/types/scan';
-import type { TabType } from './tab-switcher';
+import type { TabType } from './home-header';
 
 interface ScanListProps {
   scans: ScanResult[];
@@ -27,7 +27,7 @@ export function ScanList({
 }: ScanListProps) {
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center py-20">
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0D9488" />
       </View>
     );
@@ -42,6 +42,8 @@ export function ScanList({
     <FlatList
       data={scans}
       keyExtractor={(item) => item.id}
+      numColumns={2}
+      columnWrapperStyle={styles.row}
       renderItem={({ item, index }) => (
         <ScanCard
           scan={item}
@@ -51,7 +53,7 @@ export function ScanList({
         />
       )}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 120 }}
+      contentContainerStyle={styles.listContent}
       refreshControl={
         onRefresh ? (
           <RefreshControl
@@ -65,3 +67,19 @@ export function ScanList({
     />
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 80,
+  },
+  listContent: {
+    paddingHorizontal: 12,
+    paddingBottom: 120,
+  },
+  row: {
+    justifyContent: 'space-between',
+  },
+});

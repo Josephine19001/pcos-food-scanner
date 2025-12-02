@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Switch,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { PageLayout } from '@/components/layouts';
 
 import type { KeyboardTypeOptions } from 'react-native';
@@ -39,26 +38,25 @@ export function FormField({
   const height = multiline ? 56 * numberOfLines : 56;
 
   return (
-    <View className="gap-2">
-      <Text className="text-sm font-medium text-gray-400 ml-1">{label}</Text>
-      <View
-        className="rounded-2xl overflow-hidden bg-white/[0.03]"
-        style={{ height }}
-      >
-        <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
-        <View className="absolute inset-0 rounded-2xl border border-white/10" />
+    <View style={styles.fieldContainer}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <View style={[styles.inputWrapper, { height }]}>
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#6B7280"
+          placeholderTextColor="#9CA3AF"
           editable={editable}
           multiline={multiline}
           numberOfLines={numberOfLines}
           keyboardType={keyboardType}
-          keyboardAppearance="dark"
+          keyboardAppearance="light"
           textAlignVertical={multiline ? 'top' : 'center'}
-          className={`flex-1 text-base px-4 ${multiline ? 'py-4' : ''} ${editable ? 'text-white' : 'text-gray-500'}`}
+          style={[
+            styles.input,
+            multiline && styles.inputMultiline,
+            !editable && styles.inputDisabled,
+          ]}
         />
       </View>
     </View>
@@ -79,20 +77,18 @@ export function ToggleField({
   onValueChange,
 }: ToggleFieldProps) {
   return (
-    <View className="rounded-2xl overflow-hidden bg-white/[0.03]">
-      <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
-      <View className="absolute inset-0 rounded-2xl border border-white/10" />
-      <View className="flex-row items-center justify-between px-4 py-4">
-        <View className="flex-1 mr-4">
-          <Text className="text-base text-white">{label}</Text>
+    <View style={styles.toggleWrapper}>
+      <View style={styles.toggleContent}>
+        <View style={styles.toggleTextContainer}>
+          <Text style={styles.toggleLabel}>{label}</Text>
           {description && (
-            <Text className="text-sm text-gray-500 mt-1">{description}</Text>
+            <Text style={styles.toggleDescription}>{description}</Text>
           )}
         </View>
         <Switch
           value={value}
           onValueChange={onValueChange}
-          trackColor={{ false: '#3f3f46', true: '#10B981' }}
+          trackColor={{ false: '#D1D5DB', true: '#0D9488' }}
           thumbColor="#FFFFFF"
         />
       </View>
@@ -123,14 +119,12 @@ function SkeletonField() {
   }, [opacity]);
 
   return (
-    <View className="gap-2">
+    <View style={styles.fieldContainer}>
       <Animated.View
-        style={{ opacity }}
-        className="h-4 w-20 rounded bg-white/10 ml-1"
+        style={[styles.skeletonLabel, { opacity }]}
       />
       <Animated.View
-        style={{ opacity }}
-        className="h-14 rounded-2xl bg-white/[0.05]"
+        style={[styles.skeletonInput, { opacity }]}
       />
     </View>
   );
@@ -142,7 +136,7 @@ interface FormSkeletonProps {
 
 export function FormSkeleton({ fields = 3 }: FormSkeletonProps) {
   return (
-    <View className="gap-5">
+    <View style={styles.formContainer}>
       {Array.from({ length: fields }).map((_, i) => (
         <SkeletonField key={i} />
       ))}
@@ -168,15 +162,15 @@ export function FormPage({
   return (
     <PageLayout title={title} showBackButton rightAction={rightAction}>
       <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 120 }}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         {isLoading ? (
           <FormSkeleton fields={skeletonFields} />
         ) : (
-          <View className="gap-5">{children}</View>
+          <View style={styles.formContainer}>{children}</View>
         )}
       </ScrollView>
     </PageLayout>
@@ -203,10 +197,92 @@ export function SaveButton({
       style={{ opacity: !disabled && !loading ? 1 : 0.4 }}
     >
       {loading ? (
-        <ActivityIndicator size="small" color="#10B981" />
+        <ActivityIndicator size="small" color="#0D9488" />
       ) : (
-        <Text className="text-base font-semibold text-emerald-500">{label}</Text>
+        <Text style={styles.saveButtonText}>{label}</Text>
       )}
     </Pressable>
   );
 }
+
+const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 120,
+  },
+  formContainer: {
+    gap: 20,
+  },
+  fieldContainer: {
+    gap: 8,
+  },
+  fieldLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+    marginLeft: 4,
+  },
+  inputWrapper: {
+    borderRadius: 16,
+    backgroundColor: 'rgba(243, 244, 246, 0.95)',
+    overflow: 'hidden',
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    paddingHorizontal: 16,
+    color: '#111827',
+  },
+  inputMultiline: {
+    paddingVertical: 16,
+  },
+  inputDisabled: {
+    color: '#9CA3AF',
+  },
+  toggleWrapper: {
+    borderRadius: 16,
+    backgroundColor: 'rgba(243, 244, 246, 0.95)',
+    overflow: 'hidden',
+  },
+  toggleContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  toggleTextContainer: {
+    flex: 1,
+    marginRight: 16,
+  },
+  toggleLabel: {
+    fontSize: 16,
+    color: '#111827',
+  },
+  toggleDescription: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  skeletonLabel: {
+    height: 16,
+    width: 80,
+    borderRadius: 4,
+    backgroundColor: '#E5E7EB',
+    marginLeft: 4,
+  },
+  skeletonInput: {
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0D9488',
+  },
+});

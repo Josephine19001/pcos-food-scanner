@@ -51,7 +51,7 @@ export default function FeedbackScreen() {
         />
       }
     >
-      <Text className="text-gray-400 text-base -mt-2 mb-2">
+      <Text className="text-gray-500 text-base -mt-2 mb-2">
         We'd love to hear your thoughts on how we can improve.
       </Text>
 
