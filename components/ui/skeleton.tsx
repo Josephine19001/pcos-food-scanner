@@ -144,3 +144,41 @@ export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
     </View>
   );
 }
+
+export function PreferencesStepSkeleton() {
+  return (
+    <View className="flex-1 bg-teal-50">
+      {/* Header with back button and progress bar */}
+      <View className="flex-row items-center py-4 px-6 mt-14">
+        <Skeleton width={40} height={40} borderRadius={20} className="mr-3" />
+        <View className="flex-1">
+          <Skeleton width="100%" height={6} borderRadius={3} />
+        </View>
+      </View>
+
+      {/* Title */}
+      <View className="px-6 mb-6 mt-2">
+        <Skeleton width={250} height={28} className="mb-2" />
+        <Skeleton width={180} height={16} />
+      </View>
+
+      {/* Option cards */}
+      <View className="px-6 gap-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Skeleton
+            key={index}
+            width="100%"
+            height={56}
+            borderRadius={16}
+            style={{ opacity: 1 - index * 0.1 }}
+          />
+        ))}
+      </View>
+
+      {/* Bottom button */}
+      <View className="absolute bottom-10 left-6 right-6">
+        <Skeleton width="100%" height={56} borderRadius={16} />
+      </View>
+    </View>
+  );
+}

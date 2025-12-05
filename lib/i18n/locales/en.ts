@@ -212,6 +212,9 @@ export default {
     analyzing: 'Analyzing...',
     analyzingImage: 'Analyzing Image',
     notifyWhenDone: "We'll notify you when done!",
+    analysisComplete: 'Analysis Complete',
+    analysisFailed: 'Analysis Failed',
+    viewResult: 'View Result',
     cameraPermission: {
       title: 'Camera Access Required',
       description: 'To scan food items, please enable camera access in your device settings.',
@@ -363,6 +366,7 @@ export default {
     items: {
       profile: 'Profile',
       updatePreferences: 'Update Preferences',
+      notifications: 'Notifications',
       language: 'Language',
       giveFeedback: 'Give Feedback',
       rateApp: 'Rate the App',
@@ -533,10 +537,24 @@ export default {
     terms: 'Thank you for helping spread awareness about PCOS-friendly nutrition.',
   },
 
+  // Notifications
+  notifications: {
+    title: 'Notifications',
+    pushNotifications: 'Push Notifications',
+    pushDescription: 'Get notified when your food scan is complete',
+    helpText: 'Notifications help you know when your food analysis is ready, so you can continue with your day while we process your scan.',
+    enabled: 'Notifications enabled',
+    disabledTitle: 'Notifications Disabled',
+    disabledMessage: 'To enable notifications, please go to Settings and allow notifications for PCOS Food Scanner.',
+    disableTitle: 'Disable Notifications',
+    disableMessage: 'To disable notifications, please go to Settings and turn off notifications for PCOS Food Scanner.',
+  },
+
   // Errors
   errors: {
     generic: 'Something went wrong. Please try again.',
     network: 'Network error. Please check your connection.',
     camera: 'Failed to capture photo. Please try again.',
+    notAuthenticated: 'Please sign in to continue.',
   },
 };

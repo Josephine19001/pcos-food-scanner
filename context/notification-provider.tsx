@@ -7,13 +7,13 @@ import { supabase } from '@/lib/supabase/client';
 import { useAuth } from './auth-provider';
 
 // Configure how notifications are handled when app is in foreground
+// We disable the banner since we show our own in-app toast notification
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
+    shouldShowBanner: false,
     shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: true,
   }),
 });
 
@@ -49,17 +49,18 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     // Listen for user interactions with notifications
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
       const data = response.notification.request.content.data;
-      // Handle notification tap - could navigate to specific screen
-      console.log('Notification tapped:', data);
+      // Handle notification tap - navigate to scan detail if scanId present
+      if (data?.scanId && data?.type === 'scan_complete') {
+        // Use expo-router to navigate
+        const { router } = require('expo-router');
+        router.push(`/scan/${data.scanId}`);
+      }
     });
 
     return () => {
-      if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
-      }
-      if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
-      }
+      // Use .remove() method on subscription objects
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
     };
   }, []);
 
@@ -100,8 +101,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         await savePushToken(token);
       }
 
-      // Configure Android notification channel
+      // Configure Android notification channels
       if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('scan-results', {
+          name: 'Scan Results',
+          description: 'Notifications when food scan analysis is complete',
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#10B981',
+        });
+
         await Notifications.setNotificationChannelAsync('payment-reminders', {
           name: 'Payment Reminders',
           importance: Notifications.AndroidImportance.HIGH,

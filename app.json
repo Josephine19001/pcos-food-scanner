@@ -17,8 +17,16 @@
         "NSCameraUsageDescription": "PCOS Food Scanner uses your camera to scan food items and take photos for your profile avatar.",
         "NSPhotoLibraryUsageDescription": "PCOS Food Scanner accesses your photo library to analyze food items and select your profile avatar.",
         "NSPhotoLibraryAddUsageDescription": "PCOS Food Scanner saves images to your photo library.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["remote-notification"]
       }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.pcosfoodscanner.app"
     },
     "web": {
       "bundler": "metro",
@@ -39,7 +47,15 @@
         }
       ],
       "expo-web-browser",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#0D9488",
+          "sounds": []
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

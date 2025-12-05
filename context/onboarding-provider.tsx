@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
+import type { OnboardingProfile } from '@/lib/hooks/use-accounts';
 
 export interface OnboardingData {
   // Their personal "why" - what they want to achieve
@@ -24,6 +25,7 @@ interface OnboardingContextType {
   updateData: (updates: Partial<OnboardingData>) => void;
   toggleArrayItem: (field: keyof OnboardingData, value: string) => void;
   resetData: () => void;
+  loadFromProfile: (profile: OnboardingProfile) => void;
 }
 
 const defaultData: OnboardingData = {
@@ -63,8 +65,21 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setData(defaultData);
   };
 
+  const loadFromProfile = (profile: OnboardingProfile) => {
+    setData({
+      primaryGoal: profile.primary_goal,
+      symptoms: profile.symptoms ?? [],
+      dailyStruggles: profile.daily_struggles ?? [],
+      foodRelationship: profile.food_relationship,
+      feelGoodFoods: profile.feel_good_foods ?? [],
+      guiltFoods: profile.guilt_foods ?? [],
+      activityLevel: profile.activity_level,
+      referralSource: profile.referral_source,
+    });
+  };
+
   return (
-    <OnboardingContext.Provider value={{ data, updateData, toggleArrayItem, resetData }}>
+    <OnboardingContext.Provider value={{ data, updateData, toggleArrayItem, resetData, loadFromProfile }}>
       {children}
     </OnboardingContext.Provider>
   );

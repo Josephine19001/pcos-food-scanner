@@ -1,13 +1,23 @@
+import { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text, ScrollView, Image, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle } from 'react-native-svg';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  interpolate,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { DEMO_MODE, getDemoScanById, DEMO_IMAGES } from '@/lib/config/demo-data';
-import { useScan } from '@/lib/hooks/use-scans';
+import { useScan, useToggleFavorite } from '@/lib/hooks/use-scans';
 import type { ScanResult, ScanStatus } from '@/lib/types/scan';
+import * as Haptics from 'expo-haptics';
 
 // Icons
 function ChevronLeftIcon({ color = '#111827', size = 24 }: { color?: string; size?: number }) {
@@ -53,8 +63,131 @@ function XCircleIcon({ color = '#EF4444', size = 20 }: { color?: string; size?: 
   );
 }
 
+// Image skeleton with shimmer effect for hero image
+function HeroImageSkeleton() {
+  const shimmer = useSharedValue(0);
+
+  useEffect(() => {
+    shimmer.value = withRepeat(
+      withTiming(1, { duration: 1200 }),
+      -1,
+      false
+    );
+  }, []);
+
+  const shimmerStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(shimmer.value, [0, 0.5, 1], [0.4, 0.7, 0.4]),
+  }));
+
+  return (
+    <Animated.View style={[styles.heroImageSkeleton, shimmerStyle]} />
+  );
+}
+
+// Skeleton loader component
+function ScanDetailSkeleton({ insets }: { insets: { top: number; bottom: number } }) {
+  const shimmer = useSharedValue(0);
+
+  useEffect(() => {
+    shimmer.value = withRepeat(
+      withTiming(1, { duration: 1200 }),
+      -1,
+      false
+    );
+  }, []);
+
+  const shimmerStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(shimmer.value, [0, 0.5, 1], [0.3, 0.7, 0.3]),
+  }));
+
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={['#F0FDFA', '#CCFBF1', '#99F6E4', '#F0FDFA']}
+        locations={[0, 0.3, 0.7, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* Floating orbs */}
+      <View style={[styles.orb, styles.orb1]} />
+      <View style={[styles.orb, styles.orb2]} />
+      <View style={[styles.orb, styles.orb3]} />
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero Image Skeleton */}
+        <View>
+          <Animated.View style={[styles.skeletonHeroImage, shimmerStyle]} />
+          <View style={[styles.headerOverlay, { paddingTop: insets.top }]}>
+            <View style={styles.headerButton}>
+              <ChevronLeftIcon color="rgba(255,255,255,0.5)" />
+            </View>
+            <View style={styles.headerButton}>
+              <BookmarkIcon color="rgba(255,255,255,0.5)" />
+            </View>
+          </View>
+        </View>
+
+        {/* Content Skeleton */}
+        <View style={styles.content}>
+          {/* Status Badge Skeleton */}
+          <Animated.View style={[styles.skeletonStatusBadge, shimmerStyle]} />
+
+          {/* Title Skeleton */}
+          <Animated.View style={[styles.skeletonTitle, shimmerStyle]} />
+
+          {/* Summary Skeleton */}
+          <Animated.View style={[styles.skeletonSummary, shimmerStyle]} />
+          <Animated.View style={[styles.skeletonSummary, styles.skeletonSummaryShort, shimmerStyle]} />
+
+          {/* Analysis Section Skeleton */}
+          <View style={styles.skeletonSection}>
+            <Animated.View style={[styles.skeletonSectionTitle, shimmerStyle]} />
+            <View style={styles.skeletonAnalysisGrid}>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Animated.View key={i} style={[styles.skeletonAnalysisItem, shimmerStyle]} />
+              ))}
+            </View>
+          </View>
+
+          {/* Ingredients Section Skeleton */}
+          <View style={styles.skeletonSection}>
+            <Animated.View style={[styles.skeletonSectionTitle, shimmerStyle]} />
+            <View style={styles.skeletonIngredients}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Animated.View
+                  key={i}
+                  style={[styles.skeletonIngredientTag, { width: 60 + Math.random() * 40 }, shimmerStyle]}
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Recommendations Section Skeleton */}
+          <View style={styles.skeletonSection}>
+            <Animated.View style={[styles.skeletonSectionTitle, shimmerStyle]} />
+            <View style={styles.skeletonListContainer}>
+              {[1, 2, 3].map((i) => (
+                <View key={i} style={styles.skeletonListItem}>
+                  <Animated.View style={[styles.skeletonListIcon, shimmerStyle]} />
+                  <Animated.View style={[styles.skeletonListText, shimmerStyle]} />
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
 // Status configuration (labels will be translated in component)
-const statusConfig: Record<ScanStatus, { color: string; bgColor: string; icon: React.ReactNode }> = {
+const statusConfig: Record<Exclude<ScanStatus, 'pending'>, { color: string; bgColor: string; icon: React.ReactNode }> = {
   safe: {
     color: '#059669',
     bgColor: 'rgba(209, 250, 229, 0.8)',
@@ -173,11 +306,19 @@ export default function ScanDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const toggleFavorite = useToggleFavorite();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Get scan data
   const { data: apiScan, isLoading } = useScan(id || '');
   const demoScan = DEMO_MODE ? getDemoScanById(id || '') : undefined;
   const scan: ScanResult | undefined = DEMO_MODE ? demoScan : apiScan;
+
+  const handleToggleFavorite = () => {
+    if (!scan) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    toggleFavorite.mutate(scan);
+  };
 
   if (!scan && !isLoading) {
     return (
@@ -202,20 +343,7 @@ export default function ScanDetailScreen() {
   }
 
   if (!scan) {
-    return (
-      <View style={styles.container}>
-        <LinearGradient
-          colors={['#F0FDFA', '#CCFBF1', '#99F6E4', '#F0FDFA']}
-          locations={[0, 0.3, 0.7, 1]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>{t('scanDetail.loading')}</Text>
-        </View>
-      </View>
-    );
+    return <ScanDetailSkeleton insets={insets} />;
   }
 
   const status = statusConfig[scan.status];
@@ -254,19 +382,28 @@ export default function ScanDetailScreen() {
         {/* Hero Image */}
         {scan.image_url && (
           <Animated.View entering={FadeIn.duration(400)}>
-            {scan.image_url.startsWith('local:') ? (
-              <Image
-                source={DEMO_IMAGES[scan.image_url.replace('local:', '') as keyof typeof DEMO_IMAGES]}
-                style={styles.heroImage}
-              />
-            ) : (
-              <Image source={{ uri: scan.image_url }} style={styles.heroImage} />
-            )}
+            <View style={styles.heroImageContainer}>
+              {scan.image_url.startsWith('local:') ? (
+                <Image
+                  source={DEMO_IMAGES[scan.image_url.replace('local:', '') as keyof typeof DEMO_IMAGES]}
+                  style={styles.heroImage}
+                />
+              ) : (
+                <>
+                  {!imageLoaded && <HeroImageSkeleton />}
+                  <Image
+                    source={{ uri: scan.image_url }}
+                    style={[styles.heroImage, !imageLoaded && styles.imageHidden]}
+                    onLoad={() => setImageLoaded(true)}
+                  />
+                </>
+              )}
+            </View>
             <View style={[styles.headerOverlay, { paddingTop: insets.top }]}>
-              <Pressable onPress={() => router.back()} style={styles.headerButton}>
+              <Pressable onPress={() => router.back()} style={styles.headerButtonDark}>
                 <ChevronLeftIcon color="#FFFFFF" />
               </Pressable>
-              <Pressable style={styles.headerButton}>
+              <Pressable onPress={handleToggleFavorite} style={styles.headerButtonDark}>
                 <BookmarkIcon color="#FFFFFF" filled={scan.is_favorite} />
               </Pressable>
             </View>
@@ -364,7 +501,7 @@ export default function ScanDetailScreen() {
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <ChevronLeftIcon />
           </Pressable>
-          <Pressable style={styles.backButton}>
+          <Pressable onPress={handleToggleFavorite} style={styles.backButton}>
             <BookmarkIcon filled={scan.is_favorite} />
           </Pressable>
         </View>
@@ -405,12 +542,26 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  heroImage: {
+  heroImageContainer: {
     width: '100%',
     height: 300,
     backgroundColor: '#F3F4F6',
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
+    overflow: 'hidden',
+  },
+  heroImage: {
+    width: '100%',
+    height: 300,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  heroImageSkeleton: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#D1D5DB',
+  },
+  imageHidden: {
+    opacity: 0,
   },
   headerOverlay: {
     position: 'absolute',
@@ -431,6 +582,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  headerButtonDark: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   headerNoImage: {
     position: 'absolute',
@@ -564,15 +725,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#374151',
   },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
   notFound: {
     flex: 1,
     alignItems: 'center',
@@ -581,5 +733,92 @@ const styles = StyleSheet.create({
   notFoundText: {
     fontSize: 16,
     color: '#6B7280',
+  },
+  // Skeleton styles
+  skeletonHeroImage: {
+    width: '100%',
+    height: 300,
+    backgroundColor: '#D1D5DB',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  skeletonStatusBadge: {
+    width: 100,
+    height: 36,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+  skeletonTitle: {
+    width: '70%',
+    height: 32,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  skeletonSummary: {
+    width: '100%',
+    height: 16,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  skeletonSummaryShort: {
+    width: '60%',
+    marginBottom: 24,
+  },
+  skeletonSection: {
+    marginBottom: 24,
+  },
+  skeletonSectionTitle: {
+    width: 120,
+    height: 20,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  skeletonAnalysisGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  skeletonAnalysisItem: {
+    width: '47%',
+    height: 70,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 16,
+  },
+  skeletonIngredients: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  skeletonIngredientTag: {
+    height: 36,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 20,
+  },
+  skeletonListContainer: {
+    gap: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: 16,
+    padding: 16,
+  },
+  skeletonListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  skeletonListIcon: {
+    width: 18,
+    height: 18,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 9,
+  },
+  skeletonListText: {
+    flex: 1,
+    height: 16,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 8,
   },
 });

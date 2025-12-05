@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { HomeHeader, ScanList, type TabType } from '@/components/home';
-import { useScans, useToggleFavorite } from '@/lib/hooks/use-scans';
+import { useScans, useToggleFavorite, useScansRealtime } from '@/lib/hooks/use-scans';
+import { usePendingScan } from '@/context/pending-scan-provider';
 import { DEMO_MODE, DEMO_SCANS } from '@/lib/config/demo-data';
 import type { ScanResult } from '@/lib/types/scan';
 
@@ -17,21 +18,49 @@ export default function HomeScreen() {
   // Fetch scans from backend (only when not in demo mode)
   const { data: apiScans = [], isLoading: apiLoading, refetch, isRefetching } = useScans();
   const toggleFavorite = useToggleFavorite();
+  const { pendingScan } = usePendingScan();
+
+  // Enable realtime updates for scans (invalidates queries on INSERT/UPDATE/DELETE)
+  useScansRealtime();
 
   // Use demo data or real data based on DEMO_MODE
   const scans = DEMO_MODE ? demoScans : apiScans;
   const isLoading = DEMO_MODE ? false : apiLoading;
 
+  // Create a pending scan item for the list if there's an active scan
+  const pendingScanItem: ScanResult | null = pendingScan ? {
+    id: pendingScan.id,
+    user_id: 'pending',
+    name: 'Analyzing...',
+    image_url: pendingScan.imagePreviewUri,
+    status: 'pending',
+    summary: '',
+    progress: Math.round(pendingScan.progress),
+    is_favorite: false,
+    scanned_at: pendingScan.createdAt.toISOString(),
+    created_at: pendingScan.createdAt.toISOString(),
+    updated_at: pendingScan.createdAt.toISOString(),
+  } : null;
+
   // Filter scans based on active tab and search query
   const filteredScans = useMemo(() => {
-    return scans.filter((scan) => {
+    const baseScans = scans.filter((scan) => {
       const matchesSearch = scan.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesTab = activeTab === 'all' || (activeTab === 'saves' && scan.is_favorite);
       return matchesSearch && matchesTab;
     });
-  }, [scans, activeTab, searchQuery]);
+
+    // Add pending scan at the top if it exists and we're on 'all' tab
+    if (pendingScanItem && activeTab === 'all') {
+      return [pendingScanItem, ...baseScans];
+    }
+
+    return baseScans;
+  }, [scans, activeTab, searchQuery, pendingScanItem]);
 
   const handleScanPress = useCallback((scan: ScanResult) => {
+    // Don't navigate for pending scans
+    if (scan.status === 'pending') return;
     router.push(`/scan/${scan.id}`);
   }, [router]);
 

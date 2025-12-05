@@ -1,11 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, Pressable, Image, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
 import Animated, {
   FadeInUp,
   useSharedValue,
   useAnimatedProps,
+  useAnimatedStyle,
   withTiming,
+  withRepeat,
+  interpolate,
   Easing,
 } from 'react-native-reanimated';
 import {
@@ -91,6 +94,27 @@ function SkeletonBars() {
         <View style={[styles.skeletonBar, { width: '28%' }]} />
       </View>
     </View>
+  );
+}
+
+// Image skeleton with shimmer effect
+function ImageSkeleton() {
+  const shimmer = useSharedValue(0);
+
+  useEffect(() => {
+    shimmer.value = withRepeat(
+      withTiming(1, { duration: 1200 }),
+      -1,
+      false
+    );
+  }, []);
+
+  const shimmerStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(shimmer.value, [0, 0.5, 1], [0.4, 0.7, 0.4]),
+  }));
+
+  return (
+    <Animated.View style={[styles.imageSkeleton, shimmerStyle]} />
   );
 }
 
@@ -206,6 +230,8 @@ export function ScanCard({ scan, index, onPress, onToggleFavorite }: ScanCardPro
 
   const timeString = format(new Date(scan.scanned_at), 'h:mm a');
 
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const renderImage = () => {
     if (scan.image_url) {
       if (scan.image_url.startsWith('local:')) {
@@ -218,11 +244,15 @@ export function ScanCard({ scan, index, onPress, onToggleFavorite }: ScanCardPro
         );
       }
       return (
-        <Image
-          source={{ uri: scan.image_url }}
-          style={styles.image}
-          blurRadius={isPending ? 15 : 0}
-        />
+        <>
+          {!imageLoaded && <ImageSkeleton />}
+          <Image
+            source={{ uri: scan.image_url }}
+            style={[styles.image, !imageLoaded && styles.imageHidden]}
+            blurRadius={isPending ? 15 : 0}
+            onLoad={() => setImageLoaded(true)}
+          />
+        </>
       );
     }
     return (
@@ -469,5 +499,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  imageSkeleton: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#D1D5DB',
+    borderRadius: 12,
+  },
+  imageHidden: {
+    opacity: 0,
   },
 });

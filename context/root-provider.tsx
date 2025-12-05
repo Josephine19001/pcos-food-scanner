@@ -7,7 +7,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Toaster } from 'sonner-native';
 import { AuthProvider } from './auth-provider';
 import { RevenueCatProvider } from './revenuecat-provider';
-// import { NotificationProvider } from './notification-provider';
+import { NotificationProvider } from './notification-provider';
+import { PendingScanProvider } from './pending-scan-provider';
 import { ThemeProvider } from './theme-provider';
 import { TabBarProvider } from './tab-bar-provider';
 import { LanguageProvider } from './language-provider';
@@ -34,16 +35,33 @@ export const RootProvider = ({ children }: PropsWithChildren) => {
           <AuthProvider>
             <OnboardingProvider>
               <RevenueCatProvider>
-                {/* <NotificationProvider> */}
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                  <BottomSheetModalProvider>
-                    <TabBarProvider>
-                      {children}
-                      <Toaster theme="light" />
-                    </TabBarProvider>
-                  </BottomSheetModalProvider>
-                </GestureHandlerRootView>
-                {/* </NotificationProvider> */}
+                <NotificationProvider>
+                  <PendingScanProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                      <BottomSheetModalProvider>
+                        <TabBarProvider>
+                          {children}
+                          <Toaster
+                            theme="light"
+                            toastOptions={{
+                              style: {
+                                paddingVertical: 12,
+                                paddingHorizontal: 16,
+                              },
+                              titleStyle: {
+                                fontSize: 14,
+                                fontWeight: '600',
+                              },
+                              descriptionStyle: {
+                                fontSize: 12,
+                              },
+                            }}
+                          />
+                        </TabBarProvider>
+                      </BottomSheetModalProvider>
+                    </GestureHandlerRootView>
+                  </PendingScanProvider>
+                </NotificationProvider>
               </RevenueCatProvider>
             </OnboardingProvider>
           </AuthProvider>

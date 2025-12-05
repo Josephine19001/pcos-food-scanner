@@ -6,17 +6,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import { useTabBar } from '@/context/tab-bar-provider';
+import { usePendingScan } from '@/context/pending-scan-provider';
 import {
   CameraHeader,
   CameraControls,
   ScanFrame,
 } from '@/components/scan';
-// import { useCreateScan } from '@/lib/hooks/use-scans';
 
 export default function ScanScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { hideTabBar, showTabBar } = useTabBar();
+  const { startScan, pendingScan } = usePendingScan();
   const cameraRef = useRef<CameraView>(null);
   const [facing, setFacing] = useState<CameraType>('back');
   const [flash, setFlash] = useState(false);
@@ -38,9 +41,6 @@ export default function ScanScreen() {
     }
   }, [permission, requestPermission]);
 
-  // TODO: Uncomment when backend is ready
-  // const createScan = useCreateScan();
-
   const handleClose = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.back();
@@ -56,20 +56,18 @@ export default function ScanScreen() {
     setFacing((current) => (current === 'back' ? 'front' : 'back'));
   }, []);
 
-  const processImage = useCallback(async (_imageUri: string) => {
-    // TODO: Send image to backend for analysis
-    // For now, show a placeholder message
-    Alert.alert(
-      'Photo Captured',
-      'Food analysis feature coming soon! We will analyze this food item for PCOS compatibility.',
-      [{ text: 'OK', onPress: () => router.back() }]
-    );
-  }, [router]);
+  const processImage = useCallback((imageBase64: string, imageUri?: string) => {
+    // Start the scan in background and immediately go back to home
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    startScan(imageBase64, imageUri);
+
+    // Navigate back to home to show pending scan in list
+    router.back();
+  }, [startScan, router]);
 
   const handleCapture = useCallback(async () => {
-    if (!cameraRef.current || isCapturing) return;
+    if (!cameraRef.current || isCapturing || pendingScan) return;
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsCapturing(true);
 
     try {
@@ -78,18 +76,23 @@ export default function ScanScreen() {
         base64: true,
       });
 
-      if (photo?.uri) {
-        await processImage(photo.uri);
+      if (photo?.base64) {
+        processImage(photo.base64, photo.uri);
+      } else {
+        throw new Error('No image data captured');
       }
     } catch (error) {
       console.error('Error capturing photo:', error);
-      Alert.alert('Error', 'Failed to capture photo. Please try again.');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert(t('common.error'), t('errors.camera'));
     } finally {
       setIsCapturing(false);
     }
-  }, [isCapturing, processImage]);
+  }, [isCapturing, pendingScan, processImage, t]);
 
   const handlePickImage = useCallback(async () => {
+    if (pendingScan) return;
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -100,10 +103,10 @@ export default function ScanScreen() {
       base64: true,
     });
 
-    if (!result.canceled && result.assets[0]?.uri) {
-      await processImage(result.assets[0].uri);
+    if (!result.canceled && result.assets[0]?.base64) {
+      processImage(result.assets[0].base64, result.assets[0].uri);
     }
-  }, [processImage]);
+  }, [pendingScan, processImage]);
 
   const handleOpenSettings = useCallback(() => {
     Linking.openSettings();
@@ -125,12 +128,12 @@ export default function ScanScreen() {
             onToggleFlash={() => {}}
           />
           <View style={styles.permissionContent}>
-            <Text style={styles.permissionTitle}>Camera Access Required</Text>
+            <Text style={styles.permissionTitle}>{t('scan.cameraPermission.title')}</Text>
             <Text style={styles.permissionText}>
-              To scan food items, please enable camera access in your device settings.
+              {t('scan.cameraPermission.description')}
             </Text>
             <Pressable onPress={handleOpenSettings} style={styles.settingsButton}>
-              <Text style={styles.settingsButtonText}>Open Settings</Text>
+              <Text style={styles.settingsButtonText}>{t('scan.cameraPermission.openSettings')}</Text>
             </Pressable>
           </View>
         </SafeAreaView>
@@ -152,6 +155,8 @@ export default function ScanScreen() {
       </View>
     );
   }
+
+  const isProcessing = isCapturing || !!pendingScan;
 
   // Camera view
   return (
@@ -175,7 +180,7 @@ export default function ScanScreen() {
             onCapture={handleCapture}
             onFlipCamera={toggleCameraFacing}
             onPickImage={handlePickImage}
-            isCapturing={isCapturing}
+            isCapturing={isProcessing}
           />
         </SafeAreaView>
       </CameraView>

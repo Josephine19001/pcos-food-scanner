@@ -363,6 +363,7 @@ export default {
     items: {
       profile: 'Perfil',
       updatePreferences: 'Actualizar Preferencias',
+      notifications: 'Notificaciones',
       language: 'Idioma',
       giveFeedback: 'Dar Comentarios',
       rateApp: 'Calificar la App',
@@ -531,6 +532,19 @@ export default {
       step2: 'Tu recomendación podría ayudar a alguien a descubrir alimentos que funcionan para ella',
     },
     terms: 'Gracias por ayudar a difundir la conciencia sobre la nutrición para SOP.',
+  },
+
+  // Notifications
+  notifications: {
+    title: 'Notificaciones',
+    pushNotifications: 'Notificaciones Push',
+    pushDescription: 'Recibe notificaciones cuando tu escaneo esté listo',
+    helpText: 'Las notificaciones te ayudan a saber cuándo tu análisis de alimentos está listo, para que puedas continuar con tu día mientras procesamos tu escaneo.',
+    enabled: 'Notificaciones activadas',
+    disabledTitle: 'Notificaciones Desactivadas',
+    disabledMessage: 'Para activar las notificaciones, ve a Configuración y permite las notificaciones para PCOS Food Scanner.',
+    disableTitle: 'Desactivar Notificaciones',
+    disableMessage: 'Para desactivar las notificaciones, ve a Configuración y desactiva las notificaciones para PCOS Food Scanner.',
   },
 
   // Errors

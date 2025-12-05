@@ -1,7 +1,7 @@
 import type { ScanResult } from '@/lib/types/scan';
 
 // Toggle this to enable/disable demo mode
-export const DEMO_MODE = true;
+export const DEMO_MODE = false;
 
 // Local image imports for demo
 export const DEMO_IMAGES = {

@@ -34,6 +34,7 @@ import {
   BookOpen,
   Globe,
   Settings2,
+  Bell,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/language-provider';
@@ -236,6 +237,13 @@ export default function SettingsScreen() {
             icon={Settings2}
             label={t('settings.items.updatePreferences')}
             onPress={() => router.push('/preferences')}
+            colors={colors}
+          />
+          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+          <SettingsItem
+            icon={Bell}
+            label={t('settings.items.notifications')}
+            onPress={() => router.push('/notifications')}
             colors={colors}
           />
           <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />

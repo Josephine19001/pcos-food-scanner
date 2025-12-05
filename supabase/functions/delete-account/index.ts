@@ -16,10 +16,10 @@ serve(async (req) => {
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'No authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'No authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Create Supabase client with user's token
@@ -36,13 +36,16 @@ serve(async (req) => {
 
     // Get user from token
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseClient.auth.getUser(token);
 
     if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Get deletion reason from request body
@@ -51,32 +54,26 @@ serve(async (req) => {
 
     // Save deletion feedback before deleting account
     if (reason) {
-      await supabaseClient
-        .from('account_deletion_feedback')
-        .insert({
-          account_id: user.id,
-          deletion_reason: reason,
-          additional_comments: additional_comments || null,
-        });
+      await supabaseClient.from('deletion_feedback').insert({
+        account_id: user.id,
+        deletion_reason: reason,
+        additional_comments: additional_comments || null,
+      });
     }
 
     // Delete user's storage files (avatars)
-    const { data: avatarFiles } = await supabaseClient.storage
-      .from('avatars')
-      .list(user.id);
+    const { data: avatarFiles } = await supabaseClient.storage.from('avatars').list(user.id);
 
     if (avatarFiles && avatarFiles.length > 0) {
-      const filesToDelete = avatarFiles.map(file => `${user.id}/${file.name}`);
+      const filesToDelete = avatarFiles.map((file) => `${user.id}/${file.name}`);
       await supabaseClient.storage.from('avatars').remove(filesToDelete);
     }
 
     // Delete user's scan images
-    const { data: scanFiles } = await supabaseClient.storage
-      .from('scans')
-      .list(user.id);
+    const { data: scanFiles } = await supabaseClient.storage.from('scans').list(user.id);
 
     if (scanFiles && scanFiles.length > 0) {
-      const filesToDelete = scanFiles.map(file => `${user.id}/${file.name}`);
+      const filesToDelete = scanFiles.map((file) => `${user.id}/${file.name}`);
       await supabaseClient.storage.from('scans').remove(filesToDelete);
     }
 
@@ -85,10 +82,10 @@ serve(async (req) => {
 
     if (deleteError) {
       console.error('Error deleting user:', deleteError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to delete account' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Failed to delete account' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     return new Response(
@@ -97,9 +94,9 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
