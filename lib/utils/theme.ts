@@ -1,25 +1,21 @@
-import { useTheme } from '@/context/theme-provider';
-
 /**
  * Hook to get theme-aware class names
  * Usage: const themed = useThemedStyles(); themed('bg-white', 'dark:bg-gray-900')
+ * Note: Dark theme is disabled for now, always returns light theme
  */
 export function useThemedStyles() {
-  const { isDark } = useTheme();
-
-  return (lightClass: string, darkClass: string = '') => {
-    if (!darkClass) {
-      return lightClass;
-    }
-    return isDark ? darkClass.replace('dark:', '') : lightClass;
+  return (lightClass: string, _darkClass: string = '') => {
+    return lightClass;
   };
 }
 
 /**
  * Get theme-specific color values
+ * Note: Dark theme is disabled for now, always returns light theme colors
  */
 export function useThemedColors() {
-  const { isDark } = useTheme();
+  // Dark theme disabled - always use light theme
+  const isDark = false;
 
   return {
     // Backgrounds

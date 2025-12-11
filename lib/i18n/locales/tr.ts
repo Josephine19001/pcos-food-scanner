@@ -328,23 +328,32 @@ export default {
 
   // Paywall
   paywall: {
-    title: 'Ne Yediğinizi Bilin',
-    subtitle: 'Herhangi bir yiyeceği tarayarak kan şekerinizi, hormonlarınızı ve inflamasyonu nasıl etkilediğini anında görün. PKOS için güvenle seçim yapın.',
+    title: 'Premium\'u Aç',
+    subtitle: 'PKOS için sınırsız tarama ve kişiselleştirilmiş bilgiler alın',
     features: {
+      unlimitedScans: {
+        title: 'Sınırsız Tarama',
+        description: 'Herhangi bir yiyeceği, sınırsız tarayın',
+      },
       bloodSugar: {
-        title: 'Yiyeceklerin kan şekerinizi nasıl etkilediğini görün',
+        title: 'Kan Şekeri Etkisi',
+        description: 'Yiyeceklerin kan şekerinizi nasıl etkilediğini görün',
       },
       inflammation: {
-        title: 'İnflamasyon tetikleyen yiyecekleri tespit edin',
+        title: 'İnflamasyon Puanı',
+        description: 'İnflamasyon tetikleyen yiyecekleri belirleyin',
       },
       hormones: {
-        title: 'Hormon etkisini anında anlayın',
+        title: 'Hormon Etkisi',
+        description: 'Hormonlarınız üzerindeki etkiyi anlayın',
       },
       hiddenSugars: {
-        title: 'Gizli şekerleri ve katkı maddelerini bulun',
+        title: 'Gizli İçerikler',
+        description: 'Gizli şekerleri ve katkı maddelerini tespit edin',
       },
       personalizedTips: {
-        title: 'Semptomlarınıza göre ipuçları alın',
+        title: 'Kişisel İpuçları',
+        description: 'Semptomlarınıza göre tavsiyeler alın',
       },
     },
     plans: {
@@ -360,7 +369,7 @@ export default {
       then: 'Sonra {{price}}/yıl',
     },
     cta: {
-      startTrial: '{{days}} Günlük Ücretsiz Denemeyi Başlat',
+      startTrial: '{{days}} Günlük Denemeyi Başlat',
       subscribeNow: 'Şimdi Abone Ol',
       thenPrice: 'Sonra {{price}}/yıl',
       perMonth: '{{price}}/ay',
@@ -520,6 +529,11 @@ export default {
     remember: {
       title: 'Unutmayın',
       message: 'Herkesin vücudu farklı tepki verir. Bu kılavuzları başlangıç noktası olarak kullanın ve sizin için en iyi olanı bulmak için sağlık uzmanınızla çalışın.',
+    },
+    references: {
+      title: 'Tıbbi Referanslar',
+      intro: 'Bu rehberdeki bilgiler, hakemli araştırmalara ve aşağıdaki saygın tıbbi kaynaklardan gelen kılavuzlara dayanmaktadır:',
+      disclaimer: 'Bu uygulama yalnızca genel bilgi sağlar ve profesyonel tıbbi tavsiyenin yerini almaz. Kişiselleştirilmiş rehberlik için her zaman sağlık uzmanınıza danışın.',
     },
   },
 

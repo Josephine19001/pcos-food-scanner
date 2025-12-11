@@ -325,23 +325,32 @@ export default {
 
   // Paywall
   paywall: {
-    title: 'Sabe Lo Que Comes',
-    subtitle: 'Escanea cualquier alimento para ver al instante cómo afecta tu azúcar, hormonas e inflamación. Toma decisiones seguras para tu SOP.',
+    title: 'Desbloquear Premium',
+    subtitle: 'Obtén escaneos ilimitados e información personalizada para tu SOP',
     features: {
+      unlimitedScans: {
+        title: 'Escaneos Ilimitados',
+        description: 'Escanea cualquier alimento, sin límites',
+      },
       bloodSugar: {
-        title: 'Mira cómo los alimentos afectan tu azúcar',
+        title: 'Impacto en el Azúcar',
+        description: 'Mira cómo los alimentos afectan tu glucosa',
       },
       inflammation: {
-        title: 'Detecta alimentos que causan inflamación',
+        title: 'Puntuación de Inflamación',
+        description: 'Identifica alimentos que causan inflamación',
       },
       hormones: {
-        title: 'Entiende el impacto hormonal al instante',
+        title: 'Impacto Hormonal',
+        description: 'Entiende los efectos en tus hormonas',
       },
       hiddenSugars: {
-        title: 'Encuentra azúcares y aditivos ocultos',
+        title: 'Ingredientes Ocultos',
+        description: 'Detecta azúcares y aditivos ocultos',
       },
       personalizedTips: {
-        title: 'Consejos según tus síntomas',
+        title: 'Consejos Personalizados',
+        description: 'Recibe consejos según tus síntomas',
       },
     },
     plans: {
@@ -357,7 +366,7 @@ export default {
       then: 'Luego {{price}}/año',
     },
     cta: {
-      startTrial: 'Iniciar Prueba Gratis de {{days}} Días',
+      startTrial: 'Iniciar Prueba de {{days}} Días',
       subscribeNow: 'Suscribirse Ahora',
       thenPrice: 'Luego {{price}}/año',
       perMonth: '{{price}}/mes',
@@ -517,6 +526,11 @@ export default {
     remember: {
       title: 'Recuerda',
       message: 'El cuerpo de cada persona responde diferente. Usa estas guías como punto de partida y trabaja con tu proveedor de salud para encontrar lo que funciona mejor para ti.',
+    },
+    references: {
+      title: 'Referencias Médicas',
+      intro: 'La información en esta guía se basa en investigaciones revisadas por pares y directrices de las siguientes fuentes médicas reconocidas:',
+      disclaimer: 'Esta aplicación proporciona solo información general y no sustituye el consejo médico profesional. Consulta siempre a tu proveedor de salud para orientación personalizada.',
     },
   },
 

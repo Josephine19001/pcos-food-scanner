@@ -40,6 +40,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/context/language-provider';
 import { useRouter } from 'expo-router';
 import { useThemedColors } from '@/lib/utils/theme';
+import { useResponsive } from '@/lib/utils/responsive';
 
 interface SettingsItemProps {
   icon: React.ElementType;
@@ -120,6 +121,7 @@ export default function SettingsScreen() {
   const { language, supportedLanguages } = useLanguage();
   const { deleteAccount, signOut } = useAuth();
   const colors = useThemedColors();
+  const { isTablet, contentMaxWidth } = useResponsive();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -178,6 +180,11 @@ export default function SettingsScreen() {
     setShowDeleteModal(true);
   };
 
+  // Content wrapper style for tablets
+  const contentWrapperStyle = isTablet
+    ? { maxWidth: contentMaxWidth, alignSelf: 'center' as const, width: '100%' as const }
+    : {};
+
   return (
     <PageLayout title={t('settings.title')}>
       <ScrollView
@@ -185,90 +192,91 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }}
       >
-        {/* Share and Earn Banner */}
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/referral');
-          }}
-          className="mx-4 mb-4"
-        >
-          <View className="rounded-2xl overflow-hidden" style={{ minHeight: 140 }}>
-            <ImageBackground
-              source={require('@/assets/images/referral-image.png')}
-              style={StyleSheet.absoluteFill}
-              imageStyle={{ borderRadius: 16 }}
-            >
-              <LinearGradient
-                colors={['rgba(13, 148, 136, 0.75)', 'rgba(15, 118, 110, 0.70)']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
-              />
-              <View className="p-5 justify-between flex-row items-center" style={{ minHeight: 140 }}>
-                <View className="flex-row items-center flex-1">
-                  <View className="w-14 h-14 rounded-2xl bg-white/25 items-center justify-center mr-4">
-                    <Gift size={28} color="#ffffff" />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-white font-bold text-lg mb-1">{t('settings.share.banner.title')}</Text>
-                    <Text className="text-white/95 text-sm">{t('settings.share.banner.subtitle')}</Text>
-                    <View className="bg-white/25 rounded-lg px-3 py-1.5 self-start mt-2">
-                      <Text className="text-white font-bold text-sm">{t('settings.share.banner.earnPerReferral')}</Text>
-                    </View>
-                  </View>
-                </View>
-                <ChevronRight size={24} color="rgba(255,255,255,0.9)" />
-              </View>
-            </ImageBackground>
-          </View>
-        </Pressable>
-
-        {/* Account Section */}
-        <SettingsGroup title={t('settings.sections.account')} colors={colors}>
-          <SettingsItem
-            icon={User}
-            label={t('settings.items.profile')}
-            onPress={() => router.push('/profile')}
-            colors={colors}
-          />
-          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
-          <SettingsItem
-            icon={Settings2}
-            label={t('settings.items.updatePreferences')}
-            onPress={() => router.push('/preferences')}
-            colors={colors}
-          />
-          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
-          <SettingsItem
-            icon={Bell}
-            label={t('settings.items.notifications')}
-            onPress={() => router.push('/notifications')}
-            colors={colors}
-          />
-          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+        <View style={contentWrapperStyle}>
+          {/* Share and Earn Banner */}
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/language');
+              router.push('/referral');
             }}
-            className="flex-row items-center py-4 px-1"
+            className="mx-4 mb-4"
           >
-            <View
-              className="w-9 h-9 rounded-full items-center justify-center mr-3"
-              style={{ backgroundColor: colors.iconBackground }}
-            >
-              <Globe size={18} color={colors.textSecondary} />
+            <View className="rounded-2xl overflow-hidden" style={{ minHeight: 140 }}>
+              <ImageBackground
+                source={require('@/assets/images/referral-image.png')}
+                style={StyleSheet.absoluteFill}
+                imageStyle={{ borderRadius: 16 }}
+              >
+                <LinearGradient
+                  colors={['rgba(13, 148, 136, 0.75)', 'rgba(15, 118, 110, 0.70)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View className="p-5 justify-between flex-row items-center" style={{ minHeight: 140 }}>
+                  <View className="flex-row items-center flex-1">
+                    <View className="w-14 h-14 rounded-2xl bg-white/25 items-center justify-center mr-4">
+                      <Gift size={28} color="#ffffff" />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-white font-bold text-lg mb-1" numberOfLines={2}>{t('settings.share.banner.title')}</Text>
+                      <Text className="text-white/95 text-sm" numberOfLines={2}>{t('settings.share.banner.subtitle')}</Text>
+                      <View className="bg-white/25 rounded-lg px-3 py-1.5 self-start mt-2">
+                        <Text className="text-white font-bold text-sm" numberOfLines={1}>{t('settings.share.banner.earnPerReferral')}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <ChevronRight size={24} color="rgba(255,255,255,0.9)" />
+                </View>
+              </ImageBackground>
             </View>
-            <Text className="flex-1 text-base" style={{ color: colors.text }}>
-              {t('settings.items.language')}
-            </Text>
-            <Text className="text-sm mr-2" style={{ color: colors.textMuted }}>
-              {currentLanguageName}
-            </Text>
-            <ChevronRight size={20} color={colors.textMuted} />
           </Pressable>
-        </SettingsGroup>
+
+          {/* Account Section */}
+          <SettingsGroup title={t('settings.sections.account')} colors={colors}>
+            <SettingsItem
+              icon={User}
+              label={t('settings.items.profile')}
+              onPress={() => router.push('/profile')}
+              colors={colors}
+            />
+            <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+            <SettingsItem
+              icon={Settings2}
+              label={t('settings.items.updatePreferences')}
+              onPress={() => router.push('/preferences')}
+              colors={colors}
+            />
+            <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+            <SettingsItem
+              icon={Bell}
+              label={t('settings.items.notifications')}
+              onPress={() => router.push('/notifications')}
+              colors={colors}
+            />
+            <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/language');
+              }}
+              className="flex-row items-center py-4 px-1"
+            >
+              <View
+                className="w-9 h-9 rounded-full items-center justify-center mr-3"
+                style={{ backgroundColor: colors.iconBackground }}
+              >
+                <Globe size={18} color={colors.textSecondary} />
+              </View>
+              <Text className="flex-1 text-base" style={{ color: colors.text }}>
+                {t('settings.items.language')}
+              </Text>
+              <Text className="text-sm mr-2" style={{ color: colors.textMuted }}>
+                {currentLanguageName}
+              </Text>
+              <ChevronRight size={20} color={colors.textMuted} />
+            </Pressable>
+          </SettingsGroup>
 
         {/* Appearance Section - Commented out, using light theme as default */}
         {/* <SettingsGroup title={t('settings.sections.appearance')} colors={colors}>
@@ -330,91 +338,92 @@ export default function SettingsScreen() {
           </Pressable>
         </SettingsGroup> */}
 
-        {/* Support Section */}
-        <SettingsGroup title={t('settings.sections.support')} colors={colors}>
-          <SettingsItem
-            icon={MessageCircle}
-            label={t('settings.items.giveFeedback')}
-            onPress={() => router.push('/feedback')}
-            colors={colors}
-          />
-          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
-          <SettingsItem
-            icon={Star}
-            label={t('settings.items.rateApp')}
-            onPress={handleRateApp}
-            colors={colors}
-          />
-        </SettingsGroup>
+          {/* Support Section */}
+          <SettingsGroup title={t('settings.sections.support')} colors={colors}>
+            <SettingsItem
+              icon={MessageCircle}
+              label={t('settings.items.giveFeedback')}
+              onPress={() => router.push('/feedback')}
+              colors={colors}
+            />
+            <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+            <SettingsItem
+              icon={Star}
+              label={t('settings.items.rateApp')}
+              onPress={handleRateApp}
+              colors={colors}
+            />
+          </SettingsGroup>
 
-        {/* About Section */}
-        <SettingsGroup title={t('settings.sections.about')} colors={colors}>
-          <SettingsItem
-            icon={HelpCircle}
-            label={t('settings.items.howItWorks')}
-            onPress={() => router.push('/how-it-works')}
-            colors={colors}
-          />
-          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
-          <SettingsItem
-            icon={BookOpen}
-            label={t('settings.items.nutritionGuide')}
-            onPress={() => router.push('/nutrition-guide')}
-            colors={colors}
-          />
-          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
-          <SettingsItem
-            icon={Info}
-            label={t('settings.items.aboutPcos')}
-            onPress={() =>
-              Linking.openURL('https://www.womenshealth.gov/a-z-topics/polycystic-ovary-syndrome')
-            }
-            colors={colors}
-          />
-        </SettingsGroup>
+          {/* About Section */}
+          <SettingsGroup title={t('settings.sections.about')} colors={colors}>
+            <SettingsItem
+              icon={HelpCircle}
+              label={t('settings.items.howItWorks')}
+              onPress={() => router.push('/how-it-works')}
+              colors={colors}
+            />
+            <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+            <SettingsItem
+              icon={BookOpen}
+              label={t('settings.items.nutritionGuide')}
+              onPress={() => router.push('/nutrition-guide')}
+              colors={colors}
+            />
+            <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+            <SettingsItem
+              icon={Info}
+              label={t('settings.items.aboutPcos')}
+              onPress={() =>
+                Linking.openURL('https://www.womenshealth.gov/a-z-topics/polycystic-ovary-syndrome')
+              }
+              colors={colors}
+            />
+          </SettingsGroup>
 
-        {/* Legal Section */}
-        <SettingsGroup title={t('settings.sections.legal')} colors={colors}>
-          <SettingsItem
-            icon={FileText}
-            label={t('settings.items.termsOfService')}
-            onPress={() => Linking.openURL(APP_URLS.terms)}
-            colors={colors}
-          />
-          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
-          <SettingsItem
-            icon={Shield}
-            label={t('settings.items.privacyPolicy')}
-            onPress={() => Linking.openURL(APP_URLS.privacy)}
-            colors={colors}
-          />
-        </SettingsGroup>
+          {/* Legal Section */}
+          <SettingsGroup title={t('settings.sections.legal')} colors={colors}>
+            <SettingsItem
+              icon={FileText}
+              label={t('settings.items.termsOfService')}
+              onPress={() => Linking.openURL(APP_URLS.terms)}
+              colors={colors}
+            />
+            <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+            <SettingsItem
+              icon={Shield}
+              label={t('settings.items.privacyPolicy')}
+              onPress={() => Linking.openURL(APP_URLS.privacy)}
+              colors={colors}
+            />
+          </SettingsGroup>
 
-        {/* Account Actions */}
-        <SettingsGroup colors={colors}>
-          <SettingsItem
-            icon={LogOut}
-            label={t('settings.items.logOut')}
-            onPress={() => setShowLogoutModal(true)}
-            showChevron={false}
-            colors={colors}
-          />
-          <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
-          <SettingsItem
-            icon={Trash2}
-            label={t('settings.items.deleteAccount')}
-            onPress={showDeleteAlert}
-            showChevron={false}
-            danger
-            colors={colors}
-          />
-        </SettingsGroup>
+          {/* Account Actions */}
+          <SettingsGroup colors={colors}>
+            <SettingsItem
+              icon={LogOut}
+              label={t('settings.items.logOut')}
+              onPress={() => setShowLogoutModal(true)}
+              showChevron={false}
+              colors={colors}
+            />
+            <View className="h-px mx-1" style={{ backgroundColor: colors.borderLight }} />
+            <SettingsItem
+              icon={Trash2}
+              label={t('settings.items.deleteAccount')}
+              onPress={showDeleteAlert}
+              showChevron={false}
+              danger
+              colors={colors}
+            />
+          </SettingsGroup>
 
-        {/* App Version */}
-        <View className="items-center mt-4">
-          <Text className="text-sm" style={{ color: colors.textMuted }}>
-            {t('settings.version', { version: '1.0.0' })}
-          </Text>
+          {/* App Version */}
+          <View className="items-center mt-4">
+            <Text className="text-sm" style={{ color: colors.textMuted }}>
+              {t('settings.version', { version: '1.0.0' })}
+            </Text>
+          </View>
         </View>
       </ScrollView>
 

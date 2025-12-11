@@ -328,23 +328,32 @@ export default {
 
   // Paywall
   paywall: {
-    title: 'Know What You\'re Eating',
-    subtitle: 'Scan any food to instantly see how it affects your blood sugar, hormones, and inflammation. Make confident choices for your PCOS.',
+    title: 'Unlock Premium',
+    subtitle: 'Get unlimited scans and personalized insights for your PCOS journey',
     features: {
+      unlimitedScans: {
+        title: 'Unlimited Food Scans',
+        description: 'Scan any food, anytime, without limits',
+      },
       bloodSugar: {
-        title: 'See how foods spike your blood sugar',
+        title: 'Blood Sugar Impact',
+        description: 'See how foods affect your glucose levels',
       },
       inflammation: {
-        title: 'Spot foods that trigger inflammation',
+        title: 'Inflammation Scores',
+        description: 'Identify foods that trigger inflammation',
       },
       hormones: {
-        title: 'Understand hormone impact instantly',
+        title: 'Hormone Impact',
+        description: 'Understand effects on your hormones',
       },
       hiddenSugars: {
-        title: 'Find hidden sugars & additives',
+        title: 'Hidden Ingredients',
+        description: 'Detect hidden sugars & additives',
       },
       personalizedTips: {
-        title: 'Get tips based on your symptoms',
+        title: 'Personalized Tips',
+        description: 'Get advice based on your symptoms',
       },
     },
     plans: {
@@ -520,6 +529,11 @@ export default {
     remember: {
       title: 'Remember',
       message: "Everyone's body responds differently. Use these guidelines as a starting point and work with your healthcare provider to find what works best for you.",
+    },
+    references: {
+      title: 'Medical References',
+      intro: 'The information in this guide is based on peer-reviewed research and guidelines from the following reputable medical sources:',
+      disclaimer: 'This app provides general information only and is not a substitute for professional medical advice. Always consult your healthcare provider for personalized guidance.',
     },
   },
 

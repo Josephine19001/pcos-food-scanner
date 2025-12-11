@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, G } from 'react-native-svg';
 import { useTabBar } from '@/context/tab-bar-provider';
 import * as Haptics from 'expo-haptics';
+import { useResponsive } from '@/lib/utils/responsive';
 
 // Custom Home Icon
 function HomeIcon({ color, size = 24 }: { color: string; size?: number }) {
@@ -48,6 +49,7 @@ interface TabBarProps {
 function CustomTabBar({ state, navigation }: TabBarProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { tabBarWidth } = useResponsive();
 
   const handleScanPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -82,7 +84,7 @@ function CustomTabBar({ state, navigation }: TabBarProps) {
       ]}
     >
       {/* Liquid Glass Tab Bar */}
-      <View style={styles.tabBarWrapper}>
+      <View style={[styles.tabBarWrapper, { maxWidth: tabBarWidth }]}>
         <View style={styles.tabBarContent}>
           {/* Home Tab */}
           <Pressable
@@ -123,7 +125,6 @@ const styles = StyleSheet.create({
   },
   tabBarWrapper: {
     width: '100%',
-    maxWidth: 280,
     borderRadius: 32,
     overflow: 'hidden',
     // Liquid glass effect with backdrop blur simulation

@@ -1,20 +1,9 @@
 import { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  StatusBar,
-  Dimensions,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Pressable, StatusBar, Dimensions, StyleSheet } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, {
-  FadeIn,
-  SlideInRight,
-  SlideOutLeft,
-} from 'react-native-reanimated';
+import Animated, { FadeIn, SlideInRight, SlideOutLeft } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 
@@ -99,9 +88,7 @@ export function WelcomeScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.buttonGradient}
               >
-                <Text style={styles.continueButtonText}>
-                  {t('welcomeFlow.continue')}
-                </Text>
+                <Text style={styles.continueButtonText}>{t('welcomeFlow.continue')}</Text>
               </LinearGradient>
             </Pressable>
 
@@ -133,26 +120,17 @@ function WelcomeStep0() {
       exiting={SlideOutLeft.duration(300)}
       style={styles.valuePropsStep}
     >
-      <Animated.View
-        entering={FadeIn.delay(200).duration(400)}
-        style={styles.iconContainer}
-      >
+      <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.iconContainer}>
         <FastImage
           source={require('@/assets/images/splash-icon.png')}
           style={styles.logoIcon}
           resizeMode={FastImage.resizeMode.contain}
         />
       </Animated.View>
-      <Animated.Text
-        entering={FadeIn.delay(300).duration(400)}
-        style={styles.valuePropTitle}
-      >
+      <Animated.Text entering={FadeIn.delay(300).duration(400)} style={styles.valuePropTitle}>
         {t('welcomeFlow.step1.title')}
       </Animated.Text>
-      <Animated.Text
-        entering={FadeIn.delay(400).duration(400)}
-        style={styles.valuePropSubtitle}
-      >
+      <Animated.Text entering={FadeIn.delay(400).duration(400)} style={styles.valuePropSubtitle}>
         {t('welcomeFlow.step1.subtitle')}
       </Animated.Text>
     </Animated.View>
@@ -169,17 +147,11 @@ function WelcomeStep1() {
       exiting={SlideOutLeft.duration(300)}
       style={styles.mockupStep}
     >
-      <Animated.Text
-        entering={FadeIn.delay(100).duration(400)}
-        style={styles.mockupTitle}
-      >
+      <Animated.Text entering={FadeIn.delay(100).duration(400)} style={styles.mockupTitle}>
         {t('welcomeFlow.step2.title')}
       </Animated.Text>
 
-      <Animated.View
-        entering={FadeIn.delay(200).duration(500)}
-        style={styles.phoneFrame}
-      >
+      <Animated.View entering={FadeIn.delay(200).duration(500)} style={styles.phoneFrame}>
         <View style={styles.dynamicIsland} />
         <View style={styles.screenContainer}>
           <FastImage
@@ -204,17 +176,11 @@ function WelcomeStep2() {
       exiting={SlideOutLeft.duration(300)}
       style={styles.mockupStep}
     >
-      <Animated.Text
-        entering={FadeIn.delay(100).duration(400)}
-        style={styles.mockupTitle}
-      >
+      <Animated.Text entering={FadeIn.delay(100).duration(400)} style={styles.mockupTitle}>
         {t('welcomeFlow.step3.title')}
       </Animated.Text>
 
-      <Animated.View
-        entering={FadeIn.delay(200).duration(500)}
-        style={styles.phoneFrame}
-      >
+      <Animated.View entering={FadeIn.delay(200).duration(500)} style={styles.phoneFrame}>
         <View style={styles.dynamicIsland} />
         <View style={styles.screenContainer}>
           <FastImage

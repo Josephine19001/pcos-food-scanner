@@ -7,18 +7,18 @@ import {
   Linking,
   StatusBar,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import FastImage from 'react-native-fast-image';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Gauge, Flame, HeartPulse, Candy, Activity, Check, CreditCard } from 'lucide-react-native';
+import { Gauge, Flame, HeartPulse, Candy, Activity, Check, ScanLine } from 'lucide-react-native';
 import { useRevenueCat } from '@/context/revenuecat-provider';
-import { useAuth } from '@/context/auth-provider';
 import { APP_URLS } from '@/lib/config/urls';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner-native';
+import { useResponsive } from '@/lib/utils/responsive';
 
 // Fallback prices if RevenueCat fails to load
 const FALLBACK_MONTHLY_PRICE = 3.99;
@@ -30,17 +30,42 @@ type PlanType = 'monthly' | 'yearly';
 export default function PaywallScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('yearly');
   const { offerings, purchasePackage, restorePurchases } = useRevenueCat();
+  const { isTablet, contentMaxWidth } = useResponsive();
 
   const features = [
-    { icon: Gauge, title: t('paywall.features.bloodSugar.title') },
-    { icon: Flame, title: t('paywall.features.inflammation.title') },
-    { icon: HeartPulse, title: t('paywall.features.hormones.title') },
-    { icon: Candy, title: t('paywall.features.hiddenSugars.title') },
-    { icon: Activity, title: t('paywall.features.personalizedTips.title') },
+    {
+      icon: ScanLine,
+      title: t('paywall.features.unlimitedScans.title'),
+      description: t('paywall.features.unlimitedScans.description'),
+    },
+    {
+      icon: Gauge,
+      title: t('paywall.features.bloodSugar.title'),
+      description: t('paywall.features.bloodSugar.description'),
+    },
+    {
+      icon: Flame,
+      title: t('paywall.features.inflammation.title'),
+      description: t('paywall.features.inflammation.description'),
+    },
+    {
+      icon: HeartPulse,
+      title: t('paywall.features.hormones.title'),
+      description: t('paywall.features.hormones.description'),
+    },
+    {
+      icon: Candy,
+      title: t('paywall.features.hiddenSugars.title'),
+      description: t('paywall.features.hiddenSugars.description'),
+    },
+    {
+      icon: Activity,
+      title: t('paywall.features.personalizedTips.title'),
+      description: t('paywall.features.personalizedTips.description'),
+    },
   ];
 
   // Get packages from RevenueCat offerings
@@ -57,6 +82,7 @@ export default function PaywallScreen() {
   const monthlyPrice = monthlyPackage?.product.price ?? FALLBACK_MONTHLY_PRICE;
   const yearlyPrice = yearlyPackage?.product.price ?? FALLBACK_YEARLY_PRICE;
 
+  const currentPriceString = selectedPlan === 'yearly' ? yearlyPriceString : monthlyPriceString;
   const savingsPercent = Math.round((1 - yearlyPrice / 12 / monthlyPrice) * 100);
 
   const handleSubscribe = async () => {
@@ -94,15 +120,13 @@ export default function PaywallScreen() {
     }
   };
 
-  // Handle Stripe web checkout
-  const handleStripeCheckout = () => {
-    if (!user?.id) {
-      toast.error(t('errors.notAuthenticated'));
-      return;
-    }
-    // Build checkout URL with user ID and selected plan
-    const checkoutUrl = `${APP_URLS.stripeCheckout}?user_id=${user.id}&plan=${selectedPlan}`;
-    Linking.openURL(checkoutUrl);
+  // Dynamic styles for responsive layout
+  const dynamicStyles = {
+    contentWrapper: {
+      maxWidth: isTablet ? contentMaxWidth : undefined,
+      alignSelf: isTablet ? ('center' as const) : undefined,
+      width: '100%' as const,
+    },
   };
 
   return (
@@ -124,117 +148,118 @@ export default function PaywallScreen() {
       <Animated.View entering={FadeIn.delay(300).duration(1000)} style={styles.orb3} />
 
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.headerSection}>
-            <Text style={styles.headerTitle}>{t('paywall.title')}</Text>
-            <Text style={styles.headerSubtitle}>{t('paywall.subtitle')}</Text>
-          </View>
-
-          {/* Phone Screenshot Preview - Cropped to show top half */}
-          <View style={styles.phoneContainer}>
-            <View style={styles.phoneFrame}>
-              <View style={styles.phoneNotch} />
-              <View style={styles.phoneScreenContainer}>
-                <FastImage
-                  source={require('@/assets/images/paywall-screenshot.jpg')}
-                  style={styles.phoneScreenshot}
-                  resizeMode={FastImage.resizeMode.cover}
-                />
-              </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.content, dynamicStyles.contentWrapper]}>
+            {/* Header */}
+            <View style={styles.headerSection}>
+              {/* <View style={styles.iconContainer}>
+                <ScanLine size={40} color="#14B8A6" />
+              </View> */}
+              <Text style={[styles.headerTitle, isTablet && styles.headerTitleTablet]}>
+                {t('paywall.title')}
+              </Text>
+              {/* <Text style={[styles.headerSubtitle, isTablet && styles.headerSubtitleTablet]}>
+                {t('paywall.subtitle')}
+              </Text> */}
             </View>
-          </View>
 
-          {/* Compact Features - Liquid Glass Style */}
-          {/* <View style={styles.featuresCard}>
-            {features.map((feature, index) => (
-              <View
-                key={feature.title}
-                style={[
-                  styles.featureItem,
-                  index < features.length - 1 && styles.featureItemBorder,
-                ]}
-              >
-                <View style={styles.featureIconContainer}>
-                  <feature.icon size={16} color="#14B8A6" />
-                </View>
-                <Text style={styles.featureTitle} numberOfLines={1}>
-                  {feature.title}
-                </Text>
-                <Check size={16} color="#14B8A6" />
-              </View>
-            ))}
-          </View> */}
-
-          {/* Plan Selection - Row Layout */}
-          <View style={styles.plansContainer}>
-            {/* Yearly Plan */}
-            <Pressable onPress={() => setSelectedPlan('yearly')} style={styles.planWrapper}>
-              <View style={[styles.planCard, selectedPlan === 'yearly' && styles.planCardSelected]}>
-                {/* Save Badge */}
-                {savingsPercent > 0 && (
-                  <View style={styles.saveBadge}>
-                    <Text style={styles.saveBadgeText}>
-                      {t('paywall.plans.save', { percent: savingsPercent })}
+            {/* Features Card */}
+            <View style={styles.featuresCard}>
+              {features.map((feature, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.featureItem,
+                    index < features.length - 1 && styles.featureItemBorder,
+                  ]}
+                >
+                  <View style={styles.featureIconContainer}>
+                    <feature.icon size={20} color="#14B8A6" />
+                  </View>
+                  <View style={styles.featureTextContainer}>
+                    <Text style={styles.featureTitle} numberOfLines={1}>
+                      {feature.title}
+                    </Text>
+                    <Text style={styles.featureDescription} numberOfLines={2}>
+                      {feature.description}
                     </Text>
                   </View>
-                )}
-                <View
-                  style={[
-                    styles.radioButton,
-                    selectedPlan === 'yearly' && styles.radioButtonSelected,
-                  ]}
-                >
-                  {selectedPlan === 'yearly' && <Check size={10} color="#fff" />}
+                  <Check size={18} color="#14B8A6" />
                 </View>
-                <Text style={styles.planName}>{t('paywall.plans.yearly')}</Text>
-                <Text style={styles.planPriceTotal}>{yearlyPriceString}</Text>
-                <Text style={styles.planPeriod}>
-                  {yearlyPerMonthString}
-                  {t('paywall.plans.perMonth')}
-                </Text>
-              </View>
-            </Pressable>
-
-            {/* Monthly Plan */}
-            <Pressable onPress={() => setSelectedPlan('monthly')} style={styles.planWrapper}>
-              <View
-                style={[styles.planCard, selectedPlan === 'monthly' && styles.planCardSelected]}
-              >
-                <View
-                  style={[
-                    styles.radioButton,
-                    selectedPlan === 'monthly' && styles.radioButtonSelected,
-                  ]}
-                >
-                  {selectedPlan === 'monthly' && <Check size={10} color="#fff" />}
-                </View>
-                <Text style={styles.planName}>{t('paywall.plans.monthly')}</Text>
-                <Text style={styles.planPriceTotal}>{monthlyPriceString}</Text>
-                <Text style={styles.planPeriod}>{t('paywall.plans.perMonthFull')}</Text>
-              </View>
-            </Pressable>
-          </View>
-
-          {/* Trial Info - Only for Yearly */}
-          {/* {selectedPlan === 'yearly' && (
-            <View style={styles.trialCard}>
-              <View style={styles.trialIconContainer}>
-                <Text style={styles.trialIconText}>{TRIAL_DAYS}</Text>
-              </View>
-              <View style={styles.trialContent}>
-                <Text style={styles.trialTitle}>
-                  {t('paywall.trial.days', { days: TRIAL_DAYS })}
-                </Text>
-                <Text style={styles.trialSubtitle}>{t('paywall.trial.subtitle')}</Text>
-              </View>
+              ))}
             </View>
-          )} */}
-        </View>
+
+            {/* Plan Selection - Row Layout */}
+            <View style={[styles.plansContainer, isTablet && styles.plansContainerTablet]}>
+              {/* Yearly Plan */}
+              <Pressable onPress={() => setSelectedPlan('yearly')} style={styles.planWrapper}>
+                <View
+                  style={[styles.planCard, selectedPlan === 'yearly' && styles.planCardSelected]}
+                >
+                  {/* Save Badge */}
+                  {savingsPercent > 0 && (
+                    <View style={styles.saveBadge}>
+                      <Text style={styles.saveBadgeText} numberOfLines={1}>
+                        {t('paywall.plans.save', { percent: savingsPercent })}
+                      </Text>
+                    </View>
+                  )}
+                  <View
+                    style={[
+                      styles.radioButton,
+                      selectedPlan === 'yearly' && styles.radioButtonSelected,
+                    ]}
+                  >
+                    {selectedPlan === 'yearly' && <Check size={10} color="#fff" />}
+                  </View>
+                  <Text style={styles.planName} numberOfLines={1}>
+                    {t('paywall.plans.yearly')}
+                  </Text>
+                  <Text style={styles.planPriceTotal} numberOfLines={1} adjustsFontSizeToFit>
+                    {yearlyPriceString}
+                  </Text>
+                  <Text style={styles.planPeriod} numberOfLines={1}>
+                    {yearlyPerMonthString}
+                    {t('paywall.plans.perMonth')}
+                  </Text>
+                </View>
+              </Pressable>
+
+              {/* Monthly Plan */}
+              <Pressable onPress={() => setSelectedPlan('monthly')} style={styles.planWrapper}>
+                <View
+                  style={[styles.planCard, selectedPlan === 'monthly' && styles.planCardSelected]}
+                >
+                  <View
+                    style={[
+                      styles.radioButton,
+                      selectedPlan === 'monthly' && styles.radioButtonSelected,
+                    ]}
+                  >
+                    {selectedPlan === 'monthly' && <Check size={10} color="#fff" />}
+                  </View>
+                  <Text style={styles.planName} numberOfLines={1}>
+                    {t('paywall.plans.monthly')}
+                  </Text>
+                  <Text style={styles.planPriceTotal} numberOfLines={1} adjustsFontSizeToFit>
+                    {monthlyPriceString}
+                  </Text>
+                  <Text style={styles.planPeriod} numberOfLines={1}>
+                    {t('paywall.plans.perMonthFull')}
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+          </View>
+        </ScrollView>
 
         {/* Bottom Section */}
-        <View style={styles.bottomSection}>
-          {/* CTA Button - App Store */}
+        <View style={[styles.bottomSection, dynamicStyles.contentWrapper]}>
+          {/* CTA Button */}
           <Pressable
             onPress={handleSubscribe}
             disabled={isLoading}
@@ -249,23 +274,25 @@ export default function PaywallScreen() {
             {isLoading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.ctaButtonText}>
-                {selectedPlan === 'yearly'
-                  ? t('paywall.cta.startTrial', { days: TRIAL_DAYS })
-                  : t('paywall.cta.subscribeNow')}
-              </Text>
+              <View style={styles.ctaContent}>
+                <Text style={styles.ctaButtonText}>
+                  {selectedPlan === 'yearly'
+                    ? t('paywall.cta.startTrial', { days: TRIAL_DAYS })
+                    : t('paywall.cta.subscribeNow')}
+                </Text>
+                <Text style={styles.ctaSubtext}>
+                  {selectedPlan === 'yearly'
+                    ? t('paywall.cta.thenPrice', { price: currentPriceString })
+                    : t('paywall.cta.perMonth', { price: currentPriceString })}
+                </Text>
+              </View>
             )}
           </Pressable>
 
-          {/* Stripe Web Checkout Button - 30% Off */}
-          {/* <Pressable
-            onPress={handleStripeCheckout}
-            disabled={isLoading}
-            style={[styles.stripeButton, isLoading && styles.buttonDisabled]}
-          >
-            <CreditCard size={18} color="#0D9488" style={{ marginRight: 8 }} />
-            <Text style={styles.stripeButtonText}>{t('paywall.save30')}</Text>
-          </Pressable> */}
+          {/* Continue for Free */}
+          <Pressable onPress={() => router.replace('/(tabs)/home')} style={styles.continueButton}>
+            <Text style={styles.continueButtonText}>{t('paywall.continueForFree')}</Text>
+          </Pressable>
 
           {/* Legal Links */}
           <View style={styles.legalContainer}>
@@ -300,71 +327,103 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
     paddingHorizontal: 20,
-    justifyContent: 'center',
+    paddingTop: 16,
   },
   headerSection: {
     alignItems: 'center',
     paddingHorizontal: 10,
-    marginTop: 20,
     marginBottom: 24,
   },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: 'rgba(20, 184, 166, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   headerTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
     color: '#111827',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+  headerTitleTablet: {
+    fontSize: 28,
   },
   headerSubtitle: {
     fontSize: 15,
     color: '#6B7280',
     textAlign: 'center',
+    lineHeight: 22,
+  },
+  headerSubtitleTablet: {
+    fontSize: 17,
     lineHeight: 24,
   },
   featuresCard: {
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.7)',
-    padding: 12,
-    marginBottom: 16,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    padding: 16,
+    marginBottom: 20,
     shadowColor: '#0D9488',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   featureItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.6)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
   },
   featureIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     backgroundColor: 'rgba(20, 184, 166, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  featureTitle: {
+  featureTextContainer: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
+    marginRight: 8,
+  },
+  featureTitle: {
+    fontSize: 15,
+    fontWeight: '600',
     color: '#111827',
+    marginBottom: 2,
+  },
+  featureDescription: {
+    fontSize: 13,
+    color: '#6B7280',
+    lineHeight: 18,
   },
   plansContainer: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  plansContainerTablet: {
+    gap: 16,
   },
   planWrapper: {
     flex: 1,
@@ -372,15 +431,15 @@ const styles = StyleSheet.create({
   planCard: {
     borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.7)',
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     padding: 14,
     alignItems: 'center',
   },
   planCardSelected: {
     borderColor: '#14B8A6',
-    backgroundColor: 'rgba(240, 253, 250, 0.6)',
+    backgroundColor: 'rgba(240, 253, 250, 0.7)',
     shadowColor: '#0D9488',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -392,20 +451,20 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     backgroundColor: '#14B8A6',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderBottomLeftRadius: 10,
     borderTopRightRadius: 14,
   },
   saveBadgeText: {
     color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
   },
   radioButton: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 2,
     borderColor: '#D1D5DB',
     backgroundColor: 'transparent',
@@ -433,42 +492,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
   },
-  trialCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.7)',
-    padding: 12,
-    marginBottom: 12,
-  },
-  trialIconContainer: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    backgroundColor: 'rgba(251, 191, 36, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  trialIconText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#D97706',
-  },
-  trialContent: {
-    flex: 1,
-  },
-  trialTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  trialSubtitle: {
-    fontSize: 11,
-    color: '#6B7280',
-  },
   bottomSection: {
     paddingHorizontal: 20,
     paddingBottom: 12,
@@ -478,75 +501,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     paddingVertical: 14,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
     shadowColor: '#0D9488',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
-  },
-  stripeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 14,
-    paddingVertical: 14,
-    marginBottom: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(20, 184, 166, 0.3)',
-  },
-  stripeButtonText: {
-    color: '#0D9488',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  phoneContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-    flex: 1,
-    justifyContent: 'center',
-  },
-  phoneFrame: {
-    width: 300,
-    height: 340,
-    backgroundColor: 'rgba(13, 148, 136, 0.15)',
-    borderWidth: 2,
-    borderColor: 'rgba(20, 184, 166, 0.4)',
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
-    borderBottomLeftRadius: 6,
-    borderBottomRightRadius: 6,
-    padding: 6,
-    paddingBottom: 0,
-    shadowColor: '#0D9488',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 15,
-    overflow: 'hidden',
-  },
-  phoneNotch: {
-    position: 'absolute',
-    top: 6,
-    left: '50%',
-    marginLeft: -40,
-    width: 80,
-    height: 22,
-    backgroundColor: 'rgba(13, 148, 136, 0.3)',
-    borderBottomLeftRadius: 14,
-    borderBottomRightRadius: 14,
-    zIndex: 10,
-  },
-  phoneScreenContainer: {
-    flex: 1,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    overflow: 'hidden',
-  },
-  phoneScreenshot: {
-    width: '100%',
-    height: 680,
   },
   ctaContent: {
     alignItems: 'center',
@@ -554,15 +514,25 @@ const styles = StyleSheet.create({
   ctaButtonText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 17,
   },
   ctaSubtext: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 13,
     marginTop: 2,
   },
   buttonDisabled: {
     opacity: 0.7,
+  },
+  continueButton: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  continueButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#6B7280',
   },
   legalContainer: {
     alignItems: 'center',
@@ -572,14 +542,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   legalLink: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#9CA3AF',
     textDecorationLine: 'underline',
   },
   legalDot: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#9CA3AF',
-    marginHorizontal: 6,
+    marginHorizontal: 8,
   },
   orb1: {
     position: 'absolute',

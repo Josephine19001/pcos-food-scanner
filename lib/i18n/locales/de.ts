@@ -328,23 +328,32 @@ export default {
 
   // Paywall
   paywall: {
-    title: 'Wissen Sie, was Sie essen',
-    subtitle: 'Scannen Sie jedes Lebensmittel, um sofort zu sehen, wie es Ihren Blutzucker, Ihre Hormone und Entzündungen beeinflusst. Treffen Sie sichere Entscheidungen für Ihr PCOS.',
+    title: 'Premium Freischalten',
+    subtitle: 'Erhalten Sie unbegrenzte Scans und personalisierte Einblicke für Ihr PCOS',
     features: {
+      unlimitedScans: {
+        title: 'Unbegrenzte Scans',
+        description: 'Scannen Sie jedes Lebensmittel, ohne Limits',
+      },
       bloodSugar: {
-        title: 'Sehen Sie, wie Lebensmittel Ihren Blutzucker beeinflussen',
+        title: 'Blutzucker-Einfluss',
+        description: 'Sehen Sie die Auswirkung auf Ihren Blutzucker',
       },
       inflammation: {
-        title: 'Erkennen Sie entzündungsfördernde Lebensmittel',
+        title: 'Entzündungswerte',
+        description: 'Erkennen Sie entzündungsfördernde Lebensmittel',
       },
       hormones: {
-        title: 'Verstehen Sie die hormonelle Wirkung sofort',
+        title: 'Hormon-Einfluss',
+        description: 'Verstehen Sie die Wirkung auf Ihre Hormone',
       },
       hiddenSugars: {
-        title: 'Finden Sie versteckte Zucker & Zusatzstoffe',
+        title: 'Versteckte Zutaten',
+        description: 'Erkennen Sie versteckte Zucker & Zusatzstoffe',
       },
       personalizedTips: {
-        title: 'Erhalten Sie Tipps basierend auf Ihren Symptomen',
+        title: 'Personalisierte Tipps',
+        description: 'Erhalten Sie Tipps basierend auf Ihren Symptomen',
       },
     },
     plans: {
@@ -360,7 +369,7 @@ export default {
       then: 'Dann {{price}}/Jahr',
     },
     cta: {
-      startTrial: '{{days}}-Tage kostenlose Testversion starten',
+      startTrial: '{{days}}-Tage Testversion starten',
       subscribeNow: 'Jetzt abonnieren',
       thenPrice: 'Dann {{price}}/Jahr',
       perMonth: '{{price}}/Monat',
@@ -520,6 +529,11 @@ export default {
     remember: {
       title: 'Denken Sie daran',
       message: 'Jeder Körper reagiert anders. Verwenden Sie diese Richtlinien als Ausgangspunkt und arbeiten Sie mit Ihrem Arzt zusammen, um herauszufinden, was für Sie am besten funktioniert.',
+    },
+    references: {
+      title: 'Medizinische Referenzen',
+      intro: 'Die Informationen in diesem Leitfaden basieren auf begutachteter Forschung und Richtlinien der folgenden anerkannten medizinischen Quellen:',
+      disclaimer: 'Diese App bietet nur allgemeine Informationen und ersetzt keine professionelle medizinische Beratung. Konsultieren Sie immer Ihren Arzt für persönliche Empfehlungen.',
     },
   },
 

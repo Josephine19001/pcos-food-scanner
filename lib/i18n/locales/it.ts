@@ -328,23 +328,32 @@ export default {
 
   // Paywall
   paywall: {
-    title: 'Scopri Cosa Stai Mangiando',
-    subtitle: 'Scansiona qualsiasi cibo per vedere istantaneamente come influisce sulla glicemia, gli ormoni e l\'infiammazione. Fai scelte sicure per la tua PCOS.',
+    title: 'Sblocca Premium',
+    subtitle: 'Ottieni scansioni illimitate e consigli personalizzati per la tua PCOS',
     features: {
+      unlimitedScans: {
+        title: 'Scansioni Illimitate',
+        description: 'Scansiona qualsiasi cibo, senza limiti',
+      },
       bloodSugar: {
-        title: 'Vedi come i cibi influenzano la glicemia',
+        title: 'Impatto Glicemico',
+        description: 'Vedi come i cibi influenzano la glicemia',
       },
       inflammation: {
-        title: 'Individua i cibi che causano infiammazione',
+        title: 'Punteggio Infiammazione',
+        description: 'Identifica i cibi che causano infiammazione',
       },
       hormones: {
-        title: 'Comprendi l\'impatto ormonale istantaneamente',
+        title: 'Impatto Ormonale',
+        description: 'Comprendi l\'effetto sugli ormoni',
       },
       hiddenSugars: {
-        title: 'Trova zuccheri e additivi nascosti',
+        title: 'Ingredienti Nascosti',
+        description: 'Rileva zuccheri e additivi nascosti',
       },
       personalizedTips: {
-        title: 'Ricevi consigli basati sui tuoi sintomi',
+        title: 'Consigli Personalizzati',
+        description: 'Ricevi consigli basati sui tuoi sintomi',
       },
     },
     plans: {
@@ -360,7 +369,7 @@ export default {
       then: 'Poi {{price}}/anno',
     },
     cta: {
-      startTrial: 'Inizia Prova Gratuita di {{days}} Giorni',
+      startTrial: 'Inizia Prova di {{days}} Giorni',
       subscribeNow: 'Abbonati Ora',
       thenPrice: 'Poi {{price}}/anno',
       perMonth: '{{price}}/mese',
@@ -520,6 +529,11 @@ export default {
     remember: {
       title: 'Ricorda',
       message: 'Il corpo di ognuno risponde in modo diverso. Usa queste linee guida come punto di partenza e lavora con il tuo medico per trovare ciò che funziona meglio per te.',
+    },
+    references: {
+      title: 'Riferimenti Medici',
+      intro: 'Le informazioni in questa guida si basano su ricerche peer-reviewed e linee guida delle seguenti fonti mediche accreditate:',
+      disclaimer: 'Questa app fornisce solo informazioni generali e non sostituisce il parere medico professionale. Consulta sempre il tuo medico per consigli personalizzati.',
     },
   },
 

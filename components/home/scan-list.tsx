@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { FlatList, View, RefreshControl, StyleSheet, Dimensions } from 'react-native';
+import { FlatList, View, RefreshControl, StyleSheet, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -12,12 +12,10 @@ import { ScanCard } from './scan-card';
 import { EmptyState } from './empty-state';
 import type { ScanResult } from '@/lib/types/scan';
 import type { TabType } from './home-header';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - 32;
+import { useResponsive } from '@/lib/utils/responsive';
 
 // Skeleton card component with shimmer effect
-function SkeletonCard({ index }: { index: number }) {
+function SkeletonCard({ index, cardWidth, imageSize }: { index: number; cardWidth: number; imageSize: number }) {
   const shimmer = useSharedValue(0);
 
   useEffect(() => {
@@ -33,10 +31,10 @@ function SkeletonCard({ index }: { index: number }) {
   }));
 
   return (
-    <Animated.View style={[styles.skeletonWrapper, { opacity: 1 - index * 0.15 }]}>
+    <Animated.View style={[styles.skeletonWrapper, { opacity: 1 - index * 0.15, width: cardWidth }]}>
       <View style={styles.skeletonContainer}>
         {/* Image skeleton */}
-        <Animated.View style={[styles.skeletonImage, shimmerStyle]} />
+        <Animated.View style={[styles.skeletonImage, shimmerStyle, { width: imageSize, height: imageSize }]} />
 
         {/* Content skeleton */}
         <View style={styles.skeletonContent}>
@@ -62,11 +60,11 @@ function SkeletonCard({ index }: { index: number }) {
 }
 
 // Skeleton list for loading state
-function SkeletonList() {
+function SkeletonList({ cardWidth, imageSize }: { cardWidth: number; imageSize: number }) {
   return (
     <View style={styles.skeletonListContainer}>
       {[0, 1, 2, 3, 4].map((index) => (
-        <SkeletonCard key={index} index={index} />
+        <SkeletonCard key={index} index={index} cardWidth={cardWidth} imageSize={imageSize} />
       ))}
     </View>
   );
@@ -95,8 +93,17 @@ export function ScanList({
   onToggleFavorite,
   onDeleteScan,
 }: ScanListProps) {
+  const { width: screenWidth } = useWindowDimensions();
+  const { isTablet, contentMaxWidth } = useResponsive();
+
+  // Calculate responsive card width and image size
+  const cardWidth = isTablet
+    ? Math.min(contentMaxWidth - 32, screenWidth - 32)
+    : screenWidth - 32;
+  const imageSize = isTablet ? 130 : 110;
+
   if (isLoading) {
-    return <SkeletonList />;
+    return <SkeletonList cardWidth={cardWidth} imageSize={imageSize} />;
   }
 
   if (scans.length === 0) {
@@ -152,7 +159,6 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   skeletonWrapper: {
-    width: CARD_WIDTH,
     marginBottom: 12,
     alignSelf: 'center',
   },
@@ -165,8 +171,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.95)',
   },
   skeletonImage: {
-    width: 110,
-    height: 110,
     backgroundColor: '#D1D5DB',
     borderRadius: 16,
     margin: 8,

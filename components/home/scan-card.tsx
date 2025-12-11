@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, useWindowDimensions, Alert } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Svg, { Circle as SvgCircle } from 'react-native-svg';
 import Animated, {
@@ -24,9 +24,7 @@ import type { ScanResult, ScanStatus, ScanAnalysis } from '@/lib/types/scan';
 import { DEMO_IMAGES } from '@/lib/config/demo-data';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - 32;
+import { useResponsive } from '@/lib/utils/responsive';
 
 const AnimatedCircle = Animated.createAnimatedComponent(SvgCircle);
 
@@ -207,8 +205,18 @@ function NutritionIndicators({ analysis }: { analysis?: ScanAnalysis }) {
 
 export function ScanCard({ scan, index, onPress, onToggleFavorite, onDelete }: ScanCardProps) {
   const { t } = useTranslation();
+  const { width: screenWidth } = useWindowDimensions();
+  const { isTablet, contentMaxWidth } = useResponsive();
   const isPending = scan.status === 'pending';
   const progress = scan.progress ?? 0;
+
+  // Calculate card width - use content max width on tablets, otherwise screen width minus padding
+  const cardWidth = isTablet
+    ? Math.min(contentMaxWidth - 32, screenWidth - 32)
+    : screenWidth - 32;
+
+  // Scale image size for tablets
+  const imageSize = isTablet ? 130 : 110;
 
   const statusConfig: Record<Exclude<ScanStatus, 'pending'>, { label: string; color: string; bgColor: string }> = {
     safe: {
@@ -285,7 +293,7 @@ export function ScanCard({ scan, index, onPress, onToggleFavorite, onDelete }: S
   return (
     <Animated.View
       entering={FadeInUp.delay(index * 80).duration(400)}
-      style={styles.wrapper}
+      style={[styles.wrapper, { width: cardWidth }]}
     >
       <Pressable
         onPress={isPending ? undefined : onPress}
@@ -295,7 +303,7 @@ export function ScanCard({ scan, index, onPress, onToggleFavorite, onDelete }: S
         disabled={isPending}
       >
         {/* Image Section */}
-        <View style={styles.imageContainer}>
+        <View style={[styles.imageContainer, { width: imageSize, height: imageSize }]}>
           {renderImage()}
 
           {/* Progress overlay for pending */}
@@ -328,7 +336,7 @@ export function ScanCard({ scan, index, onPress, onToggleFavorite, onDelete }: S
             <>
               {/* Title Row */}
               <View style={styles.titleRow}>
-                <Text style={styles.title} numberOfLines={1}>
+                <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
                   {scan.name}
                 </Text>
                 <Text style={styles.time}>{timeString}</Text>
@@ -355,7 +363,6 @@ export function ScanCard({ scan, index, onPress, onToggleFavorite, onDelete }: S
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: CARD_WIDTH,
     marginBottom: 12,
     alignSelf: 'center',
   },
@@ -373,8 +380,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.95)',
   },
   imageContainer: {
-    width: 110,
-    height: 110,
     backgroundColor: '#E5E7EB',
     position: 'relative',
     borderRadius: 16,

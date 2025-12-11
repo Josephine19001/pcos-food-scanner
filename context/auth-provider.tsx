@@ -139,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithApple = async (): Promise<boolean> => {
     setLoading(true);
+    // router.replace('/paywall');
     try {
       const nonce = Math.random().toString(36).substring(2, 10);
       const hashedNonce = await Crypto.digestStringAsync(

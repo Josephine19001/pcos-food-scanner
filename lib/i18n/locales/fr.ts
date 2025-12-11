@@ -325,23 +325,32 @@ export default {
 
   // Paywall
   paywall: {
-    title: 'Sachez Ce Que Vous Mangez',
-    subtitle: 'Scannez n\'importe quel aliment pour voir instantanément son impact sur votre glycémie, vos hormones et l\'inflammation. Faites des choix éclairés pour votre SOPK.',
+    title: 'Débloquer Premium',
+    subtitle: 'Obtenez des scans illimités et des conseils personnalisés pour votre SOPK',
     features: {
+      unlimitedScans: {
+        title: 'Scans Illimités',
+        description: 'Scannez n\'importe quel aliment, sans limites',
+      },
       bloodSugar: {
-        title: 'Voyez l\'impact sur votre glycémie',
+        title: 'Impact Glycémique',
+        description: 'Voyez l\'effet sur votre glycémie',
       },
       inflammation: {
-        title: 'Détectez les aliments inflammatoires',
+        title: 'Score d\'Inflammation',
+        description: 'Identifiez les aliments inflammatoires',
       },
       hormones: {
-        title: 'Comprenez l\'effet sur vos hormones',
+        title: 'Impact Hormonal',
+        description: 'Comprenez l\'effet sur vos hormones',
       },
       hiddenSugars: {
-        title: 'Trouvez les sucres et additifs cachés',
+        title: 'Ingrédients Cachés',
+        description: 'Détectez les sucres et additifs cachés',
       },
       personalizedTips: {
-        title: 'Conseils adaptés à vos symptômes',
+        title: 'Conseils Personnalisés',
+        description: 'Recevez des conseils selon vos symptômes',
       },
     },
     plans: {
@@ -357,7 +366,7 @@ export default {
       then: 'Puis {{price}}/an',
     },
     cta: {
-      startTrial: 'Commencer l\'Essai Gratuit de {{days}} Jours',
+      startTrial: 'Démarrer l\'Essai de {{days}} Jours',
       subscribeNow: 'S\'Abonner Maintenant',
       thenPrice: 'Puis {{price}}/an',
       perMonth: '{{price}}/mois',
@@ -517,6 +526,11 @@ export default {
     remember: {
       title: 'Rappel',
       message: 'Chaque corps réagit différemment. Utilisez ces directives comme point de départ et travaillez avec votre médecin pour trouver ce qui fonctionne le mieux pour vous.',
+    },
+    references: {
+      title: 'Références Médicales',
+      intro: 'Les informations de ce guide sont basées sur des recherches évaluées par des pairs et des directives des sources médicales réputées suivantes:',
+      disclaimer: 'Cette application fournit uniquement des informations générales et ne remplace pas un avis médical professionnel. Consultez toujours votre médecin pour des conseils personnalisés.',
     },
   },
 

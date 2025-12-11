@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, ExternalLink } from 'lucide-react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import Svg, { Path, Circle } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
@@ -146,6 +146,40 @@ function MetricCard({
     </Animated.View>
   );
 }
+
+// Medical references with citations
+const MEDICAL_REFERENCES = [
+  {
+    source: 'National Institutes of Health (NIH)',
+    description: 'PCOS and insulin resistance research',
+    url: 'https://www.nichd.nih.gov/health/topics/pcos',
+  },
+  {
+    source: 'The Journal of Clinical Endocrinology & Metabolism',
+    description: 'Dietary interventions for PCOS',
+    url: 'https://academic.oup.com/jcem',
+  },
+  {
+    source: 'American College of Obstetricians and Gynecologists',
+    description: 'PCOS management guidelines',
+    url: 'https://www.acog.org/womens-health/faqs/polycystic-ovary-syndrome-pcos',
+  },
+  {
+    source: 'Glycemic Index Foundation',
+    description: 'Official GI database and research',
+    url: 'https://www.glycemicindex.com/',
+  },
+  {
+    source: 'Harvard T.H. Chan School of Public Health',
+    description: 'Nutrition and inflammation research',
+    url: 'https://www.hsph.harvard.edu/nutritionsource/',
+  },
+  {
+    source: 'The Endocrine Society',
+    description: 'Hormone health and PCOS studies',
+    url: 'https://www.endocrine.org/patient-engagement/endocrine-library/pcos',
+  },
+];
 
 const NUTRITION_METRICS = [
   {
@@ -294,6 +328,34 @@ export default function NutritionGuideScreen() {
               <Text style={styles.noteTitle}>{t('nutritionGuide.remember.title')}</Text>
               <Text style={styles.noteText}>
                 {t('nutritionGuide.remember.message')}
+              </Text>
+            </View>
+          </Animated.View>
+
+          {/* Medical References Section */}
+          <Animated.View entering={FadeInUp.delay(900).duration(400)}>
+            <View style={styles.referencesCard}>
+              <Text style={styles.referencesTitle}>{t('nutritionGuide.references.title')}</Text>
+              <Text style={styles.referencesIntro}>
+                {t('nutritionGuide.references.intro')}
+              </Text>
+
+              {MEDICAL_REFERENCES.map((ref, index) => (
+                <Pressable
+                  key={index}
+                  onPress={() => Linking.openURL(ref.url)}
+                  style={styles.referenceItem}
+                >
+                  <View style={styles.referenceContent}>
+                    <Text style={styles.referenceSource}>{ref.source}</Text>
+                    <Text style={styles.referenceDescription}>{ref.description}</Text>
+                  </View>
+                  <ExternalLink size={16} color="#0D9488" />
+                </Pressable>
+              ))}
+
+              <Text style={styles.referencesDisclaimer}>
+                {t('nutritionGuide.references.disclaimer')}
               </Text>
             </View>
           </Animated.View>
@@ -485,6 +547,63 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#0F766E',
     lineHeight: 20,
+  },
+  referencesCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 20,
+    padding: 20,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+    shadowColor: '#0D9488',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  referencesTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  referencesIntro: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  referenceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(20, 184, 166, 0.08)',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(20, 184, 166, 0.15)',
+  },
+  referenceContent: {
+    flex: 1,
+    marginRight: 8,
+  },
+  referenceSource: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0D9488',
+    marginBottom: 2,
+  },
+  referenceDescription: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  referencesDisclaimer: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontStyle: 'italic',
+    lineHeight: 18,
+    marginTop: 12,
+    textAlign: 'center',
   },
   orb1: {
     position: 'absolute',

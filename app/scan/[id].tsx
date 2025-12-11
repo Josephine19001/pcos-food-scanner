@@ -23,15 +23,41 @@ import * as Haptics from 'expo-haptics';
 // Icons
 function ChevronLeftIcon({ color = '#111827', size = 24 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Path d="m15 18-6-6 6-6" />
     </Svg>
   );
 }
 
-function BookmarkIcon({ color = '#111827', size = 24, filled = false }: { color?: string; size?: number; filled?: boolean }) {
+function BookmarkIcon({
+  color = '#111827',
+  size = 24,
+  filled = false,
+}: {
+  color?: string;
+  size?: number;
+  filled?: boolean;
+}) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : 'none'} stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill={filled ? color : 'none'}
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </Svg>
   );
@@ -39,7 +65,16 @@ function BookmarkIcon({ color = '#111827', size = 24, filled = false }: { color?
 
 function TrashIcon({ color = '#111827', size = 24 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
     </Svg>
   );
@@ -47,7 +82,16 @@ function TrashIcon({ color = '#111827', size = 24 }: { color?: string; size?: nu
 
 function CheckCircleIcon({ color = '#10B981', size = 20 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Circle cx="12" cy="12" r="10" />
       <Path d="m9 12 2 2 4-4" />
     </Svg>
@@ -56,7 +100,16 @@ function CheckCircleIcon({ color = '#10B981', size = 20 }: { color?: string; siz
 
 function AlertTriangleIcon({ color = '#F59E0B', size = 20 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
       <Path d="M12 9v4M12 17h.01" />
     </Svg>
@@ -65,7 +118,16 @@ function AlertTriangleIcon({ color = '#F59E0B', size = 20 }: { color?: string; s
 
 function XCircleIcon({ color = '#EF4444', size = 20 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <Circle cx="12" cy="12" r="10" />
       <Path d="m15 9-6 6M9 9l6 6" />
     </Svg>
@@ -77,20 +139,14 @@ function HeroImageSkeleton() {
   const shimmer = useSharedValue(0);
 
   useEffect(() => {
-    shimmer.value = withRepeat(
-      withTiming(1, { duration: 1200 }),
-      -1,
-      false
-    );
+    shimmer.value = withRepeat(withTiming(1, { duration: 1200 }), -1, false);
   }, []);
 
   const shimmerStyle = useAnimatedStyle(() => ({
     opacity: interpolate(shimmer.value, [0, 0.5, 1], [0.4, 0.7, 0.4]),
   }));
 
-  return (
-    <Animated.View style={[styles.heroImageSkeleton, shimmerStyle]} />
-  );
+  return <Animated.View style={[styles.heroImageSkeleton, shimmerStyle]} />;
 }
 
 // Skeleton loader component
@@ -98,11 +154,7 @@ function ScanDetailSkeleton({ insets }: { insets: { top: number; bottom: number 
   const shimmer = useSharedValue(0);
 
   useEffect(() => {
-    shimmer.value = withRepeat(
-      withTiming(1, { duration: 1200 }),
-      -1,
-      false
-    );
+    shimmer.value = withRepeat(withTiming(1, { duration: 1200 }), -1, false);
   }, []);
 
   const shimmerStyle = useAnimatedStyle(() => ({
@@ -152,7 +204,9 @@ function ScanDetailSkeleton({ insets }: { insets: { top: number; bottom: number 
 
           {/* Summary Skeleton */}
           <Animated.View style={[styles.skeletonSummary, shimmerStyle]} />
-          <Animated.View style={[styles.skeletonSummary, styles.skeletonSummaryShort, shimmerStyle]} />
+          <Animated.View
+            style={[styles.skeletonSummary, styles.skeletonSummaryShort, shimmerStyle]}
+          />
 
           {/* Analysis Section Skeleton */}
           <View style={styles.skeletonSection}>
@@ -171,7 +225,11 @@ function ScanDetailSkeleton({ insets }: { insets: { top: number; bottom: number 
               {[1, 2, 3, 4, 5].map((i) => (
                 <Animated.View
                   key={i}
-                  style={[styles.skeletonIngredientTag, { width: 60 + Math.random() * 40 }, shimmerStyle]}
+                  style={[
+                    styles.skeletonIngredientTag,
+                    { width: 60 + Math.random() * 40 },
+                    shimmerStyle,
+                  ]}
                 />
               ))}
             </View>
@@ -196,7 +254,10 @@ function ScanDetailSkeleton({ insets }: { insets: { top: number; bottom: number 
 }
 
 // Status configuration (labels will be translated in component)
-const statusConfig: Record<Exclude<ScanStatus, 'pending'>, { color: string; bgColor: string; icon: React.ReactNode }> = {
+const statusConfig: Record<
+  Exclude<ScanStatus, 'pending'>,
+  { color: string; bgColor: string; icon: React.ReactNode }
+> = {
   safe: {
     color: '#059669',
     bgColor: 'rgba(209, 250, 229, 0.8)',
@@ -333,25 +394,21 @@ export default function ScanDetailScreen() {
   const handleDelete = () => {
     if (!scan) return;
 
-    Alert.alert(
-      t('scan.deleteTitle'),
-      t('scan.deleteMessage'),
-      [
-        {
-          text: t('common.cancel'),
-          style: 'cancel',
+    Alert.alert(t('scan.deleteTitle'), t('scan.deleteMessage'), [
+      {
+        text: t('common.cancel'),
+        style: 'cancel',
+      },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          deleteScan.mutate(scan.id);
+          router.back();
         },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            deleteScan.mutate(scan.id);
-            router.back();
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   if (!scan && !isLoading) {
@@ -419,10 +476,13 @@ export default function ScanDetailScreen() {
             <View style={styles.heroImageContainer}>
               {scan.image_url.startsWith('local:') ? (
                 <FastImage
-                  source={DEMO_IMAGES[scan.image_url.replace('local:', '') as keyof typeof DEMO_IMAGES]}
+                  source={
+                    DEMO_IMAGES[scan.image_url.replace('local:', '') as keyof typeof DEMO_IMAGES]
+                  }
                   style={styles.heroImage}
                 />
               ) : (
+                // <HeroImageSkeleton />
                 <>
                   {!imageLoaded && <HeroImageSkeleton />}
                   <FastImage
@@ -430,6 +490,7 @@ export default function ScanDetailScreen() {
                     style={[styles.heroImage, !imageLoaded && styles.imageHidden]}
                     onLoad={() => setImageLoaded(true)}
                   />
+                  {/* <HeroImageSkeleton /> */}
                 </>
               )}
             </View>
@@ -477,7 +538,8 @@ export default function ScanDetailScreen() {
             <Section title={t('scanDetail.sections.analysis')} delay={250}>
               <View style={styles.analysisGrid}>
                 {Object.entries(analysis).map(([key, value]) => {
-                  if (key === 'recommendations' || key === 'warnings' || value === undefined) return null;
+                  if (key === 'recommendations' || key === 'warnings' || value === undefined)
+                    return null;
                   return (
                     <AnalysisItem
                       key={key}
