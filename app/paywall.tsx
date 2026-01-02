@@ -13,19 +13,14 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Gauge, Flame, HeartPulse, Candy, Activity, Check, ScanLine } from 'lucide-react-native';
+import { Gauge, Flame, HeartPulse, Candy, Check, ScanLine, BookOpen } from 'lucide-react-native';
 import { useRevenueCat } from '@/context/revenuecat-provider';
 import { APP_URLS } from '@/lib/config/urls';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner-native';
 import { useResponsive } from '@/lib/utils/responsive';
 
-// Fallback prices if RevenueCat fails to load
-const FALLBACK_MONTHLY_PRICE = 3.99;
-const FALLBACK_YEARLY_PRICE = 29.99;
-const TRIAL_DAYS = 3;
-
-type PlanType = 'monthly' | 'yearly';
+type PlanType = 'weekly' | 'yearly';
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -40,6 +35,11 @@ export default function PaywallScreen() {
       icon: ScanLine,
       title: t('paywall.features.unlimitedScans.title'),
       description: t('paywall.features.unlimitedScans.description'),
+    },
+    {
+      icon: BookOpen,
+      title: t('paywall.features.foodJournal.title'),
+      description: t('paywall.features.foodJournal.description'),
     },
     {
       icon: Gauge,
@@ -61,32 +61,29 @@ export default function PaywallScreen() {
       title: t('paywall.features.hiddenSugars.title'),
       description: t('paywall.features.hiddenSugars.description'),
     },
-    {
-      icon: Activity,
-      title: t('paywall.features.personalizedTips.title'),
-      description: t('paywall.features.personalizedTips.description'),
-    },
   ];
 
   // Get packages from RevenueCat offerings
-  const monthlyPackage = offerings?.current?.monthly;
+  const weeklyPackage = offerings?.current?.weekly;
   const yearlyPackage = offerings?.current?.annual;
 
   // Use RevenueCat formatted price strings (includes currency symbol)
-  const monthlyPriceString = monthlyPackage?.product.priceString ?? `$${FALLBACK_MONTHLY_PRICE}`;
-  const yearlyPriceString = yearlyPackage?.product.priceString ?? `$${FALLBACK_YEARLY_PRICE}`;
-  const yearlyPerMonthString =
-    yearlyPackage?.product.pricePerMonthString ?? `$${(FALLBACK_YEARLY_PRICE / 12).toFixed(2)}`;
+  const weeklyPriceString = weeklyPackage?.product.priceString;
+  const yearlyPriceString = yearlyPackage?.product.priceString;
+  const yearlyPerMonthString = yearlyPackage?.product.pricePerMonthString;
 
   // Numeric prices for calculations
-  const monthlyPrice = monthlyPackage?.product.price ?? FALLBACK_MONTHLY_PRICE;
-  const yearlyPrice = yearlyPackage?.product.price ?? FALLBACK_YEARLY_PRICE;
+  const weeklyPrice = weeklyPackage?.product.price;
+  const yearlyPrice = yearlyPackage?.product.price;
 
-  const currentPriceString = selectedPlan === 'yearly' ? yearlyPriceString : monthlyPriceString;
-  const savingsPercent = Math.round((1 - yearlyPrice / 12 / monthlyPrice) * 100);
+  const currentPriceString = selectedPlan === 'yearly' ? yearlyPriceString : weeklyPriceString;
+  // Calculate savings: yearly vs 52 weeks
+  const savingsPercent = weeklyPrice && yearlyPrice
+    ? Math.round((1 - yearlyPrice / (weeklyPrice * 52)) * 100)
+    : 0;
 
   const handleSubscribe = async () => {
-    const packageToPurchase = selectedPlan === 'yearly' ? yearlyPackage : monthlyPackage;
+    const packageToPurchase = selectedPlan === 'yearly' ? yearlyPackage : weeklyPackage;
 
     if (!packageToPurchase) {
       router.replace('/(tabs)/home');
@@ -229,27 +226,27 @@ export default function PaywallScreen() {
                 </View>
               </Pressable>
 
-              {/* Monthly Plan */}
-              <Pressable onPress={() => setSelectedPlan('monthly')} style={styles.planWrapper}>
+              {/* Weekly Plan */}
+              <Pressable onPress={() => setSelectedPlan('weekly')} style={styles.planWrapper}>
                 <View
-                  style={[styles.planCard, selectedPlan === 'monthly' && styles.planCardSelected]}
+                  style={[styles.planCard, selectedPlan === 'weekly' && styles.planCardSelected]}
                 >
                   <View
                     style={[
                       styles.radioButton,
-                      selectedPlan === 'monthly' && styles.radioButtonSelected,
+                      selectedPlan === 'weekly' && styles.radioButtonSelected,
                     ]}
                   >
-                    {selectedPlan === 'monthly' && <Check size={10} color="#fff" />}
+                    {selectedPlan === 'weekly' && <Check size={10} color="#fff" />}
                   </View>
                   <Text style={styles.planName} numberOfLines={1}>
-                    {t('paywall.plans.monthly')}
+                    {t('paywall.plans.weekly')}
                   </Text>
                   <Text style={styles.planPriceTotal} numberOfLines={1} adjustsFontSizeToFit>
-                    {monthlyPriceString}
+                    {weeklyPriceString}
                   </Text>
                   <Text style={styles.planPeriod} numberOfLines={1}>
-                    {t('paywall.plans.perMonthFull')}
+                    {t('paywall.plans.perWeek')}
                   </Text>
                 </View>
               </Pressable>
@@ -276,14 +273,12 @@ export default function PaywallScreen() {
             ) : (
               <View style={styles.ctaContent}>
                 <Text style={styles.ctaButtonText}>
-                  {selectedPlan === 'yearly'
-                    ? t('paywall.cta.startTrial', { days: TRIAL_DAYS })
-                    : t('paywall.cta.subscribeNow')}
+                  {t('paywall.cta.getStarted')}
                 </Text>
                 <Text style={styles.ctaSubtext}>
                   {selectedPlan === 'yearly'
-                    ? t('paywall.cta.thenPrice', { price: currentPriceString })
-                    : t('paywall.cta.perMonth', { price: currentPriceString })}
+                    ? t('paywall.cta.pricePerYear', { price: currentPriceString })
+                    : t('paywall.cta.pricePerWeek', { price: currentPriceString })}
                 </Text>
               </View>
             )}

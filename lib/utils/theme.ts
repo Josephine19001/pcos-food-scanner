@@ -47,8 +47,9 @@ export function useThemedColors() {
     modalOverlay: 'rgba(0, 0, 0, 0.5)',
 
     // Input
-    inputBackground: isDark ? '#2A2A2A' : '#F3F4F6',
-    inputText: isDark ? '#F9FAFB' : '#0D0D0D',
+    inputBackground: isDark ? '#2A2A2A' : '#F8FAFC',
+    inputBorder: isDark ? '#374151' : '#E2E8F0',
+    inputText: isDark ? '#F9FAFB' : '#111827',
     inputPlaceholder: '#9CA3AF',
 
     // Status bar

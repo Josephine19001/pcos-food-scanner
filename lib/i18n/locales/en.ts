@@ -347,6 +347,10 @@ export default {
         title: 'Unlimited Food Scans',
         description: 'Scan any food, anytime, without limits',
       },
+      foodJournal: {
+        title: 'Food Journal',
+        description: 'Track reactions & discover your triggers',
+      },
       bloodSugar: {
         title: 'Blood Sugar Impact',
         description: 'See how foods affect your glucose levels',
@@ -363,16 +367,12 @@ export default {
         title: 'Hidden Ingredients',
         description: 'Detect hidden sugars & additives',
       },
-      personalizedTips: {
-        title: 'Personalized Tips',
-        description: 'Get advice based on your symptoms',
-      },
     },
     plans: {
       yearly: 'Yearly',
-      monthly: 'Monthly',
+      weekly: 'Weekly',
       perMonth: '/mo',
-      perMonthFull: '/month',
+      perWeek: '/week',
       save: '-{{percent}}%',
     },
     trial: {
@@ -381,10 +381,9 @@ export default {
       then: 'Then {{price}}/year',
     },
     cta: {
-      startTrial: 'Start {{days}}-Day Free Trial',
-      subscribeNow: 'Subscribe Now',
-      thenPrice: 'Then {{price}}/year',
-      perMonth: '{{price}}/month',
+      getStarted: 'Get Started',
+      pricePerYear: '{{price}}/year',
+      pricePerWeek: '{{price}}/week',
     },
     save30: 'Save 30%',
     continueForFree: 'Continue for Free',
@@ -605,6 +604,132 @@ export default {
     disabledMessage: 'To enable notifications, please go to Settings and allow notifications for PCOS Food Scanner.',
     disableTitle: 'Disable Notifications',
     disableMessage: 'To disable notifications, please go to Settings and turn off notifications for PCOS Food Scanner.',
+  },
+
+  // Journal - Food Reaction Tracking
+  journal: {
+    title: 'Food Journal',
+    addEntry: 'Log Reaction',
+    premium: {
+      badge: 'Premium',
+      title: 'Unlock Food Journal',
+      description: 'Discover which foods trigger your PCOS symptoms and finally understand your body.',
+      feature1: 'Track bloating & inflammation',
+      feature1Highlight: 'bloating',
+      feature2: 'Monitor energy crashes',
+      feature2Highlight: 'energy crashes',
+      feature3: 'Identify your trigger foods',
+      feature3Highlight: 'trigger foods',
+      unlock: 'Unlock Premium',
+    },
+    editEntry: 'Edit Reaction',
+    noEntries: {
+      title: 'No food reactions logged',
+      description: 'Track how foods affect you to discover your personal triggers',
+      cta: 'Log Your First Reaction',
+    },
+    noMeals: {
+      title: 'No meals logged',
+      description: 'Tap to add your first meal',
+      cta: 'Add Meal',
+    },
+    mealType: {
+      title: 'Meal Type',
+      breakfast: 'Breakfast',
+      lunch: 'Lunch',
+      dinner: 'Dinner',
+      snack: 'Snack',
+    },
+    // Food selection
+    food: {
+      selectFood: 'Select Food',
+      recentScans: 'Recent Scans',
+      manualEntry: 'Enter Manually',
+      foodName: 'Food Name',
+      foodNamePlaceholder: 'e.g., Greek Yogurt with Berries',
+      noRecentScans: 'No recent scans. Scan a food first or enter manually.',
+    },
+    // Reaction
+    reaction: {
+      title: 'How did it make you feel?',
+      good: 'Good',
+      goodDesc: 'Felt great!',
+      okay: 'Okay',
+      okayDesc: 'No issues',
+      bad: 'Bad',
+      badDesc: 'Caused problems',
+    },
+    // Food-related symptoms
+    symptoms: {
+      title: 'Any symptoms?',
+      hint: 'Select all that apply',
+      none: 'No symptoms',
+      bloating: 'Bloating',
+      nausea: 'Nausea',
+      stomachPain: 'Stomach Pain',
+      heartburn: 'Heartburn',
+      gas: 'Gas',
+      diarrhea: 'Diarrhea',
+      constipation: 'Constipation',
+      headache: 'Headache',
+      fatigue: 'Fatigue',
+      brainFog: 'Brain Fog',
+      skinBreakout: 'Skin Breakout',
+      cravings: 'Cravings',
+    },
+    // Severity
+    severity: {
+      title: 'How severe?',
+      mild: 'Mild',
+      moderate: 'Moderate',
+      severe: 'Severe',
+    },
+    // Time after eating
+    timeAfter: {
+      title: 'When did symptoms appear?',
+      immediate: 'Immediately',
+      thirtyMin: '30 minutes',
+      oneHour: '1 hour',
+      twoHours: '2 hours',
+      nextDay: 'Next day',
+    },
+    // Energy level
+    energy: {
+      title: 'Energy level after eating',
+      low: 'Low',
+      normal: 'Normal',
+      high: 'Energized',
+    },
+    // Notes
+    notes: {
+      title: 'Notes',
+      placeholder: 'Any additional details about how this food affected you...',
+    },
+    // Dates
+    dates: {
+      today: 'Today',
+      yesterday: 'Yesterday',
+    },
+    // Actions
+    actions: {
+      save: 'Save Reaction',
+      update: 'Update Reaction',
+      delete: 'Delete',
+      deleteConfirm: 'Are you sure you want to delete this food reaction?',
+    },
+    // Success messages
+    success: {
+      created: 'Reaction logged',
+      updated: 'Reaction updated',
+      deleted: 'Reaction deleted',
+    },
+    // Error messages
+    errors: {
+      noFood: 'Please select or enter a food',
+      noReaction: 'Please select how the food made you feel',
+      saveFailed: 'Failed to save reaction',
+      loadFailed: 'Failed to load reactions',
+    },
   },
 
   // Errors

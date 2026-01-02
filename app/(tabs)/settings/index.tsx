@@ -590,12 +590,15 @@ export default function SettingsScreen() {
                 onChangeText={setAdditionalComments}
                 multiline
                 numberOfLines={3}
-                className="rounded-lg p-3 mt-2 mb-4"
+                className="rounded-2xl p-4 mt-2 mb-4"
                 style={{
                   backgroundColor: colors.inputBackground,
+                  borderWidth: 1,
+                  borderColor: colors.inputBorder,
                   color: colors.inputText,
                   textAlignVertical: 'top',
                   minHeight: 80,
+                  fontSize: 16,
                 }}
               />
 

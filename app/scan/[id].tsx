@@ -164,17 +164,10 @@ function ScanDetailSkeleton({ insets }: { insets: { top: number; bottom: number 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#F0FDFA', '#CCFBF1', '#99F6E4', '#F0FDFA']}
-        locations={[0, 0.3, 0.7, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        colors={['#F8FAFC', '#F1F5F9', '#E2E8F0']}
+        locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
-
-      {/* Floating orbs */}
-      <View style={[styles.orb, styles.orb1]} />
-      <View style={[styles.orb, styles.orb2]} />
-      <View style={[styles.orb, styles.orb3]} />
 
       <ScrollView
         style={styles.scrollView}
@@ -415,10 +408,8 @@ export default function ScanDetailScreen() {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#F0FDFA', '#CCFBF1', '#99F6E4', '#F0FDFA']}
-          locations={[0, 0.3, 0.7, 1]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          colors={['#F8FAFC', '#F1F5F9', '#E2E8F0']}
+          locations={[0, 0.5, 1]}
           style={StyleSheet.absoluteFill}
         />
         <View style={[styles.header, { paddingTop: insets.top }]}>
@@ -444,25 +435,9 @@ export default function ScanDetailScreen() {
     <View style={styles.container}>
       {/* Background gradient */}
       <LinearGradient
-        colors={['#F0FDFA', '#CCFBF1', '#99F6E4', '#F0FDFA']}
-        locations={[0, 0.3, 0.7, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        colors={['#F8FAFC', '#F1F5F9', '#E2E8F0']}
+        locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
-      />
-
-      {/* Floating orbs for liquid effect */}
-      <Animated.View
-        entering={FadeIn.delay(100).duration(1000)}
-        style={[styles.orb, styles.orb1]}
-      />
-      <Animated.View
-        entering={FadeIn.delay(200).duration(1000)}
-        style={[styles.orb, styles.orb2]}
-      />
-      <Animated.View
-        entering={FadeIn.delay(300).duration(1000)}
-        style={[styles.orb, styles.orb3]}
       />
 
       <ScrollView
@@ -619,31 +594,6 @@ export default function ScanDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  orb: {
-    position: 'absolute',
-    borderRadius: 999,
-  },
-  orb1: {
-    width: 200,
-    height: 200,
-    backgroundColor: 'rgba(20, 184, 166, 0.15)',
-    top: -50,
-    right: -50,
-  },
-  orb2: {
-    width: 150,
-    height: 150,
-    backgroundColor: 'rgba(45, 212, 191, 0.12)',
-    bottom: 200,
-    left: -40,
-  },
-  orb3: {
-    width: 100,
-    height: 100,
-    backgroundColor: 'rgba(94, 234, 212, 0.1)',
-    top: '40%',
-    right: -20,
   },
   scrollView: {
     flex: 1,

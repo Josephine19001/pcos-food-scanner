@@ -32,6 +32,46 @@ function SettingsIcon({ color, size = 24 }: { color: string; size?: number }) {
   );
 }
 
+// Custom Journal Icon (Book/Notebook)
+function JournalIcon({ color, size = 24 }: { color: string; size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M4 19.5C4 18.837 4.26339 18.2011 4.73223 17.7322C5.20107 17.2634 5.83696 17 6.5 17H20"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M6.5 2H20V22H6.5C5.83696 22 5.20107 21.7366 4.73223 21.2678C4.26339 20.7989 4 20.163 4 19.5V4.5C4 3.83696 4.26339 3.20107 4.73223 2.73223C5.20107 2.26339 5.83696 2 6.5 2Z"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M8 6H16"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M8 10H16"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M8 14H12"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
 // Custom Scan Icon
 function ScanIcon({ color, size = 24 }: { color: string; size?: number }) {
   return (
@@ -94,11 +134,12 @@ function CustomTabBar({ state, navigation }: TabBarProps) {
             <HomeIcon color={getTabColor('home/index')} size={24} />
           </Pressable>
 
-          {/* Scan Button */}
-          <Pressable onPress={handleScanPress} style={styles.scanButtonWrapper}>
-            <View style={styles.scanButton}>
-              <ScanIcon color="#FFFFFF" size={24} />
-            </View>
+          {/* Journal Tab */}
+          <Pressable
+            onPress={() => handleTabPress('journal/index')}
+            style={styles.tabButton}
+          >
+            <JournalIcon color={getTabColor('journal/index')} size={24} />
           </Pressable>
 
           {/* Settings Tab */}
@@ -107,6 +148,13 @@ function CustomTabBar({ state, navigation }: TabBarProps) {
             style={styles.tabButton}
           >
             <SettingsIcon color={getTabColor('settings/index')} size={24} />
+          </Pressable>
+
+          {/* Scan Button */}
+          <Pressable onPress={handleScanPress} style={styles.scanButtonWrapper}>
+            <View style={styles.scanButton}>
+              <ScanIcon color="#FFFFFF" size={24} />
+            </View>
           </Pressable>
         </View>
       </View>
@@ -178,6 +226,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="home/index" />
+      <Tabs.Screen name="journal/index" />
       <Tabs.Screen
         name="scan/index"
         options={{

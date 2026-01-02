@@ -5,7 +5,6 @@ import { ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useThemedColors } from '@/lib/utils/theme';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn } from 'react-native-reanimated';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -63,17 +62,12 @@ export function PageLayout({
 
   return (
     <View style={styles.container}>
-      {/* Liquid Glass Background */}
+      {/* Background gradient */}
       <LinearGradient
-        colors={['#F0FDFA', '#CCFBF1', '#99F6E4', '#F0FDFA']}
-        locations={[0, 0.3, 0.7, 1]}
+        colors={['#F8FAFC', '#F1F5F9', '#E2E8F0']}
+        locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
-
-      {/* Floating orbs */}
-      <Animated.View entering={FadeIn.duration(1000)} style={styles.orb1} />
-      <Animated.View entering={FadeIn.duration(1200).delay(200)} style={styles.orb2} />
-      <Animated.View entering={FadeIn.duration(1400).delay(400)} style={styles.orb3} />
 
       <StatusBar barStyle="dark-content" />
       {renderHeader()}
@@ -118,36 +112,6 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingBottom: 16,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  // Floating orbs for liquid glass effect
-  orb1: {
-    position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: 'rgba(20, 184, 166, 0.15)',
-    top: -100,
-    right: -100,
-  },
-  orb2: {
-    position: 'absolute',
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: 'rgba(13, 148, 136, 0.12)',
-    bottom: 100,
-    left: -80,
-  },
-  orb3: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(15, 118, 110, 0.1)',
-    top: '40%',
-    right: -50,
   },
   headerContent: {
     flexDirection: 'row',

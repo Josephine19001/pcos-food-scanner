@@ -19,7 +19,6 @@ export function Skeleton({
   style,
 }: SkeletonProps) {
   const animatedValue = useRef(new Animated.Value(0)).current;
-  const { isDark } = useTheme();
 
   useEffect(() => {
     const animation = Animated.loop(
@@ -43,9 +42,7 @@ export function Skeleton({
 
   const backgroundColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: isDark 
-      ? ['#374151', '#4B5563'] // Dark mode colors
-      : ['#f1f5f9', '#e2e8f0'], // Light mode colors
+    outputRange: ['#E5E7EB', '#F3F4F6'], // Light colors only
   });
 
   return (
@@ -178,6 +175,139 @@ export function PreferencesStepSkeleton() {
       {/* Bottom button */}
       <View className="absolute bottom-10 left-6 right-6">
         <Skeleton width="100%" height={56} borderRadius={16} />
+      </View>
+    </View>
+  );
+}
+
+export function JournalStatsSkeleton() {
+  return (
+    <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 16 }}>
+      {Array.from({ length: 3 }).map((_, index) => (
+        <View
+          key={index}
+          style={{
+            flex: 1,
+            backgroundColor: '#fff',
+            borderRadius: 12,
+            padding: 12,
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.04,
+            shadowRadius: 4,
+            elevation: 1,
+          }}
+        >
+          <Skeleton width={32} height={32} borderRadius={8} style={{ marginBottom: 6 }} />
+          <Skeleton width={30} height={20} style={{ marginBottom: 4 }} />
+          <Skeleton width={40} height={11} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+export function JournalMealCardSkeleton() {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 12,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 6,
+        elevation: 1,
+      }}
+    >
+      <Skeleton width={52} height={52} borderRadius={12} />
+      <View style={{ flex: 1, marginLeft: 12 }}>
+        <Skeleton width={140} height={16} style={{ marginBottom: 6 }} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Skeleton width={70} height={20} borderRadius={6} />
+          <Skeleton width={50} height={13} />
+        </View>
+      </View>
+      <Skeleton width={32} height={32} borderRadius={16} style={{ marginRight: 8 }} />
+      <Skeleton width={18} height={18} borderRadius={9} />
+    </View>
+  );
+}
+
+export function JournalMealsListSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <View style={{ paddingHorizontal: 16 }}>
+      {Array.from({ length: count }).map((_, index) => (
+        <JournalMealCardSkeleton key={index} />
+      ))}
+    </View>
+  );
+}
+
+export function JournalLoadingModal() {
+  return (
+    <View
+      style={{
+        backgroundColor: '#fff',
+        borderRadius: 24,
+        padding: 24,
+        marginHorizontal: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.15,
+        shadowRadius: 24,
+        elevation: 8,
+      }}
+    >
+      {/* Stats skeleton */}
+      <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+        {Array.from({ length: 3 }).map((_, index) => (
+          <View
+            key={index}
+            style={{
+              flex: 1,
+              backgroundColor: '#F9FAFB',
+              borderRadius: 12,
+              padding: 12,
+              alignItems: 'center',
+            }}
+          >
+            <Skeleton width={32} height={32} borderRadius={8} style={{ marginBottom: 6 }} />
+            <Skeleton width={30} height={18} style={{ marginBottom: 4 }} />
+            <Skeleton width={40} height={10} />
+          </View>
+        ))}
+      </View>
+
+      {/* Meals skeleton */}
+      <View style={{ gap: 10 }}>
+        {Array.from({ length: 3 }).map((_, index) => (
+          <View
+            key={index}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: '#F9FAFB',
+              borderRadius: 12,
+              padding: 12,
+            }}
+          >
+            <Skeleton width={48} height={48} borderRadius={10} />
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Skeleton width={120} height={14} style={{ marginBottom: 6 }} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Skeleton width={60} height={18} borderRadius={6} />
+                <Skeleton width={45} height={12} />
+              </View>
+            </View>
+            <Skeleton width={28} height={28} borderRadius={14} />
+          </View>
+        ))}
       </View>
     </View>
   );
