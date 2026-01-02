@@ -17,10 +17,27 @@ export type DailyStats = {
   hasData: boolean;
 };
 
+// Map language codes to locale codes
+function getLocaleCode(language: string): string {
+  const localeMap: Record<string, string> = {
+    en: 'en-US',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    de: 'de-DE',
+    pt: 'pt-BR',
+    it: 'it-IT',
+    ar: 'ar-SA',
+    hi: 'hi-IN',
+    tr: 'tr-TR',
+  };
+  return localeMap[language] || 'en-US';
+}
+
 // Get week days for calendar strip
-export function getWeekDays(selectedDate: Date): WeekDay[] {
+export function getWeekDays(selectedDate: Date, language: string = 'en'): WeekDay[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const locale = getLocaleCode(language);
 
   const result: WeekDay[] = [];
   const startOfWeek = new Date(selectedDate);
@@ -33,7 +50,7 @@ export function getWeekDays(selectedDate: Date): WeekDay[] {
 
     result.push({
       date,
-      dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+      dayName: date.toLocaleDateString(locale, { weekday: 'short' }),
       dayNum: date.getDate(),
       isToday: date.getTime() === today.getTime(),
       isSelected: date.toDateString() === selectedDate.toDateString(),
@@ -72,9 +89,20 @@ export function calculateDailyStats(reactions: FoodReaction[]): DailyStats {
 }
 
 // Format time from date string
-export function formatTime(dateStr: string): string {
+export function formatTime(dateStr: string, language: string = 'en'): string {
   const date = new Date(dateStr);
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const locale = getLocaleCode(language);
+  return date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' });
+}
+
+// Format date for display (e.g., "Monday, Jan 15")
+export function formatDateDisplay(date: Date, language: string = 'en'): string {
+  const locale = getLocaleCode(language);
+  return date.toLocaleDateString(locale, {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 // Get reaction color based on reaction type
@@ -94,18 +122,27 @@ export type MealTypeInfo = {
   color: string;
 };
 
+// Meal type colors (labels should come from translations)
+export const MEAL_TYPE_COLORS: Record<MealType, string> = {
+  breakfast: '#F59E0B',
+  lunch: '#0284C7',
+  dinner: '#7C3AED',
+  snack: '#EC4899',
+};
+
 // Get meal type info (without icon - icons should be rendered in component)
-export function getMealTypeInfo(mealType: MealType | null | undefined): MealTypeInfo | null {
-  switch (mealType) {
-    case 'breakfast':
-      return { label: 'Breakfast', color: '#F59E0B' };
-    case 'lunch':
-      return { label: 'Lunch', color: '#0284C7' };
-    case 'dinner':
-      return { label: 'Dinner', color: '#7C3AED' };
-    case 'snack':
-      return { label: 'Snack', color: '#EC4899' };
-    default:
-      return null;
-  }
+// Pass translated label from component
+export function getMealTypeInfo(
+  mealType: MealType | null | undefined,
+  translatedLabel?: string
+): MealTypeInfo | null {
+  if (!mealType) return null;
+
+  const color = MEAL_TYPE_COLORS[mealType];
+  if (!color) return null;
+
+  return {
+    label: translatedLabel || mealType,
+    color
+  };
 }

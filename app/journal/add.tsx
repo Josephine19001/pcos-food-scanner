@@ -53,7 +53,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Button } from '@/components/ui/button';
 import { useCreateFoodReaction, useRecentFoods } from '@/lib/hooks/use-journal';
-import type { FoodSymptomKey, ReactionType, TimeAfterEating, FoodOption, MealType } from '@/lib/types/journal';
+import type {
+  FoodSymptomKey,
+  ReactionType,
+  TimeAfterEating,
+  FoodOption,
+  MealType,
+} from '@/lib/types/journal';
 
 // Food-related symptoms with emojis for display
 const SYMPTOMS: { key: FoodSymptomKey; emoji: string }[] = [
@@ -84,36 +90,65 @@ const STATUS_COLORS = {
   avoid: '#DC2626',
 };
 
-// Reaction options
-const REACTIONS: { type: ReactionType; icon: typeof ThumbsUp; label: string; desc: string; color: string; bgColor: string }[] = [
-  { type: 'good', icon: ThumbsUp, label: 'Felt Great', desc: 'No issues at all', color: '#059669', bgColor: '#ECFDF5' },
-  { type: 'okay', icon: Meh, label: 'Just Okay', desc: 'Minor discomfort', color: '#D97706', bgColor: '#FFFBEB' },
-  { type: 'bad', icon: ThumbsDown, label: 'Felt Bad', desc: 'Triggered symptoms', color: '#DC2626', bgColor: '#FEF2F2' },
+// Reaction options - labels are translation keys
+const REACTIONS: {
+  type: ReactionType;
+  icon: typeof ThumbsUp;
+  labelKey: string;
+  descKey: string;
+  color: string;
+  bgColor: string;
+}[] = [
+  {
+    type: 'good',
+    icon: ThumbsUp,
+    labelKey: 'journal.addFlow.feltGreat',
+    descKey: 'journal.addFlow.noIssues',
+    color: '#059669',
+    bgColor: '#ECFDF5',
+  },
+  {
+    type: 'okay',
+    icon: Meh,
+    labelKey: 'journal.addFlow.justOkay',
+    descKey: 'journal.addFlow.minorDiscomfort',
+    color: '#D97706',
+    bgColor: '#FFFBEB',
+  },
+  {
+    type: 'bad',
+    icon: ThumbsDown,
+    labelKey: 'journal.addFlow.feltBad',
+    descKey: 'journal.addFlow.triggeredSymptoms',
+    color: '#DC2626',
+    bgColor: '#FEF2F2',
+  },
 ];
 
-// Energy options
+// Energy options - labels are translation keys
 const ENERGY_OPTIONS = [
-  { value: 1, icon: ZapOff, label: 'Low', color: '#DC2626' },
-  { value: 3, icon: Activity, label: 'Normal', color: '#D97706' },
-  { value: 5, icon: Zap, label: 'Energized', color: '#059669' },
+  { value: 1, icon: ZapOff, labelKey: 'journal.energy.low', color: '#DC2626' },
+  { value: 3, icon: Activity, labelKey: 'journal.energy.normal', color: '#D97706' },
+  { value: 5, icon: Zap, labelKey: 'journal.energy.high', color: '#059669' },
 ];
 
-// Time after options
-const TIME_OPTIONS: { value: TimeAfterEating; label: string }[] = [
-  { value: 'immediate', label: 'Right away' },
-  { value: '30min', label: '30 min' },
-  { value: '1hour', label: '1 hour' },
-  { value: '2hours', label: '2+ hours' },
-  { value: 'next_day', label: 'Next day' },
+// Time after options - labels are translation keys
+const TIME_OPTIONS: { value: TimeAfterEating; labelKey: string }[] = [
+  { value: 'immediate', labelKey: 'journal.addFlow.rightAway' },
+  { value: '30min', labelKey: 'journal.timeAfter.thirtyMin' },
+  { value: '1hour', labelKey: 'journal.timeAfter.oneHour' },
+  { value: '2hours', labelKey: 'journal.timeAfter.twoHours' },
+  { value: 'next_day', labelKey: 'journal.timeAfter.nextDay' },
 ];
 
-// Meal type options
-const MEAL_TYPE_OPTIONS: { value: MealType; icon: typeof Sun; label: string; color: string }[] = [
-  { value: 'breakfast', icon: Sun, label: 'Breakfast', color: '#F59E0B' },
-  { value: 'lunch', icon: Coffee, label: 'Lunch', color: '#0284C7' },
-  { value: 'dinner', icon: Moon, label: 'Dinner', color: '#7C3AED' },
-  { value: 'snack', icon: Cookie, label: 'Snack', color: '#EC4899' },
-];
+// Meal type options - labels are translation keys
+const MEAL_TYPE_OPTIONS: { value: MealType; icon: typeof Sun; labelKey: string; color: string }[] =
+  [
+    { value: 'breakfast', icon: Sun, labelKey: 'journal.mealType.breakfast', color: '#F59E0B' },
+    { value: 'lunch', icon: Coffee, labelKey: 'journal.mealType.lunch', color: '#0284C7' },
+    { value: 'dinner', icon: Moon, labelKey: 'journal.mealType.dinner', color: '#7C3AED' },
+    { value: 'snack', icon: Cookie, labelKey: 'journal.mealType.snack', color: '#EC4899' },
+  ];
 
 // Severity levels
 const SEVERITY_COLORS = ['#FCD34D', '#FBBF24', '#F59E0B', '#D97706', '#DC2626'];
@@ -158,9 +193,7 @@ export default function AddFoodReactionScreen() {
     // Apply search filter if query exists
     if (foodSearchQuery.trim()) {
       const query = foodSearchQuery.toLowerCase().trim();
-      foods = foods.filter(food =>
-        food.name.toLowerCase().includes(query)
-      );
+      foods = foods.filter((food) => food.name.toLowerCase().includes(query));
     }
 
     // Limit to initial count if not expanded and no search
@@ -249,7 +282,7 @@ export default function AddFoodReactionScreen() {
         notes: notes.trim() || undefined,
       });
 
-      toast.success(t('journal.success.created'));
+      // toast.success(t('journal.success.created'));
       router.back();
     } catch (error) {
       toast.error(t('journal.errors.saveFailed'));
@@ -298,9 +331,7 @@ export default function AddFoodReactionScreen() {
           <Image source={{ uri: item.image_url }} style={styles.foodCardImage} />
         ) : (
           <View style={[styles.foodCardImage, styles.foodCardImagePlaceholder]}>
-            <Text style={styles.foodCardImageText}>
-              {item.name.charAt(0).toUpperCase()}
-            </Text>
+            <Text style={styles.foodCardImageText}>{item.name.charAt(0).toUpperCase()}</Text>
           </View>
         )}
         <Text style={styles.foodCardName} numberOfLines={2}>
@@ -325,8 +356,8 @@ export default function AddFoodReactionScreen() {
       style={styles.stepContent}
     >
       <View style={styles.stepHeader}>
-        <Text style={styles.stepTitle}>What did you eat?</Text>
-        <Text style={styles.stepSubtitle}>Select a recent scan or enter manually</Text>
+        <Text style={styles.stepTitle}>{t('journal.addFlow.whatDidYouEat')}</Text>
+        <Text style={styles.stepSubtitle}>{t('journal.addFlow.selectOrEnter')}</Text>
       </View>
 
       {/* Manual Entry Toggle */}
@@ -336,7 +367,7 @@ export default function AddFoodReactionScreen() {
       >
         <Edit3 size={20} color={isManualEntry ? '#0D9488' : '#6B7280'} />
         <Text style={[styles.manualToggleText, isManualEntry && styles.manualToggleTextActive]}>
-          Enter food manually
+          {t('journal.addFlow.enterManually')}
         </Text>
       </Pressable>
 
@@ -345,7 +376,7 @@ export default function AddFoodReactionScreen() {
         <Animated.View entering={FadeIn.duration(200)} style={styles.manualInputContainer}>
           <TextInput
             style={styles.manualInput}
-            placeholder="e.g., Grilled chicken salad"
+            placeholder={t('journal.addFlow.foodPlaceholder')}
             placeholderTextColor="#9CA3AF"
             value={manualFoodName}
             onChangeText={handleManualNameChange}
@@ -357,7 +388,7 @@ export default function AddFoodReactionScreen() {
           {recentFoods.length > 0 ? (
             <>
               <View style={styles.sectionHeaderRow}>
-                <Text style={styles.sectionLabel}>Recent scans</Text>
+                <Text style={styles.sectionLabel}>{t('journal.addFlow.recentScans')}</Text>
                 {!showAllFoods && hasMoreFoods && (
                   <Text style={styles.foodCountHint}>{recentFoods.length} total</Text>
                 )}
@@ -369,16 +400,13 @@ export default function AddFoodReactionScreen() {
                   <Search size={18} color="#9CA3AF" />
                   <TextInput
                     style={styles.searchInput}
-                    placeholder="Search foods..."
+                    placeholder={t('journal.addFlow.searchFoods')}
                     placeholderTextColor="#9CA3AF"
                     value={foodSearchQuery}
                     onChangeText={setFoodSearchQuery}
                   />
                   {foodSearchQuery.length > 0 && (
-                    <Pressable
-                      onPress={() => setFoodSearchQuery('')}
-                      hitSlop={8}
-                    >
+                    <Pressable onPress={() => setFoodSearchQuery('')} hitSlop={8}>
                       <X size={18} color="#9CA3AF" />
                     </Pressable>
                   )}
@@ -408,7 +436,9 @@ export default function AddFoodReactionScreen() {
                       style={styles.viewMoreButton}
                     >
                       <Text style={styles.viewMoreText}>
-                        {showAllFoods ? 'Show less' : `View all ${recentFoods.length} scans`}
+                        {showAllFoods
+                          ? t('journal.addFlow.showLess')
+                          : t('journal.addFlow.viewAllScans', { count: recentFoods.length })}
                       </Text>
                       <ChevronDown
                         size={16}
@@ -421,8 +451,10 @@ export default function AddFoodReactionScreen() {
                 ListEmptyComponent={
                   foodSearchQuery.trim() ? (
                     <View style={styles.emptyState}>
-                      <Text style={styles.emptyText}>No matches found</Text>
-                      <Text style={styles.emptySubtext}>Try a different search</Text>
+                      <Text style={styles.emptyText}>{t('journal.addFlow.noMatches')}</Text>
+                      <Text style={styles.emptySubtext}>
+                        {t('journal.addFlow.tryDifferentSearch')}
+                      </Text>
                     </View>
                   ) : null
                 }
@@ -430,8 +462,8 @@ export default function AddFoodReactionScreen() {
             </>
           ) : (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No recent scans</Text>
-              <Text style={styles.emptySubtext}>Use manual entry above</Text>
+              <Text style={styles.emptyText}>{t('journal.addFlow.noRecentScans')}</Text>
+              <Text style={styles.emptySubtext}>{t('journal.addFlow.useManualEntry')}</Text>
             </View>
           )}
         </>
@@ -448,14 +480,14 @@ export default function AddFoodReactionScreen() {
       style={styles.stepContent}
     >
       <View style={styles.stepHeader}>
-        <Text style={styles.stepTitle}>How did it make you feel?</Text>
+        <Text style={styles.stepTitle}>{t('journal.addFlow.howDidItMakeYouFeel')}</Text>
         <Text style={styles.stepSubtitle}>
-          After eating {selectedFood?.name}
+          {t('journal.addFlow.afterEating', { food: selectedFood?.name })}
         </Text>
       </View>
 
       <View style={styles.reactionGrid}>
-        {REACTIONS.map(({ type, icon: Icon, label, desc, color, bgColor }) => {
+        {REACTIONS.map(({ type, icon: Icon, labelKey, descKey, color, bgColor }) => {
           const isSelected = reaction === type;
           return (
             <Pressable
@@ -467,11 +499,16 @@ export default function AddFoodReactionScreen() {
                 isSelected && { borderColor: color, borderWidth: 2 },
               ]}
             >
-              <View style={[styles.reactionIconCircle, { backgroundColor: isSelected ? color : '#F3F4F6' }]}>
+              <View
+                style={[
+                  styles.reactionIconCircle,
+                  { backgroundColor: isSelected ? color : '#F3F4F6' },
+                ]}
+              >
                 <Icon size={32} color={isSelected ? '#fff' : '#9CA3AF'} strokeWidth={2} />
               </View>
-              <Text style={[styles.reactionLabel, isSelected && { color }]}>{label}</Text>
-              <Text style={styles.reactionDesc}>{desc}</Text>
+              <Text style={[styles.reactionLabel, isSelected && { color }]}>{t(labelKey)}</Text>
+              <Text style={styles.reactionDesc}>{t(descKey)}</Text>
             </Pressable>
           );
         })}
@@ -488,8 +525,8 @@ export default function AddFoodReactionScreen() {
       style={styles.stepContent}
     >
       <View style={styles.stepHeader}>
-        <Text style={styles.stepTitle}>Add more details</Text>
-        <Text style={styles.stepSubtitle}>All fields are optional</Text>
+        <Text style={styles.stepTitle}>{t('journal.addFlow.addMoreDetails')}</Text>
+        <Text style={styles.stepSubtitle}>{t('journal.addFlow.allFieldsOptional')}</Text>
       </View>
 
       <ScrollView
@@ -500,9 +537,9 @@ export default function AddFoodReactionScreen() {
       >
         {/* Meal Type Section */}
         <View style={styles.detailSection}>
-          <Text style={styles.detailLabel}>Type of meal</Text>
+          <Text style={styles.detailLabel}>{t('journal.addFlow.typeOfMeal')}</Text>
           <View style={styles.mealTypeRow}>
-            {MEAL_TYPE_OPTIONS.map(({ value, icon: Icon, label, color }) => {
+            {MEAL_TYPE_OPTIONS.map(({ value, icon: Icon, labelKey, color }) => {
               const isSelected = mealType === value;
               return (
                 <Pressable
@@ -518,7 +555,7 @@ export default function AddFoodReactionScreen() {
                 >
                   <Icon size={20} color={isSelected ? color : '#9CA3AF'} />
                   <Text style={[styles.mealTypeLabel, isSelected && { color, fontWeight: '600' }]}>
-                    {label}
+                    {t(labelKey)}
                   </Text>
                 </Pressable>
               );
@@ -551,7 +588,7 @@ export default function AddFoodReactionScreen() {
         {/* Severity (only if symptoms selected) */}
         {selectedSymptoms.length > 0 && (
           <Animated.View entering={FadeIn.duration(200)} style={styles.detailSection}>
-            <Text style={styles.detailLabel}>How severe?</Text>
+            <Text style={styles.detailLabel}>{t('journal.addFlow.howSevere')}</Text>
             <View style={styles.severityRow}>
               {[1, 2, 3, 4, 5].map((level) => (
                 <Pressable
@@ -570,7 +607,13 @@ export default function AddFoodReactionScreen() {
                 />
               ))}
               <Text style={styles.severityLabel}>
-                {severity === 0 ? '' : severity <= 2 ? 'Mild' : severity <= 4 ? 'Moderate' : 'Severe'}
+                {severity === 0
+                  ? ''
+                  : severity <= 2
+                  ? t('journal.severity.mild')
+                  : severity <= 4
+                  ? t('journal.severity.moderate')
+                  : t('journal.severity.severe')}
               </Text>
             </View>
           </Animated.View>
@@ -581,10 +624,10 @@ export default function AddFoodReactionScreen() {
           <Animated.View entering={FadeIn.duration(200).delay(100)} style={styles.detailSection}>
             <View style={styles.detailLabelRow}>
               <Clock size={16} color="#6B7280" />
-              <Text style={styles.detailLabel}>When did symptoms appear?</Text>
+              <Text style={styles.detailLabel}>{t('journal.addFlow.whenSymptomsAppear')}</Text>
             </View>
             <View style={styles.timeGrid}>
-              {TIME_OPTIONS.map(({ value, label }) => {
+              {TIME_OPTIONS.map(({ value, labelKey }) => {
                 const isSelected = timeAfter === value;
                 return (
                   <Pressable
@@ -596,7 +639,7 @@ export default function AddFoodReactionScreen() {
                     style={[styles.timeChip, isSelected && styles.timeChipSelected]}
                   >
                     <Text style={[styles.timeChipText, isSelected && styles.timeChipTextSelected]}>
-                      {label}
+                      {t(labelKey)}
                     </Text>
                   </Pressable>
                 );
@@ -607,9 +650,9 @@ export default function AddFoodReactionScreen() {
 
         {/* Energy Level */}
         <View style={styles.detailSection}>
-          <Text style={styles.detailLabel}>Energy after eating?</Text>
+          <Text style={styles.detailLabel}>{t('journal.addFlow.energyAfterEating')}</Text>
           <View style={styles.energyRow}>
-            {ENERGY_OPTIONS.map(({ value, icon: Icon, label, color }) => {
+            {ENERGY_OPTIONS.map(({ value, icon: Icon, labelKey, color }) => {
               const isSelected = energyLevel === value;
               return (
                 <Pressable
@@ -625,7 +668,7 @@ export default function AddFoodReactionScreen() {
                 >
                   <Icon size={24} color={isSelected ? color : '#9CA3AF'} />
                   <Text style={[styles.energyLabel, isSelected && { color, fontWeight: '600' }]}>
-                    {label}
+                    {t(labelKey)}
                   </Text>
                 </Pressable>
               );
@@ -637,11 +680,11 @@ export default function AddFoodReactionScreen() {
         <View style={styles.detailSection}>
           <View style={styles.detailLabelRow}>
             <MessageSquare size={16} color="#6B7280" />
-            <Text style={styles.detailLabel}>Additional notes</Text>
+            <Text style={styles.detailLabel}>{t('journal.addFlow.additionalNotes')}</Text>
           </View>
           <TextInput
             style={styles.notesInput}
-            placeholder="Add any notes about this meal..."
+            placeholder={t('journal.addFlow.notesPlaceholder')}
             placeholderTextColor="#9CA3AF"
             value={notes}
             onChangeText={setNotes}
@@ -687,7 +730,7 @@ export default function AddFoodReactionScreen() {
         <View style={[styles.bottomAction, { paddingBottom: insets.bottom + 16 }]}>
           {currentStep === 'details' ? (
             <Button
-              title="Save Entry"
+              title={t('journal.addFlow.saveEntry')}
               onPress={handleSave}
               loading={createReaction.isPending}
               disabled={!reaction}
@@ -699,7 +742,7 @@ export default function AddFoodReactionScreen() {
               style={[styles.nextButton, !canProceed() && styles.nextButtonDisabled]}
             >
               <Text style={[styles.nextButtonText, !canProceed() && styles.nextButtonTextDisabled]}>
-                Continue
+                {t('journal.addFlow.continue')}
               </Text>
               <ChevronRight size={20} color={canProceed() ? '#fff' : '#9CA3AF'} />
             </Pressable>
@@ -1172,5 +1215,4 @@ const styles = StyleSheet.create({
   nextButtonTextDisabled: {
     color: '#9CA3AF',
   },
-
 });

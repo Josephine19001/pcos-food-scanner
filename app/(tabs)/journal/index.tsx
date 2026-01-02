@@ -51,12 +51,14 @@ import {
   formatTime,
   getReactionColor,
   getMealTypeInfo,
+  formatDateDisplay,
 } from '@/lib/utils/journal-utils';
 
 export default function JournalScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
   const posthog = usePostHog();
   const { isSubscribed, loading: subscriptionLoading } = useRevenueCat();
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -86,7 +88,10 @@ export default function JournalScreen() {
     router.push('/paywall');
   }, [router, posthog]);
 
-  const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
+  const weekDays = useMemo(
+    () => getWeekDays(selectedDate, currentLanguage),
+    [selectedDate, currentLanguage]
+  );
   const todayReactions = useMemo(
     () => filterReactionsByDate(allReactions, selectedDate),
     [allReactions, selectedDate]
@@ -157,7 +162,10 @@ export default function JournalScreen() {
 
   // Render meal item
   const renderMealItem = ({ item, index }: { item: FoodReaction; index: number }) => {
-    const mealTypeInfo = getMealTypeInfo(item.meal_type);
+    const translatedMealLabel = item.meal_type
+      ? t(`journal.mealType.${item.meal_type}`)
+      : undefined;
+    const mealTypeInfo = getMealTypeInfo(item.meal_type, translatedMealLabel);
     const mealTypeIcon = getMealTypeIcon(item.meal_type);
 
     return (
@@ -185,7 +193,7 @@ export default function JournalScreen() {
                   </Text>
                 </View>
               )}
-              <Text style={styles.mealTime}>{formatTime(item.consumed_at)}</Text>
+              <Text style={styles.mealTime}>{formatTime(item.consumed_at, currentLanguage)}</Text>
             </View>
           </View>
           <View
@@ -204,8 +212,8 @@ export default function JournalScreen() {
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
   const showLoadingOverlay = subscriptionLoading || isLoading;
-  const showPremiumGate = subscriptionLoading && isSubscribed;
-  // const showPremiumGate = !subscriptionLoading && !isSubscribed;
+  // const showPremiumGate = subscriptionLoading && isSubscribed;
+  const showPremiumGate = !subscriptionLoading && !isSubscribed;
 
   return (
     <View style={styles.container}>
@@ -277,7 +285,7 @@ export default function JournalScreen() {
               <Text style={styles.statValue}>
                 {stats.avgEnergy > 0 ? stats.avgEnergy.toFixed(1) : '—'}
               </Text>
-              <Text style={styles.statLabel}>Energy</Text>
+              <Text style={styles.statLabel}>{t('journal.overview.energy')}</Text>
             </View>
 
             {/* Good Reactions Card */}
@@ -286,7 +294,7 @@ export default function JournalScreen() {
                 <ThumbsUp size={16} color="#059669" />
               </View>
               <Text style={[styles.statValue, { color: '#059669' }]}>{stats.good}</Text>
-              <Text style={styles.statLabel}>Good</Text>
+              <Text style={styles.statLabel}>{t('journal.overview.good')}</Text>
             </View>
 
             {/* Bad Reactions Card */}
@@ -295,7 +303,7 @@ export default function JournalScreen() {
                 <ThumbsDown size={16} color="#DC2626" />
               </View>
               <Text style={[styles.statValue, { color: '#DC2626' }]}>{stats.bad}</Text>
-              <Text style={styles.statLabel}>Bad</Text>
+              <Text style={styles.statLabel}>{t('journal.overview.bad')}</Text>
             </View>
           </View>
         </Animated.View>
@@ -306,14 +314,12 @@ export default function JournalScreen() {
         <View style={styles.mealsSectionHeader}>
           <Text style={styles.mealsSectionTitle}>
             {isToday
-              ? "Today's Meals"
-              : selectedDate.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'short',
-                  day: 'numeric',
-                })}
+              ? t('journal.overview.todaysMeals')
+              : formatDateDisplay(selectedDate, currentLanguage)}
           </Text>
-          <Text style={styles.mealsSectionCount}>{todayReactions.length} logged</Text>
+          <Text style={styles.mealsSectionCount}>
+            {todayReactions.length} {t('journal.overview.logged')}
+          </Text>
         </View>
 
         {todayReactions.length === 0 && !isLoading ? (

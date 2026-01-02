@@ -257,6 +257,8 @@ export function JournalLoadingModal() {
         borderRadius: 24,
         padding: 24,
         marginHorizontal: 24,
+        width: '90%',
+        maxWidth: 360,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.15,
