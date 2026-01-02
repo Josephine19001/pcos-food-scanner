@@ -9,6 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { Sparkles, Lock, X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { usePostHog } from 'posthog-react-native';
 import { useTabBar } from '@/context/tab-bar-provider';
 import { usePendingScan } from '@/context/pending-scan-provider';
 import { useRevenueCat } from '@/context/revenuecat-provider';
@@ -17,6 +18,7 @@ import { CameraHeader, CameraControls, ScanFrame, ScanHelpModal } from '@/compon
 export default function ScanScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const posthog = usePostHog();
   const { hideTabBar, showTabBar } = useTabBar();
   const { startScan, pendingScan } = usePendingScan();
   const { isSubscribed, freeScansRemaining, maxFreeScans, canScan } = useRevenueCat();
@@ -28,12 +30,16 @@ export default function ScanScreen() {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
-  // Hide tab bar when screen is focused, show when leaving
+  // Track scan screen view and hide tab bar
   useFocusEffect(
     useCallback(() => {
+      posthog?.capture('scan_screen_opened', {
+        is_subscribed: isSubscribed,
+        free_scans_remaining: freeScansRemaining,
+      });
       hideTabBar();
       return () => showTabBar();
-    }, [hideTabBar, showTabBar])
+    }, [hideTabBar, showTabBar, posthog, isSubscribed, freeScansRemaining])
   );
 
   // Request permission on mount if not determined
@@ -85,6 +91,10 @@ export default function ScanScreen() {
     // Check if user has reached free scan limit
     if (!canScan) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      posthog?.capture('scan_free_limit_reached', {
+        scans_used: maxFreeScans - freeScansRemaining,
+        max_free_scans: maxFreeScans,
+      });
       setShowLimitModal(true);
       return;
     }
@@ -98,6 +108,7 @@ export default function ScanScreen() {
       });
 
       if (photo?.base64) {
+        posthog?.capture('scan_photo_captured', { source: 'camera' });
         processImage(photo.base64, photo.uri);
       } else {
         throw new Error('No image data captured');
@@ -109,7 +120,7 @@ export default function ScanScreen() {
     } finally {
       setIsCapturing(false);
     }
-  }, [isCapturing, pendingScan, processImage, t, canScan]);
+  }, [isCapturing, pendingScan, processImage, t, canScan, posthog, maxFreeScans, freeScansRemaining]);
 
   const handlePickImage = useCallback(async () => {
     if (pendingScan) return;
@@ -117,6 +128,10 @@ export default function ScanScreen() {
     // Check if user has reached free scan limit
     if (!canScan) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      posthog?.capture('scan_free_limit_reached', {
+        scans_used: maxFreeScans - freeScansRemaining,
+        max_free_scans: maxFreeScans,
+      });
       setShowLimitModal(true);
       return;
     }
@@ -132,9 +147,10 @@ export default function ScanScreen() {
     });
 
     if (!result.canceled && result.assets[0]?.base64) {
+      posthog?.capture('scan_image_picked', { source: 'library' });
       processImage(result.assets[0].base64, result.assets[0].uri);
     }
-  }, [pendingScan, processImage, canScan]);
+  }, [pendingScan, processImage, canScan, posthog, maxFreeScans, freeScansRemaining]);
 
   const handleUpgrade = useCallback(() => {
     setShowLimitModal(false);

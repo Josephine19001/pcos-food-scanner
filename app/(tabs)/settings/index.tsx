@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
 import * as StoreReview from 'expo-store-review';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import { usePostHog } from 'posthog-react-native';
 import { PageLayout, GlassCard } from '@/components/layouts';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { useAuth } from '@/context/auth-provider';
@@ -118,6 +119,7 @@ const DELETE_REASONS = [
 export default function SettingsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const posthog = usePostHog();
   const { language, supportedLanguages } = useLanguage();
   const { deleteAccount, signOut } = useAuth();
   const colors = useThemedColors();
@@ -131,6 +133,11 @@ export default function SettingsScreen() {
   const [deleteReason, setDeleteReason] = useState('');
   const [additionalComments, setAdditionalComments] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Track settings screen view
+  useEffect(() => {
+    posthog?.capture('settings_screen_viewed');
+  }, []);
 
   const handleLogout = async () => {
     setShowLogoutModal(false);

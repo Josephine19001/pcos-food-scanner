@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,7 @@ import {
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { usePostHog } from 'posthog-react-native';
 import {
   useFoodReactions,
   useFoodReactionsRealtime,
@@ -56,6 +57,7 @@ export default function JournalScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const posthog = usePostHog();
   const { isSubscribed, loading: subscriptionLoading } = useRevenueCat();
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
@@ -67,10 +69,22 @@ export default function JournalScreen() {
   useFoodReactionsRealtime();
   const { streak } = useJournalStreak();
 
+  // Track journal screen view
+  useEffect(() => {
+    if (!subscriptionLoading) {
+      if (isSubscribed) {
+        posthog?.capture('journal_screen_viewed', { is_subscribed: true });
+      } else {
+        posthog?.capture('journal_premium_gate_viewed', { is_subscribed: false });
+      }
+    }
+  }, [subscriptionLoading, isSubscribed]);
+
   const handleUnlockPress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    posthog?.capture('journal_premium_unlock_clicked');
     router.push('/paywall');
-  }, [router]);
+  }, [router, posthog]);
 
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
   const todayReactions = useMemo(
@@ -81,13 +95,21 @@ export default function JournalScreen() {
 
   const handleSelectDay = useCallback((date: Date) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysFromToday = Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    posthog?.capture('journal_date_selected', {
+      selected_date: date.toISOString(),
+      days_from_today: daysFromToday,
+    });
     setSelectedDate(date);
-  }, []);
+  }, [posthog]);
 
   const handleAddEntry = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    posthog?.capture('journal_add_entry_clicked');
     router.push('/journal/add');
-  }, [router]);
+  }, [router, posthog]);
 
   const handleReactionPress = useCallback(
     (reaction: FoodReaction) => {

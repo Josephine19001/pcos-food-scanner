@@ -8,6 +8,7 @@ import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { makeRedirectUri } from 'expo-auth-session';
+import { usePostHog } from 'posthog-react-native';
 import i18n from '@/lib/i18n';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const posthog = usePostHog();
 
   // Helper function to ensure account exists in database
   const ensureAccountExists = async (
@@ -139,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithApple = async (): Promise<boolean> => {
     setLoading(true);
-    // router.replace('/paywall');
+    posthog?.capture('auth_signin_apple_initiated', { platform: 'ios' });
     try {
       const nonce = Math.random().toString(36).substring(2, 10);
       const hashedNonce = await Crypto.digestStringAsync(
@@ -178,6 +180,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ensure account exists in database
       if (data.user) {
         await ensureAccountExists(data.user.id, data.user.email, options.data?.full_name);
+        posthog?.identify(data.user.id, { email: data.user.email });
+        posthog?.capture('auth_signin_apple_success', {
+          user_id: data.user.id,
+          signup_method: 'apple',
+        });
       }
 
       // Navigate to paywall after successful sign-in
@@ -188,6 +195,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false; // Cancelled
       }
       console.error('Apple sign-in error:', error);
+      posthog?.capture('auth_signin_apple_failed', {
+        error_message: error.message,
+        error_code: error.code,
+      });
       toast.error(error.message || i18n.t('authToasts.signInAppleFailed'));
       throw error;
     } finally {
@@ -247,9 +258,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     setLoading(true);
     try {
+      posthog?.capture('auth_signout', { user_id: user?.id });
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
+      posthog?.reset();
       setSession(null);
       setUser(null);
       router.replace('/auth');
@@ -264,6 +277,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteAccount = async (reason: string, additionalComments?: string) => {
     setLoading(true);
+    posthog?.capture('auth_delete_account_initiated', {
+      user_id: user?.id,
+      delete_reason: reason,
+    });
     try {
       const { data, error } = await supabase.functions.invoke('delete-account', {
         body: { reason, additional_comments: additionalComments },
@@ -272,6 +289,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
+      posthog?.capture('auth_delete_account_confirmed', {
+        user_id: user?.id,
+        delete_reason: reason,
+        has_additional_comments: !!additionalComments,
+      });
+      posthog?.reset();
       setSession(null);
       setUser(null);
       toast.success(i18n.t('authToasts.accountDeleted'));

@@ -2,6 +2,7 @@ import { Tabs, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, G } from 'react-native-svg';
+import { usePostHog } from 'posthog-react-native';
 import { useTabBar } from '@/context/tab-bar-provider';
 import * as Haptics from 'expo-haptics';
 import { useResponsive } from '@/lib/utils/responsive';
@@ -90,9 +91,11 @@ function CustomTabBar({ state, navigation }: TabBarProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { tabBarWidth } = useResponsive();
+  const posthog = usePostHog();
 
   const handleScanPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    posthog?.capture('tab_switched', { to_tab: 'scan' });
     router.push('/(tabs)/scan');
   };
 
@@ -103,6 +106,8 @@ function CustomTabBar({ state, navigation }: TabBarProps) {
 
   const handleTabPress = (routeName: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const tabName = routeName.replace('/index', '');
+    posthog?.capture('tab_switched', { to_tab: tabName });
     const route = state.routes.find((r: any) => r.name === routeName);
     if (route) {
       const event = navigation.emit({

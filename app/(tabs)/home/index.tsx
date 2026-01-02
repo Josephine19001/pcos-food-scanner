@@ -1,10 +1,11 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, StatusBar, StyleSheet, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { Sparkles, ChevronRight } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import { usePostHog } from 'posthog-react-native';
 import { HomeHeader, ScanList, type TabType } from '@/components/home';
 import { useScans, useToggleFavorite, useDeleteScan, useScansRealtime } from '@/lib/hooks/use-scans';
 import { usePendingScan } from '@/context/pending-scan-provider';
@@ -15,10 +16,19 @@ import type { ScanResult } from '@/lib/types/scan';
 export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const posthog = usePostHog();
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [demoScans, setDemoScans] = useState(DEMO_SCANS);
   const { isSubscribed, freeScansRemaining, maxFreeScans } = useRevenueCat();
+
+  // Track home screen view
+  useEffect(() => {
+    posthog?.capture('home_screen_viewed', {
+      is_subscribed: isSubscribed,
+      free_scans_remaining: freeScansRemaining,
+    });
+  }, []);
 
   // Fetch scans from backend (only when not in demo mode)
   const { data: apiScans = [], isLoading: apiLoading, refetch, isRefetching } = useScans();
@@ -69,10 +79,18 @@ export default function HomeScreen() {
   const handleScanPress = useCallback((scan: ScanResult) => {
     // Don't navigate for pending scans
     if (scan.status === 'pending') return;
+    posthog?.capture('home_scan_card_tapped', {
+      scan_id: scan.id,
+      scan_name: scan.name,
+    });
     router.push(`/scan/${scan.id}`);
-  }, [router]);
+  }, [router, posthog]);
 
   const handleToggleFavorite = useCallback((scan: ScanResult) => {
+    posthog?.capture('home_scan_favorite_toggled', {
+      scan_id: scan.id,
+      is_favorite: !scan.is_favorite,
+    });
     if (DEMO_MODE) {
       // Toggle favorite in demo mode locally
       setDemoScans((prev) =>
@@ -83,7 +101,7 @@ export default function HomeScreen() {
     } else {
       toggleFavorite.mutate(scan);
     }
-  }, [toggleFavorite]);
+  }, [toggleFavorite, posthog]);
 
   const handleRefresh = useCallback(() => {
     if (!DEMO_MODE) {
@@ -92,18 +110,24 @@ export default function HomeScreen() {
   }, [refetch]);
 
   const handleDeleteScan = useCallback((scan: ScanResult) => {
+    posthog?.capture('home_scan_deleted', {
+      scan_id: scan.id,
+    });
     if (DEMO_MODE) {
       // Delete in demo mode locally
       setDemoScans((prev) => prev.filter((s) => s.id !== scan.id));
     } else {
       deleteScan.mutate(scan.id);
     }
-  }, [deleteScan]);
+  }, [deleteScan, posthog]);
 
   const handleUpgradeBanner = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    posthog?.capture('home_free_scans_banner_clicked', {
+      scans_remaining: freeScansRemaining,
+    });
     router.push('/paywall');
-  }, [router]);
+  }, [router, posthog, freeScansRemaining]);
 
   // Determine urgency level for banner styling
   const isLastScan = freeScansRemaining === 1;

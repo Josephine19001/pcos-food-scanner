@@ -4,6 +4,7 @@ import { useReactQueryDevTools } from '@dev-plugins/react-query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { PostHogProvider } from 'posthog-react-native';
 import { Toaster } from 'sonner-native';
 import { AuthProvider } from './auth-provider';
 import { RevenueCatProvider } from './revenuecat-provider';
@@ -29,8 +30,22 @@ export const RootProvider = ({ children }: PropsWithChildren) => {
   useReactQueryDevTools(queryClient);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
+    <PostHogProvider
+      apiKey="phc_NvX3t1zcPx4OnmKkF1xSeugK3y0tyghXvHItt6muMSw"
+      options={{
+        host: 'https://us.i.posthog.com',
+        enableSessionReplay: true,
+        sessionReplayConfig: {
+          maskAllTextInputs: true,
+          maskAllImages: true,
+          captureLog: true,
+          captureNetworkTelemetry: true,
+          throttleDelayMs: 1000,
+        },
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
         <LanguageProvider>
           <AuthProvider>
             <OnboardingProvider>
@@ -66,7 +81,8 @@ export const RootProvider = ({ children }: PropsWithChildren) => {
             </OnboardingProvider>
           </AuthProvider>
         </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </PostHogProvider>
   );
 };

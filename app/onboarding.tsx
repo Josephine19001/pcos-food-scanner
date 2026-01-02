@@ -39,6 +39,7 @@ import {
 import { useOnboarding } from '@/context/onboarding-provider';
 import { useTranslation } from 'react-i18next';
 import { useSaveOnboardingProfile } from '@/lib/hooks/use-accounts';
+import { usePostHog } from 'posthog-react-native';
 
 type Step =
   | 'welcome'
@@ -61,6 +62,8 @@ export default function OnboardingScreen() {
 
   const [step, setStep] = useState<Step>('welcome');
   const [appleLoading, setAppleLoading] = useState(false);
+  const [onboardingStartTime] = useState(Date.now());
+  const posthog = usePostHog();
 
   const isLoading = authLoading || appleLoading || isSaving;
 
@@ -82,6 +85,10 @@ export default function OnboardingScreen() {
   const goBack = () => {
     const i = steps.indexOf(step);
     if (i > 0) {
+      posthog?.capture('onboarding_step_back', {
+        from_step: step,
+        to_step: steps[i - 1],
+      });
       setStep(steps[i - 1]);
     } else {
       router.back();
@@ -92,6 +99,11 @@ export default function OnboardingScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const i = steps.indexOf(step);
     if (i < steps.length - 1) {
+      posthog?.capture('onboarding_step_completed', {
+        step,
+        step_number: i + 1,
+        total_steps: steps.length,
+      });
       setStep(steps[i + 1]);
     }
   };
@@ -117,6 +129,15 @@ export default function OnboardingScreen() {
           guilt_foods: onboardingData.guiltFoods,
           activity_level: onboardingData.activityLevel,
           referral_source: onboardingData.referralSource,
+        });
+
+        const timeSpentSeconds = Math.round((Date.now() - onboardingStartTime) / 1000);
+        posthog?.capture('onboarding_completed', {
+          time_spent_seconds: timeSpentSeconds,
+          primary_goal: onboardingData.primaryGoal,
+          symptoms_count: onboardingData.symptoms?.length || 0,
+          struggles_count: onboardingData.dailyStruggles?.length || 0,
+          activity_level: onboardingData.activityLevel,
         });
 
         resetData();

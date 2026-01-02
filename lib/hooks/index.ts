@@ -7,3 +7,4 @@ export * from './use-accounts';
 export * from './use-debt-calculations';
 export * from './use-currency-input';
 export * from './use-journal';
+export * from './use-analytics';

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Gauge, Flame, HeartPulse, Candy, Check, ScanLine, BookOpen } from 'lucide-react-native';
+import { usePostHog } from 'posthog-react-native';
 import { useRevenueCat } from '@/context/revenuecat-provider';
 import { APP_URLS } from '@/lib/config/urls';
 import { useTranslation } from 'react-i18next';
@@ -25,10 +26,16 @@ type PlanType = 'weekly' | 'yearly';
 export default function PaywallScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const posthog = usePostHog();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanType>('yearly');
   const { offerings, purchasePackage, restorePurchases } = useRevenueCat();
   const { isTablet, contentMaxWidth } = useResponsive();
+
+  // Track paywall view
+  useEffect(() => {
+    posthog?.capture('paywall_viewed');
+  }, []);
 
   const features = [
     {
@@ -90,21 +97,37 @@ export default function PaywallScreen() {
       return;
     }
 
+    posthog?.capture('paywall_subscribe_initiated', {
+      plan_type: selectedPlan,
+      price: (selectedPlan === 'yearly' ? yearlyPrice : weeklyPrice) ?? 0,
+    });
+
     setIsLoading(true);
     const result = await purchasePackage(packageToPurchase);
     setIsLoading(false);
 
     if (result.success) {
+      posthog?.capture('paywall_subscribe_success', {
+        plan_type: selectedPlan,
+        price: (selectedPlan === 'yearly' ? yearlyPrice : weeklyPrice) ?? 0,
+      });
       router.replace('/(tabs)/home');
+    } else if (result.error) {
+      posthog?.capture('paywall_subscribe_failed', {
+        plan_type: selectedPlan,
+        error_message: result.error,
+      });
     }
   };
 
   const handleRestore = async () => {
+    posthog?.capture('paywall_restore_clicked');
     setIsLoading(true);
     try {
       const customerInfo = await restorePurchases();
       const hasActiveSubscription = Object.keys(customerInfo.entitlements.active).length > 0;
       if (hasActiveSubscription) {
+        posthog?.capture('paywall_restore_success');
         toast.success(t('paywall.restoreSuccess'));
         router.replace('/(tabs)/home');
       } else {
@@ -115,6 +138,21 @@ export default function PaywallScreen() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePlanSelect = (plan: PlanType) => {
+    if (plan !== selectedPlan) {
+      posthog?.capture('paywall_plan_selected', {
+        plan_type: plan,
+        price: (plan === 'yearly' ? yearlyPrice : weeklyPrice) ?? 0,
+      });
+    }
+    setSelectedPlan(plan);
+  };
+
+  const handleContinueFree = () => {
+    posthog?.capture('paywall_continue_free');
+    router.replace('/(tabs)/home');
   };
 
   // Dynamic styles for responsive layout
@@ -193,7 +231,7 @@ export default function PaywallScreen() {
             {/* Plan Selection - Row Layout */}
             <View style={[styles.plansContainer, isTablet && styles.plansContainerTablet]}>
               {/* Yearly Plan */}
-              <Pressable onPress={() => setSelectedPlan('yearly')} style={styles.planWrapper}>
+              <Pressable onPress={() => handlePlanSelect('yearly')} style={styles.planWrapper}>
                 <View
                   style={[styles.planCard, selectedPlan === 'yearly' && styles.planCardSelected]}
                 >
@@ -227,7 +265,7 @@ export default function PaywallScreen() {
               </Pressable>
 
               {/* Weekly Plan */}
-              <Pressable onPress={() => setSelectedPlan('weekly')} style={styles.planWrapper}>
+              <Pressable onPress={() => handlePlanSelect('weekly')} style={styles.planWrapper}>
                 <View
                   style={[styles.planCard, selectedPlan === 'weekly' && styles.planCardSelected]}
                 >
@@ -285,7 +323,7 @@ export default function PaywallScreen() {
           </Pressable>
 
           {/* Continue for Free */}
-          <Pressable onPress={() => router.replace('/(tabs)/home')} style={styles.continueButton}>
+          <Pressable onPress={handleContinueFree} style={styles.continueButton}>
             <Text style={styles.continueButtonText}>{t('paywall.continueForFree')}</Text>
           </Pressable>
 
