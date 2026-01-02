@@ -392,7 +392,32 @@ export default function AddFoodReactionScreen() {
                 numColumns={2}
                 columnWrapperStyle={styles.foodGrid}
                 showsVerticalScrollIndicator={false}
-                scrollEnabled={false}
+                scrollEnabled={showAllFoods}
+                style={showAllFoods ? styles.expandedFoodList : undefined}
+                contentContainerStyle={styles.foodListContent}
+                ListFooterComponent={
+                  hasMoreFoods ? (
+                    <Pressable
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setShowAllFoods(!showAllFoods);
+                        if (showAllFoods) {
+                          setFoodSearchQuery('');
+                        }
+                      }}
+                      style={styles.viewMoreButton}
+                    >
+                      <Text style={styles.viewMoreText}>
+                        {showAllFoods ? 'Show less' : `View all ${recentFoods.length} scans`}
+                      </Text>
+                      <ChevronDown
+                        size={16}
+                        color="#0D9488"
+                        style={{ transform: [{ rotate: showAllFoods ? '180deg' : '0deg' }] }}
+                      />
+                    </Pressable>
+                  ) : null
+                }
                 ListEmptyComponent={
                   foodSearchQuery.trim() ? (
                     <View style={styles.emptyState}>
@@ -402,29 +427,6 @@ export default function AddFoodReactionScreen() {
                   ) : null
                 }
               />
-
-              {/* View More / View Less Button */}
-              {hasMoreFoods && (
-                <Pressable
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowAllFoods(!showAllFoods);
-                    if (showAllFoods) {
-                      setFoodSearchQuery('');
-                    }
-                  }}
-                  style={styles.viewMoreButton}
-                >
-                  <Text style={styles.viewMoreText}>
-                    {showAllFoods ? 'Show less' : `View all ${recentFoods.length} scans`}
-                  </Text>
-                  <ChevronDown
-                    size={16}
-                    color="#0D9488"
-                    style={{ transform: [{ rotate: showAllFoods ? '180deg' : '0deg' }] }}
-                  />
-                </Pressable>
-              )}
             </>
           ) : (
             <View style={styles.emptyState}>
@@ -927,6 +929,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#0D9488',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  expandedFoodList: {
+    maxHeight: 400,
+  },
+  foodListContent: {
+    paddingBottom: 8,
   },
   emptyState: {
     alignItems: 'center',

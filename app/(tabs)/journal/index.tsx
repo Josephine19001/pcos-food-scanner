@@ -93,17 +93,20 @@ export default function JournalScreen() {
   );
   const stats = useMemo(() => calculateDailyStats(todayReactions), [todayReactions]);
 
-  const handleSelectDay = useCallback((date: Date) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const daysFromToday = Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    posthog?.capture('journal_date_selected', {
-      selected_date: date.toISOString(),
-      days_from_today: daysFromToday,
-    });
-    setSelectedDate(date);
-  }, [posthog]);
+  const handleSelectDay = useCallback(
+    (date: Date) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const daysFromToday = Math.round((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      posthog?.capture('journal_date_selected', {
+        selected_date: date.toISOString(),
+        days_from_today: daysFromToday,
+      });
+      setSelectedDate(date);
+    },
+    [posthog]
+  );
 
   const handleAddEntry = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -201,8 +204,8 @@ export default function JournalScreen() {
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
   const showLoadingOverlay = subscriptionLoading || isLoading;
-  // const showPremiumGate = subscriptionLoading && isSubscribed;
-  const showPremiumGate = !subscriptionLoading && !isSubscribed;
+  const showPremiumGate = subscriptionLoading && isSubscribed;
+  // const showPremiumGate = !subscriptionLoading && !isSubscribed;
 
   return (
     <View style={styles.container}>
