@@ -219,6 +219,13 @@ export default {
         description: 'Try a different search term',
       },
     },
+    // Free scans banner
+    freeScans: {
+      remaining: '{{count}} of {{max}} free scans left',
+      lastScan: 'Only 1 scan left!',
+      allUsed: 'No free scans left',
+      upgradeCta: 'Tap to unlock unlimited scans',
+    },
   },
 
   // Scan
@@ -246,6 +253,7 @@ export default {
     unsave: 'Unsave',
     // Free scan limit
     freeScansRemaining: '{{count}} of {{max}} free scans left',
+    lastScanWarning: 'Last free scan!',
     limitReached: {
       title: 'Free Scans Used',
       description: 'Subscribe to unlock unlimited scans',

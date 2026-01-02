@@ -202,10 +202,21 @@ export default function ScanScreen() {
 
           {/* Free scans remaining banner for non-subscribers */}
           {!isSubscribed && freeScansRemaining > 0 && (
-            <Pressable onPress={() => router.push('/paywall')} style={styles.freeScansContainer}>
-              <Sparkles size={14} color="#14B8A6" />
-              <Text style={styles.freeScansText}>
-                {t('scan.freeScansRemaining', { count: freeScansRemaining, max: maxFreeScans })}
+            <Pressable
+              onPress={() => router.push('/paywall')}
+              style={[
+                styles.freeScansContainer,
+                freeScansRemaining === 1 && styles.freeScansContainerUrgent,
+              ]}
+            >
+              <Sparkles size={14} color={freeScansRemaining === 1 ? '#DC2626' : '#14B8A6'} />
+              <Text style={[
+                styles.freeScansText,
+                freeScansRemaining === 1 && styles.freeScansTextUrgent,
+              ]}>
+                {freeScansRemaining === 1
+                  ? t('scan.lastScanWarning')
+                  : t('scan.freeScansRemaining', { count: freeScansRemaining, max: maxFreeScans })}
               </Text>
             </Pressable>
           )}
@@ -326,10 +337,18 @@ const styles = StyleSheet.create({
     gap: 6,
     marginTop: 8,
   },
+  freeScansContainerUrgent: {
+    backgroundColor: 'rgba(254, 226, 226, 0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(220, 38, 38, 0.3)',
+  },
   freeScansText: {
     fontSize: 13,
     fontWeight: '600',
     color: '#0D0D0D',
+  },
+  freeScansTextUrgent: {
+    color: '#DC2626',
   },
   // Modal styles
   modalOverlay: {

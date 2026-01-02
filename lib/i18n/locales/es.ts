@@ -219,6 +219,13 @@ export default {
         description: 'Prueba con un término de búsqueda diferente',
       },
     },
+    // Free scans banner
+    freeScans: {
+      remaining: '{{count}} de {{max}} escaneos gratis',
+      lastScan: '¡Solo queda 1 escaneo!',
+      allUsed: 'Sin escaneos gratis',
+      upgradeCta: 'Toca para desbloquear escaneos ilimitados',
+    },
   },
 
   // Scan

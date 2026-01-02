@@ -1,18 +1,24 @@
 import { useState, useMemo, useCallback } from 'react';
-import { View, StatusBar, StyleSheet } from 'react-native';
+import { View, StatusBar, StyleSheet, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
+import { Sparkles, ChevronRight } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { HomeHeader, ScanList, type TabType } from '@/components/home';
 import { useScans, useToggleFavorite, useDeleteScan, useScansRealtime } from '@/lib/hooks/use-scans';
 import { usePendingScan } from '@/context/pending-scan-provider';
+import { useRevenueCat } from '@/context/revenuecat-provider';
 import { DEMO_MODE, DEMO_SCANS } from '@/lib/config/demo-data';
 import type { ScanResult } from '@/lib/types/scan';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [demoScans, setDemoScans] = useState(DEMO_SCANS);
+  const { isSubscribed, freeScansRemaining, maxFreeScans } = useRevenueCat();
 
   // Fetch scans from backend (only when not in demo mode)
   const { data: apiScans = [], isLoading: apiLoading, refetch, isRefetching } = useScans();
@@ -94,6 +100,17 @@ export default function HomeScreen() {
     }
   }, [deleteScan]);
 
+  const handleUpgradeBanner = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/paywall');
+  }, [router]);
+
+  // Determine urgency level for banner styling
+  const isLastScan = freeScansRemaining === 1;
+  const isLowScans = freeScansRemaining <= 2 && freeScansRemaining > 0;
+  const isOutOfScans = freeScansRemaining === 0;
+  const showFreeScansBanner = !isSubscribed;
+
   return (
     <View style={styles.container}>
       {/* Background gradient */}
@@ -111,6 +128,40 @@ export default function HomeScreen() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
+
+      {/* Free Scans Remaining Banner */}
+      {showFreeScansBanner && (
+        <Pressable
+          onPress={handleUpgradeBanner}
+          style={[
+            styles.freeScansBanner,
+            isLowScans && styles.freeScansBannerWarning,
+            (isLastScan || isOutOfScans) && styles.freeScansBannerUrgent,
+          ]}
+        >
+          <View style={styles.freeScansBannerLeft}>
+            <View style={styles.freeScansBannerIcon}>
+              <Sparkles size={16} color="#FFFFFF" />
+            </View>
+            <View>
+              <Text style={[
+                styles.freeScansBannerTitle,
+                (isLastScan || isOutOfScans) && styles.freeScansBannerTitleUrgent,
+              ]}>
+                {isOutOfScans
+                  ? t('home.freeScans.allUsed')
+                  : isLastScan
+                    ? t('home.freeScans.lastScan')
+                    : t('home.freeScans.remaining', { count: freeScansRemaining, max: maxFreeScans })}
+              </Text>
+              <Text style={styles.freeScansBannerSubtitle}>
+                {t('home.freeScans.upgradeCta')}
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={20} color="#FFFFFF" />
+        </Pressable>
+      )}
 
       <ScanList
         scans={filteredScans}
@@ -130,5 +181,52 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  // Free scans banner styles
+  freeScansBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
+    marginBottom: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: '#14B8A6',
+    borderRadius: 16,
+  },
+  freeScansBannerWarning: {
+    backgroundColor: '#F59E0B',
+  },
+  freeScansBannerUrgent: {
+    backgroundColor: '#DC2626',
+  },
+  freeScansBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  freeScansBannerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  freeScansBannerIconUrgent: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  freeScansBannerTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  freeScansBannerTitleUrgent: {
+    color: '#FFFFFF',
+  },
+  freeScansBannerSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.85)',
   },
 });
